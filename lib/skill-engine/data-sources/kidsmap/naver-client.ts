@@ -7,8 +7,10 @@
  * 어린이 놀이 공간 관련 블로그 후기 및 클립 영상 검색
  *
  * 환경변수:
- * - NAVER_CLIENT_ID: 네이버 개발자 Client ID
- * - NAVER_CLIENT_SECRET: 네이버 개발자 Client Secret
+ * - NAVER_CLIENT_ID: 네이버 개발자 Client ID (기본)
+ * - NAVER_CLIENT_SECRET: 네이버 개발자 Client Secret (기본)
+ * - NAVER_CLIENT_ID_2: 네이버 개발자 Client ID (보조 - Rate Limit 분산용)
+ * - NAVER_CLIENT_SECRET_2: 네이버 개발자 Client Secret (보조)
  */
 
 import type {
@@ -35,6 +37,112 @@ const DEFAULT_CONFIG: Omit<Required<NaverClientConfig>, 'clientId' | 'clientSecr
   retryCount: 3,
   cacheTtlMinutes: 30,
 }
+
+// ============================================
+// 자격증명 풀 관리자 (Rate Limit 분산)
+// ============================================
+
+interface NaverCredentials {
+  clientId: string
+  clientSecret: string
+}
+
+class CredentialPool {
+  private credentials: NaverCredentials[] = []
+  private currentIndex = 0
+  private rateLimitedUntil: Map<number, number> = new Map()
+
+  constructor() {
+    // 기본 자격증명
+    const primary = {
+      clientId: process.env.NAVER_CLIENT_ID,
+      clientSecret: process.env.NAVER_CLIENT_SECRET,
+    }
+    if (primary.clientId && primary.clientSecret) {
+      this.credentials.push(primary as NaverCredentials)
+    }
+
+    // 보조 자격증명 (Rate Limit 분산용)
+    const secondary = {
+      clientId: process.env.NAVER_CLIENT_ID_2,
+      clientSecret: process.env.NAVER_CLIENT_SECRET_2,
+    }
+    if (secondary.clientId && secondary.clientSecret) {
+      this.credentials.push(secondary as NaverCredentials)
+    }
+  }
+
+  /**
+   * 사용 가능한 자격증명 수
+   */
+  get size(): number {
+    return this.credentials.length
+  }
+
+  /**
+   * 다음 사용 가능한 자격증명 가져오기 (라운드 로빈)
+   */
+  getNext(): NaverCredentials | null {
+    if (this.credentials.length === 0) return null
+
+    const now = Date.now()
+
+    // 라운드 로빈으로 순환하면서 사용 가능한 자격증명 찾기
+    for (let i = 0; i < this.credentials.length; i++) {
+      const index = (this.currentIndex + i) % this.credentials.length
+      const rateLimitedUntil = this.rateLimitedUntil.get(index) || 0
+
+      if (now >= rateLimitedUntil) {
+        this.currentIndex = (index + 1) % this.credentials.length
+        return this.credentials[index]
+      }
+    }
+
+    // 모든 자격증명이 rate limited인 경우 가장 먼저 풀리는 것 반환
+    let earliestIndex = 0
+    let earliestTime = Infinity
+    this.rateLimitedUntil.forEach((time, index) => {
+      if (time < earliestTime) {
+        earliestTime = time
+        earliestIndex = index
+      }
+    })
+
+    return this.credentials[earliestIndex]
+  }
+
+  /**
+   * 특정 자격증명을 Rate Limited로 표시
+   */
+  markRateLimited(credentials: NaverCredentials, durationMs = 60000): void {
+    const index = this.credentials.findIndex(
+      (c) => c.clientId === credentials.clientId
+    )
+    if (index >= 0) {
+      this.rateLimitedUntil.set(index, Date.now() + durationMs)
+      console.warn(`[Naver API] Credential ${index + 1} rate limited for ${durationMs}ms`)
+    }
+  }
+
+  /**
+   * 명시적 자격증명으로 초기화 (테스트용)
+   */
+  addCredentials(credentials: NaverCredentials): void {
+    this.credentials.push(credentials)
+  }
+
+  /**
+   * 풀 초기화 (테스트용)
+   */
+  clear(): void {
+    this.credentials = []
+    this.currentIndex = 0
+    this.rateLimitedUntil.clear()
+  }
+}
+
+// 전역 자격증명 풀
+const credentialPool = new CredentialPool()
 
 /** 어린이 관련 검색 키워드 프리셋 */
 export const NAVER_KIDS_SEARCH_PRESETS = {
@@ -143,24 +251,37 @@ function normalizeClip(
 export class NaverBlogClient {
   private config: Required<NaverClientConfig>
   private cache: Map<string, { data: ContentSearchResult; timestamp: number }> = new Map()
+  private useCredentialPool: boolean
 
   constructor(config?: Partial<NaverClientConfig>) {
-    const clientId = config?.clientId || process.env.NAVER_CLIENT_ID
-    const clientSecret = config?.clientSecret || process.env.NAVER_CLIENT_SECRET
+    // 명시적 자격증명이 제공되면 해당 자격증명만 사용
+    if (config?.clientId && config?.clientSecret) {
+      this.useCredentialPool = false
+      this.config = {
+        ...DEFAULT_CONFIG,
+        ...config,
+      } as Required<NaverClientConfig>
+    } else {
+      // 자격증명 풀 사용 (라운드 로빈)
+      this.useCredentialPool = true
 
-    if (!clientId || !clientSecret) {
-      throw new KidsMapApiError(
-        '네이버 API 인증 정보가 설정되지 않았습니다. NAVER_CLIENT_ID, NAVER_CLIENT_SECRET 환경변수를 확인하세요.',
-        KIDSMAP_ERROR_CODES.INVALID_API_KEY
-      )
+      if (credentialPool.size === 0) {
+        throw new KidsMapApiError(
+          '네이버 API 인증 정보가 설정되지 않았습니다. NAVER_CLIENT_ID, NAVER_CLIENT_SECRET 환경변수를 확인하세요.',
+          KIDSMAP_ERROR_CODES.INVALID_API_KEY
+        )
+      }
+
+      const credentials = credentialPool.getNext()!
+      this.config = {
+        clientId: credentials.clientId,
+        clientSecret: credentials.clientSecret,
+        ...DEFAULT_CONFIG,
+        ...config,
+      } as Required<NaverClientConfig>
+
+      console.log(`[Naver API] Blog client initialized with credential pool (${credentialPool.size} credentials)`)
     }
-
-    this.config = {
-      clientId,
-      clientSecret,
-      ...DEFAULT_CONFIG,
-      ...config,
-    } as Required<NaverClientConfig>
   }
 
   // ============================================
@@ -270,13 +391,33 @@ export class NaverBlogClient {
     params: URLSearchParams
   ): Promise<T> {
     let lastError: Error | null = null
+    let currentCredentials: NaverCredentials = {
+      clientId: this.config.clientId,
+      clientSecret: this.config.clientSecret,
+    }
 
     for (let attempt = 1; attempt <= this.config.retryCount; attempt++) {
       try {
-        return await this.fetchApi<T>(endpoint, params)
+        return await this.fetchApi<T>(endpoint, params, currentCredentials)
       } catch (error) {
         lastError = error as Error
         console.warn(`[Naver API] Attempt ${attempt} failed:`, error)
+
+        // Rate limit 에러인 경우 다른 자격증명으로 전환
+        const isRateLimited =
+          error instanceof KidsMapApiError &&
+          (error.statusCode === 429 ||
+            error.message.includes('rate limit') ||
+            error.message.includes('quota'))
+
+        if (isRateLimited && this.useCredentialPool && credentialPool.size > 1) {
+          credentialPool.markRateLimited(currentCredentials)
+          const nextCredentials = credentialPool.getNext()
+          if (nextCredentials && nextCredentials.clientId !== currentCredentials.clientId) {
+            currentCredentials = nextCredentials
+            console.log('[Naver API] Switching to alternate credentials')
+          }
+        }
 
         if (attempt < this.config.retryCount) {
           await this.delay(1000 * attempt)
@@ -290,8 +431,16 @@ export class NaverBlogClient {
     )
   }
 
-  private async fetchApi<T>(endpoint: string, params: URLSearchParams): Promise<T> {
+  private async fetchApi<T>(
+    endpoint: string,
+    params: URLSearchParams,
+    credentials?: NaverCredentials
+  ): Promise<T> {
     const url = `${NAVER_API_BASE_URL}${endpoint}?${params.toString()}`
+    const creds = credentials || {
+      clientId: this.config.clientId,
+      clientSecret: this.config.clientSecret,
+    }
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout)
@@ -300,8 +449,8 @@ export class NaverBlogClient {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'X-Naver-Client-Id': this.config.clientId,
-          'X-Naver-Client-Secret': this.config.clientSecret,
+          'X-Naver-Client-Id': creds.clientId,
+          'X-Naver-Client-Secret': creds.clientSecret,
           Accept: 'application/json',
         },
         signal: controller.signal,
@@ -376,24 +525,37 @@ export class NaverBlogClient {
 export class NaverClipClient {
   private config: Required<NaverClientConfig>
   private cache: Map<string, { data: ContentSearchResult; timestamp: number }> = new Map()
+  private useCredentialPool: boolean
 
   constructor(config?: Partial<NaverClientConfig>) {
-    const clientId = config?.clientId || process.env.NAVER_CLIENT_ID
-    const clientSecret = config?.clientSecret || process.env.NAVER_CLIENT_SECRET
+    // 명시적 자격증명이 제공되면 해당 자격증명만 사용
+    if (config?.clientId && config?.clientSecret) {
+      this.useCredentialPool = false
+      this.config = {
+        ...DEFAULT_CONFIG,
+        ...config,
+      } as Required<NaverClientConfig>
+    } else {
+      // 자격증명 풀 사용 (라운드 로빈)
+      this.useCredentialPool = true
 
-    if (!clientId || !clientSecret) {
-      throw new KidsMapApiError(
-        '네이버 API 인증 정보가 설정되지 않았습니다.',
-        KIDSMAP_ERROR_CODES.INVALID_API_KEY
-      )
+      if (credentialPool.size === 0) {
+        throw new KidsMapApiError(
+          '네이버 API 인증 정보가 설정되지 않았습니다.',
+          KIDSMAP_ERROR_CODES.INVALID_API_KEY
+        )
+      }
+
+      const credentials = credentialPool.getNext()!
+      this.config = {
+        clientId: credentials.clientId,
+        clientSecret: credentials.clientSecret,
+        ...DEFAULT_CONFIG,
+        ...config,
+      } as Required<NaverClientConfig>
+
+      console.log(`[Naver API] Clip client initialized with credential pool (${credentialPool.size} credentials)`)
     }
-
-    this.config = {
-      clientId,
-      clientSecret,
-      ...DEFAULT_CONFIG,
-      ...config,
-    } as Required<NaverClientConfig>
   }
 
   // ============================================
@@ -528,12 +690,32 @@ export class NaverClipClient {
     params: URLSearchParams
   ): Promise<T> {
     let lastError: Error | null = null
+    let currentCredentials: NaverCredentials = {
+      clientId: this.config.clientId,
+      clientSecret: this.config.clientSecret,
+    }
 
     for (let attempt = 1; attempt <= this.config.retryCount; attempt++) {
       try {
-        return await this.fetchApi<T>(endpoint, params)
+        return await this.fetchApi<T>(endpoint, params, currentCredentials)
       } catch (error) {
         lastError = error as Error
+
+        // Rate limit 에러인 경우 다른 자격증명으로 전환
+        const isRateLimited =
+          error instanceof KidsMapApiError &&
+          (error.statusCode === 429 ||
+            error.message.includes('rate limit') ||
+            error.message.includes('quota'))
+
+        if (isRateLimited && this.useCredentialPool && credentialPool.size > 1) {
+          credentialPool.markRateLimited(currentCredentials)
+          const nextCredentials = credentialPool.getNext()
+          if (nextCredentials && nextCredentials.clientId !== currentCredentials.clientId) {
+            currentCredentials = nextCredentials
+            console.log('[Naver API] Clip client switching to alternate credentials')
+          }
+        }
 
         if (attempt < this.config.retryCount) {
           await this.delay(1000 * attempt)
@@ -547,8 +729,16 @@ export class NaverClipClient {
     )
   }
 
-  private async fetchApi<T>(endpoint: string, params: URLSearchParams): Promise<T> {
+  private async fetchApi<T>(
+    endpoint: string,
+    params: URLSearchParams,
+    credentials?: NaverCredentials
+  ): Promise<T> {
     const url = `${NAVER_API_BASE_URL}${endpoint}?${params.toString()}`
+    const creds = credentials || {
+      clientId: this.config.clientId,
+      clientSecret: this.config.clientSecret,
+    }
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout)
@@ -557,8 +747,8 @@ export class NaverClipClient {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'X-Naver-Client-Id': this.config.clientId,
-          'X-Naver-Client-Secret': this.config.clientSecret,
+          'X-Naver-Client-Id': creds.clientId,
+          'X-Naver-Client-Secret': creds.clientSecret,
           Accept: 'application/json',
         },
         signal: controller.signal,
