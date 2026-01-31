@@ -121,3 +121,30 @@ export {
 } from './crawler'
 
 export type { CrawlJobOptions } from './crawler'
+
+// ============================================
+// 파이프라인 export
+// ============================================
+
+export {
+  // ETL 파이프라인
+  DataBlockPipeline,
+
+  // 최적화
+  BlockOptimizer,
+
+  // 마이그레이션
+  BlockMigrator,
+
+  // 모니터링
+  BlockMonitor,
+} from './pipeline'
+
+export type {
+  PipelineConfig,
+  PipelineResult,
+  PipelineError,
+  MigrationConfig,
+  MigrationResult,
+  MonitoringMetrics,
+} from './pipeline'
