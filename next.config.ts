@@ -1,6 +1,45 @@
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
+// Validate required environment variables at build time
+if (!process.env.SKIP_ENV_VALIDATION) {
+  const requiredEnvVars = [
+    'ANTHROPIC_API_KEY',
+    'NEXTAUTH_SECRET',
+  ] as const
+
+  const requiredForProduction = [
+    'DATABASE_URL',
+    'TOSS_CLIENT_KEY',
+    'TOSS_SECRET_KEY',
+  ] as const
+
+  const missing: string[] = []
+
+  for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+      missing.push(envVar)
+    }
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    for (const envVar of requiredForProduction) {
+      if (!process.env[envVar]) {
+        missing.push(envVar)
+      }
+    }
+  }
+
+  if (missing.length > 0) {
+    console.error('\n❌ Missing required environment variables:')
+    missing.forEach((v) => console.error(`   - ${v}`))
+    console.error('\n📄 See .env.example for required variables\n')
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(`Missing required environment variables: ${missing.join(', ')}`)
+    }
+  }
+}
+
 const nextConfig: NextConfig = {
   // 압축 활성화
   compress: true,

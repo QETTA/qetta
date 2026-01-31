@@ -240,13 +240,90 @@ git push origin main
 
 ## 🔧 Environment Variables
 
-**No new environment variables required** for this refactoring.
+See `.env.example` for the complete list of environment variables.
 
-Existing variables should work:
-- `DATABASE_URL`
-- `NEXT_PUBLIC_APP_URL`
-- `SENTRY_DSN` (optional)
-- etc.
+### Required Variables
+
+| Variable | Description | Required In |
+|----------|-------------|-------------|
+| `ANTHROPIC_API_KEY` | Claude AI API key | All environments |
+| `NEXTAUTH_SECRET` | Session encryption (min 32 chars) | All environments |
+| `DATABASE_URL` | PostgreSQL connection string | Production |
+| `TOSS_CLIENT_KEY` | Toss Payments client key | Production |
+| `TOSS_SECRET_KEY` | Toss Payments secret key | Production |
+
+### Setup
+```bash
+# Copy example file
+cp .env.example .env.local
+
+# Edit with your values
+nano .env.local
+
+# Generate NEXTAUTH_SECRET
+openssl rand -base64 32
+```
+
+### Validation
+Environment variables are validated at build time. Missing required variables will:
+- **Development**: Show warning in console
+- **Production**: Fail the build with error
+
+To skip validation (CI only):
+```bash
+SKIP_ENV_VALIDATION=true npm run build
+```
+
+---
+
+## 🗄️ Database (Prisma)
+
+### Initial Setup
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Push schema to database (development)
+npx prisma db push
+
+# Or run migrations (production)
+npx prisma migrate deploy
+```
+
+### Production Migration
+
+```bash
+# 1. Set DATABASE_URL
+export DATABASE_URL="postgresql://user:pass@host:5432/qetta"
+
+# 2. Run migrations
+npx prisma migrate deploy
+
+# 3. Verify tables created
+npx prisma db pull
+```
+
+### Rollback Migration
+
+```bash
+# List migrations
+npx prisma migrate status
+
+# Rollback to specific migration (manual)
+# Edit prisma/migrations folder and re-run
+npx prisma migrate resolve --rolled-back [migration_name]
+```
+
+### Create New Migration
+
+```bash
+# After editing prisma/schema.prisma
+npx prisma migrate dev --name descriptive_name
+
+# Review generated SQL
+cat prisma/migrations/*/migration.sql
+```
 
 ---
 
