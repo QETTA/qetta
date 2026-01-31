@@ -29,7 +29,6 @@ const BetaSignupForm = dynamic(
   () => import('@/components/landing/beta-signup-form').then(m => ({ default: m.BetaSignupForm })),
   {
     loading: () => <BetaFormSkeleton />,
-    ssr: false,
   }
 )
 

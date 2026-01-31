@@ -15,9 +15,20 @@ import { Loader2, CreditCard, AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 // Toss SDK is loaded dynamically on the client
+interface TossPaymentsInstance {
+  requestPayment: (method: string, options: {
+    amount: number
+    orderId: string
+    orderName: string
+    customerKey: string | null
+    successUrl: string
+    failUrl: string
+  }) => Promise<void>
+}
+
 declare global {
   interface Window {
-    TossPayments?: any
+    TossPayments?: (clientKey: string) => TossPaymentsInstance
   }
 }
 

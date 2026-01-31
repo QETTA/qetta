@@ -41,6 +41,10 @@ if (!process.env.SKIP_ENV_VALIDATION) {
 }
 
 const nextConfig: NextConfig = {
+  // Turbopack 설정 (Next.js 16 기본값)
+  // webpack config가 있어도 빌드 허용
+  turbopack: {},
+
   // 압축 활성화
   compress: true,
 

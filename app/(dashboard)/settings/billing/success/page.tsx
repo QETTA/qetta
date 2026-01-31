@@ -26,13 +26,12 @@ function SuccessContent() {
   const amount = searchParams.get('amount')
 
   useEffect(() => {
-    if (!paymentKey || !orderId || !amount) {
-      setStatus('error')
-      setError('Invalid payment information')
-      return
-    }
-
     const confirmPayment = async () => {
+      if (!paymentKey || !orderId || !amount) {
+        setStatus('error')
+        setError('Invalid payment information')
+        return
+      }
       try {
         // Extract plan info from URL (stored orderId info or session)
         // Simple implementation: get from localStorage
