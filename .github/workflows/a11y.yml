@@ -1,0 +1,79 @@
+# Accessibility Testing with axe-core
+#
+# WCAG 2.1 AA 기준 자동 접근성 검사
+# - Lighthouse CI로 접근성 점수 측정
+# - axe-core로 상세 위반 사항 검출
+#
+# 실행 조건:
+# - PR 생성/업데이트 시
+# - main 브랜치 push 시
+
+name: Accessibility
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  accessibility:
+    name: Accessibility Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          SKIP_ENV_VALIDATION: 'true'
+
+      - name: Start server
+        run: |
+          npm run start &
+          npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://localhost:3000
+            http://localhost:3000/pricing
+            http://localhost:3000/company
+          configPath: './.lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Run axe accessibility tests
+        uses: dequelabs/axe-linter-action@v1
+        id: axe
+        with:
+          include: '**/*.tsx'
+          exclude: '**/*.test.tsx,**/node_modules/**'
+        continue-on-error: true
+
+      - name: Create accessibility report
+        if: always()
+        run: |
+          echo "## Accessibility Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Lighthouse Scores" >> $GITHUB_STEP_SUMMARY
+          echo "Check the uploaded artifacts for detailed scores." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### WCAG 2.1 AA Checklist" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] 색상 대비율 4.5:1 이상" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] 키보드 네비게이션 가능" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] 포커스 인디케이터 명확" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] 스크린 리더 호환" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] 대체 텍스트 제공" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,170 @@
+/**
+ * CONSTRUCTION Industry BLOCK
+ * Category: financeService
+ */
+import type { EnrichedIndustryBlock } from './types'
+
+export const CONSTRUCTION_BLOCK: EnrichedIndustryBlock = {
+  id: 'CONSTRUCTION',
+  name: 'Construction & Infrastructure',
+  nameKo: '건설/인프라',
+  category: 'financeService',
+  description: 'Construction project management, safety compliance, quality inspection, and progress reporting',
+  descriptionKo: '건설 프로젝트 관리, 안전 준수, 품질 검사, 공정 보고서',
+
+  terminology: [
+    {
+      id: 'pq',
+      korean: '시공능력평가',
+      english: 'Pre-Qualification',
+      category: 'qualification',
+      description: '건설업체 시공 능력 평가 순위',
+      aliases: ['PQ', '시공능력', 'pre-qualification'],
+      regulatoryRef: '건설산업기본법 제23조',
+      examples: ['PQ 순위', '입찰 자격'],
+    },
+    {
+      id: 'safety-index',
+      korean: '안전지수',
+      english: 'Safety Index',
+      category: 'metric',
+      unit: 'points',
+      description: '건설현장 안전관리 평가 지수',
+      aliases: ['안전지수', 'safety score'],
+      validationRange: { min: 0, max: 100 },
+      examples: ['90점 이상 우수', '정기 안전점검'],
+    },
+    {
+      id: 'kosha',
+      korean: '산업안전보건공단',
+      english: 'Korea Occupational Safety and Health Agency',
+      category: 'organization',
+      description: '산업 안전 보건 전문 기관',
+      aliases: ['KOSHA', '안전공단'],
+      examples: ['KOSHA 인증', '안전진단'],
+    },
+    {
+      id: 'csi',
+      korean: '건설공사 표준품셈',
+      english: 'Construction Standard Index',
+      category: 'standard',
+      description: '건설공사 표준 품셈 및 적산',
+      aliases: ['CSI', '표준품셈'],
+      regulatoryRef: '국토교통부 고시',
+      examples: ['품셈 단가', '공사비 산정'],
+    },
+    {
+      id: 'bim',
+      korean: '건축정보모델링',
+      english: 'Building Information Modeling',
+      category: 'technology',
+      description: '3D 기반 건축물 정보 통합 모델',
+      aliases: ['BIM', '3D 모델'],
+      examples: ['Revit', '간섭 체크'],
+    },
+    {
+      id: 'schedule-variance',
+      korean: '공정 편차',
+      english: 'Schedule Variance',
+      category: 'metric',
+      unit: 'days',
+      description: '계획 대비 실제 공정 차이',
+      aliases: ['SV', '공정지연'],
+      examples: ['+5일 지연', '-3일 앞당김'],
+    },
+    {
+      id: 'quality-inspection',
+      korean: '품질검사',
+      english: 'Quality Inspection',
+      category: 'process',
+      description: '건설 품질 검사 및 시험',
+      aliases: ['QC', '품질관리', 'quality control'],
+      examples: ['콘크리트 압축강도', '철근 인장강도'],
+    },
+  ],
+
+  templates: [
+    {
+      id: 'monthly-progress-report',
+      name: 'Monthly Progress Report',
+      nameKo: '월간 공정 보고서',
+      format: 'DOCX',
+      sections: [
+        '공정률 (계획 vs 실적)',
+        '주요 작업 내역',
+        '품질 검사 결과',
+        '안전관리 현황',
+        '차월 계획',
+      ],
+      estimatedGenerationTime: 90,
+    },
+    {
+      id: 'safety-inspection-report',
+      name: 'Safety Inspection Report',
+      nameKo: '안전점검 보고서',
+      format: 'PDF',
+      sections: [
+        '점검 개요',
+        '위험 요인 발견',
+        '시정 조치 사항',
+        '안전교육 실시',
+        'KOSHA 기준 적합성',
+      ],
+      estimatedGenerationTime: 60,
+    },
+    {
+      id: 'material-test-report',
+      name: 'Material Test Report',
+      nameKo: '자재 시험 성적서',
+      format: 'PDF',
+      sections: [
+        '시험 항목',
+        '시험 결과',
+        'KS 규격 적합성',
+        '시험기관 정보',
+        '검사자 서명',
+      ],
+      estimatedGenerationTime: 30,
+    },
+  ],
+
+  rules: [
+    {
+      id: 'kosha-safety-inspection',
+      name: 'KOSHA Safety Inspection',
+      description: '일정 규모 이상 현장 KOSHA 안전진단 의무',
+      condition: 'project_cost > 50_billion_won',
+      action: 'Conduct KOSHA safety diagnosis before construction',
+      severity: 'error',
+      regulatoryRef: '산업안전보건법 제42조',
+    },
+    {
+      id: 'quality-test-frequency',
+      name: 'Quality Test Frequency',
+      description: '콘크리트 압축강도 시험 빈도 준수',
+      condition: 'concrete_poured = true',
+      action: 'Test compressive strength every 150m³ or per day',
+      severity: 'error',
+      regulatoryRef: 'KCS 14 20 10 (콘크리트 일반사항)',
+    },
+    {
+      id: 'schedule-delay-threshold',
+      name: 'Schedule Delay Threshold',
+      description: '공정 지연 10% 초과 시 보고',
+      condition: 'schedule_variance > 10%',
+      action: 'Report to owner and submit recovery plan',
+      severity: 'warning',
+      regulatoryRef: 'Contract terms',
+    },
+  ],
+
+  keywords: ['PQ', 'BIM', 'KOSHA', 'safety', '안전', '건설', '공정', '품질'],
+  regulatoryBodies: ['국토교통부', '고용노동부', 'KOSHA'],
+  color: 'yellow',
+
+  tokenBudget: {
+    metadata: 50,
+    terminology: 500,
+    full: 2000,
+  },
+}

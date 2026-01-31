@@ -1,0 +1,172 @@
+/**
+ * HEALTHCARE Industry BLOCK
+ * Category: advancedTech
+ */
+import type { EnrichedIndustryBlock } from './types'
+
+export const HEALTHCARE_BLOCK: EnrichedIndustryBlock = {
+  id: 'HEALTHCARE',
+  name: 'Healthcare & Medical Devices',
+  nameKo: '의료/헬스케어',
+  category: 'advancedTech',
+  description: 'Medical device development, clinical trials, healthcare data management, and regulatory compliance reporting',
+  descriptionKo: '의료기기 개발, 임상시험, 의료 데이터 관리, 규제 준수 보고서',
+
+  terminology: [
+    {
+      id: 'gmp',
+      korean: '우수 의약품 제조 관리 기준',
+      english: 'Good Manufacturing Practice',
+      category: 'regulation',
+      description: '의약품 제조 및 품질 관리 기준',
+      aliases: ['GMP', 'cGMP'],
+      regulatoryRef: '약사법 제31조',
+      examples: ['GMP 인증', '제조 관리'],
+    },
+    {
+      id: 'mfds-approval',
+      korean: '식약처 허가',
+      english: 'MFDS Approval',
+      category: 'regulation',
+      description: '식품의약품안전처 의료기기 허가',
+      aliases: ['식약처', 'MFDS', '허가'],
+      regulatoryRef: '의료기기법 제6조',
+      examples: ['1등급 신고', '2~4등급 허가'],
+    },
+    {
+      id: 'clinical-trial',
+      korean: '임상시험',
+      english: 'Clinical Trial',
+      category: 'process',
+      description: '의약품/의료기기 임상 시험',
+      aliases: ['clinical trial', '임상'],
+      examples: ['Phase I/II/III', 'IRB 승인'],
+    },
+    {
+      id: 'irb',
+      korean: '기관생명윤리위원회',
+      english: 'Institutional Review Board',
+      category: 'organization',
+      description: '임상시험 윤리 심사 위원회',
+      aliases: ['IRB', '생명윤리위원회'],
+      regulatoryRef: '생명윤리 및 안전에 관한 법률',
+      examples: ['IRB 승인', '피험자 보호'],
+    },
+    {
+      id: 'udi',
+      korean: '의료기기 고유식별자',
+      english: 'Unique Device Identifier',
+      category: 'standard',
+      description: '의료기기 추적 고유 번호',
+      aliases: ['UDI', '고유식별자'],
+      regulatoryRef: 'FDA UDI Regulation',
+      examples: ['바코드', 'RFID'],
+    },
+    {
+      id: 'hl7-fhir',
+      korean: '의료 정보 교환 표준',
+      english: 'Health Level 7 FHIR',
+      category: 'standard',
+      description: '의료 정보 상호운용성 표준',
+      aliases: ['HL7', 'FHIR'],
+      examples: ['EMR 연동', 'API 표준'],
+    },
+    {
+      id: 'hipaa',
+      korean: '의료정보 보호법',
+      english: 'Health Insurance Portability and Accountability Act',
+      category: 'regulation',
+      description: '미국 의료정보 보호 규정',
+      aliases: ['HIPAA', 'PHI 보호'],
+      regulatoryRef: 'HIPAA Privacy Rule',
+      examples: ['환자 정보 암호화', '접근 권한 관리'],
+    },
+  ],
+
+  templates: [
+    {
+      id: 'clinical-trial-protocol',
+      name: 'Clinical Trial Protocol',
+      nameKo: '임상시험 계획서',
+      format: 'DOCX',
+      sections: [
+        '연구 목적',
+        '피험자 선정/제외 기준',
+        '연구 절차',
+        '안전성 평가',
+        'IRB 승인',
+        '통계 분석 계획',
+      ],
+      estimatedGenerationTime: 180,
+    },
+    {
+      id: 'device-master-file',
+      name: 'Device Master File',
+      nameKo: '의료기기 기술문서',
+      format: 'PDF',
+      sections: [
+        '제품 설명',
+        '설계 검증',
+        '생물학적 안전성',
+        '소프트웨어 검증',
+        'Risk Management (ISO 14971)',
+        '임상 평가',
+      ],
+      estimatedGenerationTime: 240,
+    },
+    {
+      id: 'adverse-event-report',
+      name: 'Adverse Event Report',
+      nameKo: '이상사례 보고서',
+      format: 'HWP',
+      sections: [
+        '이상사례 개요',
+        '중대성 평가',
+        '인과관계 분석',
+        '후속 조치',
+        '식약처 보고',
+      ],
+      estimatedGenerationTime: 60,
+    },
+  ],
+
+  rules: [
+    {
+      id: 'gmp-compliance',
+      name: 'GMP Compliance Requirement',
+      description: 'GMP 기준 준수 의무',
+      condition: 'pharmaceutical_manufacturing = true',
+      action: 'Maintain GMP certification and conduct regular audits',
+      severity: 'error',
+      regulatoryRef: '약사법 제31조',
+    },
+    {
+      id: 'irb-approval-required',
+      name: 'IRB Approval Required',
+      description: '임상시험 IRB 승인 필수',
+      condition: 'clinical_trial_planned = true',
+      action: 'Obtain IRB approval before enrolling subjects',
+      severity: 'error',
+      regulatoryRef: '생명윤리법 제10조',
+    },
+    {
+      id: 'adverse-event-reporting',
+      name: 'Adverse Event Reporting (15 days)',
+      description: '중대한 이상사례 15일 이내 보고',
+      condition: 'serious_adverse_event = true',
+      action: 'Report to MFDS within 15 days',
+      severity: 'error',
+      regulatoryRef: '의료기기법 시행규칙 제23조',
+    },
+  ],
+
+  keywords: ['GMP', 'MFDS', 'clinical trial', 'IRB', 'UDI', 'FHIR', '의료기기', '임상'],
+  regulatoryBodies: ['식품의약품안전처', 'FDA', 'CE', 'ISO'],
+  color: 'rose',
+
+  tokenBudget: {
+    metadata: 50,
+    terminology: 500,
+    full: 2000,
+  },
+}

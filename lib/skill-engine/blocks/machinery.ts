@@ -1,0 +1,172 @@
+/**
+ * MACHINERY Industry BLOCK
+ * Category: manufacturing
+ */
+import type { EnrichedIndustryBlock } from './types'
+
+export const MACHINERY_BLOCK: EnrichedIndustryBlock = {
+  id: 'MACHINERY',
+  name: 'Machinery & Metal',
+  nameKo: '기계/금속',
+  category: 'manufacturing',
+  description: 'Machinery manufacturing, metalworking, precision machining, and industrial equipment production reporting',
+  descriptionKo: '기계 제조, 금속 가공, 정밀 가공, 산업 장비 생산 보고서',
+
+  terminology: [
+    {
+      id: 'oee',
+      korean: '설비종합효율',
+      english: 'Overall Equipment Effectiveness',
+      category: 'metric',
+      unit: '%',
+      description: '설비의 종합 생산성 지표 (가동률 × 성능 × 품질)',
+      aliases: ['OEE', '종합효율'],
+      validationRange: { min: 0, max: 100 },
+      examples: ['OEE 85%', 'World Class 85% 이상'],
+    },
+    {
+      id: 'mtbf',
+      korean: '평균고장간격',
+      english: 'Mean Time Between Failures',
+      category: 'metric',
+      unit: 'hours',
+      description: '고장 발생 간 평균 시간',
+      aliases: ['MTBF', '평균 고장 간격'],
+      validationRange: { min: 0, max: 100000 },
+      examples: ['MTBF 5000시간', '신뢰성 지표'],
+    },
+    {
+      id: 'mttr',
+      korean: '평균수리시간',
+      english: 'Mean Time To Repair',
+      category: 'metric',
+      unit: 'hours',
+      description: '고장 복구 평균 소요 시간',
+      aliases: ['MTTR', '평균 수리 시간'],
+      validationRange: { min: 0, max: 100 },
+      examples: ['MTTR 2시간', '보전성 지표'],
+    },
+    {
+      id: 'tpm',
+      korean: '전사적 생산 보전',
+      english: 'Total Productive Maintenance',
+      category: 'method',
+      description: '설비 종합 효율 향상 활동',
+      aliases: ['TPM', '생산보전'],
+      examples: ['자주보전', '계획보전', '개별개선'],
+    },
+    {
+      id: 'cmm',
+      korean: '3차원 측정기',
+      english: 'Coordinate Measuring Machine',
+      category: 'equipment',
+      description: '3차원 좌표 측정 장비',
+      aliases: ['CMM', '3차원측정기'],
+      examples: ['치수 측정', '형상 측정'],
+    },
+    {
+      id: 'nc',
+      korean: '수치제어',
+      english: 'Numerical Control',
+      category: 'technology',
+      description: '컴퓨터 수치 제어 가공',
+      aliases: ['NC', 'CNC', '수치제어'],
+      examples: ['CNC 선반', 'CNC 밀링'],
+    },
+    {
+      id: 'tolerance',
+      korean: '공차',
+      english: 'Tolerance',
+      category: 'specification',
+      unit: 'mm',
+      description: '허용 치수 범위',
+      aliases: ['공차', 'tolerance', '허용차'],
+      examples: ['±0.01mm', 'IT7 등급'],
+    },
+  ],
+
+  templates: [
+    {
+      id: 'oee-daily-report',
+      name: 'OEE Daily Report',
+      nameKo: 'OEE 일일 보고서',
+      format: 'XLSX',
+      sections: [
+        '설비별 OEE',
+        '가동률 분석',
+        '성능 효율',
+        '품질 효율',
+        '손실 요인 분석',
+      ],
+      estimatedGenerationTime: 60,
+    },
+    {
+      id: 'maintenance-record',
+      name: 'Maintenance Record',
+      nameKo: '설비 보전 기록',
+      format: 'DOCX',
+      sections: [
+        '보전 이력',
+        '예방 보전 계획',
+        '고장 발생 내역',
+        '부품 교체 이력',
+        'MTBF/MTTR 추이',
+      ],
+      estimatedGenerationTime: 45,
+    },
+    {
+      id: 'inspection-report',
+      name: 'Quality Inspection Report',
+      nameKo: '품질 검사 성적서',
+      format: 'PDF',
+      sections: [
+        '검사 항목',
+        '측정 데이터 (CMM)',
+        '공차 적합성',
+        '불량 분석',
+        '검사자 서명',
+      ],
+      estimatedGenerationTime: 30,
+    },
+  ],
+
+  rules: [
+    {
+      id: 'oee-threshold',
+      name: 'OEE Minimum Threshold',
+      description: 'OEE 70% 미만 시 개선 활동 필수',
+      condition: 'OEE < 70%',
+      action: 'Initiate improvement project and root cause analysis',
+      severity: 'warning',
+      regulatoryRef: 'TPM Excellence Standard',
+    },
+    {
+      id: 'preventive-maintenance',
+      name: 'Preventive Maintenance Schedule',
+      description: '예방 보전 주기 준수',
+      condition: 'days_since_last_pm > scheduled_interval',
+      action: 'Trigger preventive maintenance work order',
+      severity: 'warning',
+      regulatoryRef: 'ISO 55000 Asset Management',
+    },
+    {
+      id: 'tolerance-violation',
+      name: 'Tolerance Violation',
+      description: '공차 초과 시 품질 Hold',
+      condition: 'measurement outside tolerance range',
+      action: 'Hold production lot and conduct dimensional analysis',
+      severity: 'error',
+      regulatoryRef: 'ISO 2768 General Tolerances',
+    },
+  ],
+
+  keywords: ['OEE', 'TPM', 'MTBF', 'MTTR', 'CNC', 'CMM', '기계', '금속', '가공'],
+  regulatoryBodies: ['산업통상자원부', '중소벤처기업부', 'ISO'],
+  color: 'slate',
+
+  tokenBudget: {
+    metadata: 50,
+    terminology: 500,
+    full: 2000,
+  },
+}

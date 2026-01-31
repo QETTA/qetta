@@ -1,0 +1,170 @@
+/**
+ * LOGISTICS Industry BLOCK
+ * Category: financeService
+ */
+import type { EnrichedIndustryBlock } from './types'
+
+export const LOGISTICS_BLOCK: EnrichedIndustryBlock = {
+  id: 'LOGISTICS',
+  name: 'Logistics & SCM',
+  nameKo: '물류/SCM',
+  category: 'financeService',
+  description: 'Supply chain management, warehouse operations, transportation compliance, and logistics performance reporting',
+  descriptionKo: '공급망 관리, 창고 운영, 운송 규제, 물류 성과 보고서',
+
+  terminology: [
+    {
+      id: 'otif',
+      korean: '정시 완전 배송률',
+      english: 'On-Time In-Full',
+      category: 'metric',
+      unit: '%',
+      description: '약속된 시간에 완전한 수량을 배송한 비율',
+      aliases: ['OTIF', '정시완납률'],
+      validationRange: { min: 0, max: 100 },
+      examples: ['95% OTIF 목표', '납기 준수'],
+    },
+    {
+      id: 'wms',
+      korean: '창고관리시스템',
+      english: 'Warehouse Management System',
+      category: 'system',
+      description: '창고 입출고 및 재고 관리 시스템',
+      aliases: ['WMS', '창고시스템'],
+      examples: ['바코드 스캔', '재고 실사'],
+    },
+    {
+      id: 'tms',
+      korean: '운송관리시스템',
+      english: 'Transportation Management System',
+      category: 'system',
+      description: '운송 계획 및 실행 관리 시스템',
+      aliases: ['TMS', '운송시스템'],
+      examples: ['배차 최적화', '운임 정산'],
+    },
+    {
+      id: 'inventory-turnover',
+      korean: '재고회전율',
+      english: 'Inventory Turnover',
+      category: 'metric',
+      unit: 'times/year',
+      description: '연간 재고가 판매되는 횟수',
+      aliases: ['turnover', '회전율'],
+      validationRange: { min: 0, max: 100 },
+      examples: ['12회/년', '높을수록 효율적'],
+    },
+    {
+      id: 'cross-docking',
+      korean: '크로스도킹',
+      english: 'Cross-Docking',
+      category: 'method',
+      description: '보관 없이 입고 즉시 출고하는 방식',
+      aliases: ['cross-docking', '직송'],
+      examples: ['24시간 이내 출고', '재고 최소화'],
+    },
+    {
+      id: '3pl',
+      korean: '제3자 물류',
+      english: 'Third-Party Logistics',
+      category: 'service',
+      description: '물류 전문 업체 위탁',
+      aliases: ['3PL', '위탁물류'],
+      examples: ['풀필먼트', '통합 물류'],
+    },
+    {
+      id: 'dangerous-goods',
+      korean: '위험물',
+      english: 'Dangerous Goods',
+      category: 'regulation',
+      description: 'UN 위험물 분류 물품',
+      aliases: ['DG', 'hazmat', '위험물'],
+      regulatoryRef: 'UN Recommendations on the Transport of Dangerous Goods',
+      examples: ['Class 3 인화성 액체', 'MSDS 첨부'],
+    },
+  ],
+
+  templates: [
+    {
+      id: 'monthly-logistics-report',
+      name: 'Monthly Logistics Report',
+      nameKo: '월간 물류 보고서',
+      format: 'XLSX',
+      sections: [
+        '출하 수량',
+        'OTIF 달성률',
+        '재고회전율',
+        '운송비 분석',
+        '클레임 현황',
+      ],
+      estimatedGenerationTime: 60,
+    },
+    {
+      id: 'warehouse-inventory-report',
+      name: 'Warehouse Inventory Report',
+      nameKo: '창고 재고 보고서',
+      format: 'XLSX',
+      sections: [
+        '현재고 현황',
+        '입고/출고 내역',
+        '불용 재고',
+        '재고 정확도',
+        '보관료 정산',
+      ],
+      estimatedGenerationTime: 45,
+    },
+    {
+      id: 'transport-manifest',
+      name: 'Transport Manifest',
+      nameKo: '운송 매니페스트',
+      format: 'PDF',
+      sections: [
+        '화물 목록',
+        '위험물 정보',
+        '운송 경로',
+        '운전자 정보',
+        '보험 정보',
+      ],
+      estimatedGenerationTime: 30,
+    },
+  ],
+
+  rules: [
+    {
+      id: 'dangerous-goods-labeling',
+      name: 'Dangerous Goods Labeling',
+      description: '위험물 표시 및 서류 의무',
+      condition: 'cargo_contains_dangerous_goods = true',
+      action: 'Attach DG label, MSDS, and UN classification',
+      severity: 'error',
+      regulatoryRef: 'UN Model Regulations',
+    },
+    {
+      id: 'inventory-accuracy-threshold',
+      name: 'Inventory Accuracy Threshold',
+      description: '재고 정확도 95% 미만 시 실사 필요',
+      condition: 'inventory_accuracy < 95%',
+      action: 'Conduct full physical inventory count',
+      severity: 'warning',
+      regulatoryRef: 'Internal policy',
+    },
+    {
+      id: 'otif-performance',
+      name: 'OTIF Performance Standard',
+      description: 'OTIF 90% 미만 시 개선 계획 필요',
+      condition: 'OTIF < 90%',
+      action: 'Develop improvement plan and escalate to management',
+      severity: 'warning',
+      regulatoryRef: 'SLA with customer',
+    },
+  ],
+
+  keywords: ['OTIF', 'WMS', 'TMS', '3PL', 'SCM', 'inventory', '물류', '공급망'],
+  regulatoryBodies: ['국토교통부', '관세청', 'UN', 'IATA'],
+  color: 'orange',
+
+  tokenBudget: {
+    metadata: 50,
+    terminology: 500,
+    full: 2000,
+  },
+}

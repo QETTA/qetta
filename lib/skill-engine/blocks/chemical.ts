@@ -1,0 +1,173 @@
+/**
+ * CHEMICAL Industry BLOCK
+ * Category: energyEnvironment
+ */
+import type { EnrichedIndustryBlock } from './types'
+
+export const CHEMICAL_BLOCK: EnrichedIndustryBlock = {
+  id: 'CHEMICAL',
+  name: 'Chemical & Petroleum',
+  nameKo: '화학/석유',
+  category: 'energyEnvironment',
+  description: 'Chemical manufacturing, petroleum refining, process safety, and hazardous material compliance reporting',
+  descriptionKo: '화학 제조, 석유 정제, 공정 안전, 위험물질 관리 보고서',
+
+  terminology: [
+    {
+      id: 'psm',
+      korean: '공정안전관리',
+      english: 'Process Safety Management',
+      category: 'regulation',
+      description: '유해위험물질 취급 공정의 안전 관리',
+      aliases: ['PSM', '공정안전'],
+      regulatoryRef: '산업안전보건법 제44조',
+      examples: ['PSM 인증', '공정위험성평가'],
+    },
+    {
+      id: 'msds',
+      korean: '물질안전보건자료',
+      english: 'Material Safety Data Sheet',
+      category: 'document',
+      description: '화학물질의 유해위험성 정보',
+      aliases: ['MSDS', 'SDS'],
+      regulatoryRef: '산업안전보건법 제110조',
+      examples: ['MSDS 비치', '작업자 교육'],
+    },
+    {
+      id: 'batch-yield',
+      korean: '배치 수율',
+      english: 'Batch Yield',
+      category: 'metric',
+      unit: '%',
+      description: '반응 공정에서 목적 생성물 비율',
+      aliases: ['yield', '수율'],
+      validationRange: { min: 0, max: 100 },
+      examples: ['95% 수율', '목표 수율'],
+    },
+    {
+      id: 'hazop',
+      korean: '위험과 운전 분석',
+      english: 'Hazard and Operability Study',
+      category: 'method',
+      description: '공정 위험 요인 체계적 분석',
+      aliases: ['HAZOP', 'HAZ&OP'],
+      examples: ['설계 단계 HAZOP', '정량적 위험성평가'],
+    },
+    {
+      id: 'pfd',
+      korean: '공정흐름도',
+      english: 'Process Flow Diagram',
+      category: 'document',
+      description: '화학 공정의 흐름과 설비 배치도',
+      aliases: ['PFD', 'P&ID'],
+      examples: ['반응기 PFD', '증류탑 PFD'],
+    },
+    {
+      id: 'api-gravity',
+      korean: 'API 비중',
+      english: 'API Gravity',
+      category: 'metric',
+      unit: '°API',
+      description: '석유 제품의 밀도 표준',
+      aliases: ['API도', 'API gravity'],
+      validationRange: { min: 10, max: 70 },
+      examples: ['경질유 >31°API', '중질유 <22°API'],
+    },
+    {
+      id: 'lopa',
+      korean: '보호층 분석',
+      english: 'Layer of Protection Analysis',
+      category: 'method',
+      description: '공정 안전 보호 계층 분석',
+      aliases: ['LOPA', '안전계층분석'],
+      examples: ['SIL 등급 결정', '독립보호계층'],
+    },
+  ],
+
+  templates: [
+    {
+      id: 'psm-annual-report',
+      name: 'PSM Annual Report',
+      nameKo: 'PSM 연차 보고서',
+      format: 'HWP',
+      sections: [
+        '공정안전자료 현황',
+        '위험성평가 결과',
+        '안전운전계획',
+        '비상조치계획',
+        '도급업체 안전관리',
+        '변경 관리 이력',
+      ],
+      estimatedGenerationTime: 180,
+    },
+    {
+      id: 'batch-production-record',
+      name: 'Batch Production Record',
+      nameKo: '배치 생산 기록',
+      format: 'XLSX',
+      sections: [
+        '원료 투입량',
+        '반응 조건 (온도, 압력, 시간)',
+        '수율 계산',
+        '품질 분석 결과',
+        '작업자 확인',
+      ],
+      estimatedGenerationTime: 45,
+    },
+    {
+      id: 'hazmat-incident-report',
+      name: 'Hazardous Material Incident Report',
+      nameKo: '위험물질 사고 보고서',
+      format: 'DOCX',
+      sections: [
+        '사고 개요',
+        '발생 원인',
+        '피해 현황',
+        '긴급 조치',
+        '재발 방지 대책',
+        '관할 기관 보고',
+      ],
+      estimatedGenerationTime: 90,
+    },
+  ],
+
+  rules: [
+    {
+      id: 'psm-compliance',
+      name: 'PSM Compliance Requirement',
+      description: 'PSM 대상 물질 취급 시 공정안전관리 의무',
+      condition: 'hazardous_chemical_quantity > threshold',
+      action: 'Submit PSM report and obtain certification',
+      severity: 'error',
+      regulatoryRef: '산업안전보건법 제44조',
+    },
+    {
+      id: 'msds-availability',
+      name: 'MSDS Availability Requirement',
+      description: 'MSDS 비치 및 작업자 교육 의무',
+      condition: 'chemical_in_use = true',
+      action: 'Ensure MSDS available at workplace and workers trained',
+      severity: 'error',
+      regulatoryRef: '산업안전보건법 제110조',
+    },
+    {
+      id: 'batch-yield-deviation',
+      name: 'Batch Yield Deviation Investigation',
+      description: '수율 편차 발생 시 원인 조사',
+      condition: 'abs(actual_yield - target_yield) > 5%',
+      action: 'Conduct deviation investigation and document root cause',
+      severity: 'warning',
+      regulatoryRef: 'cGMP guidelines',
+    },
+  ],
+
+  keywords: ['PSM', 'MSDS', 'HAZOP', 'chemical', 'petroleum', '화학', '석유', '안전'],
+  regulatoryBodies: ['산업통상자원부', '고용노동부', '환경부'],
+  color: 'cyan',
+
+  tokenBudget: {
+    metadata: 50,
+    terminology: 500,
+    full: 2000,
+  },
+}

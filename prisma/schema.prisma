@@ -1,0 +1,720 @@
+// QETTA Platform Database Schema
+// Prisma ORM + PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // URL is now configured in prisma.config.ts (Prisma 7+)
+}
+
+// ============================================
+// Authentication Models
+// ============================================
+
+model User {
+  id                      String    @id @default(cuid())
+  email                   String    @unique
+  password                String? // Hashed with bcrypt (null for OAuth users)
+  name                    String?
+  image                   String?
+  role                    UserRole  @default(USER)
+  emailVerified           DateTime?
+  notificationPreferences Json? // Email/push notification settings
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  sessions      Session[]
+  accounts      Account[]
+  documents     Document[]
+  applications  Application[]
+  companyBlocks CompanyBlock[]
+  subscription  Subscription?
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  PARTNER
+}
+
+// ============================================
+// Document Models (DOCS Feature)
+// ============================================
+
+model Document {
+  id               String         @id @default(cuid())
+  userId           String
+  domainEngine     DomainEngine
+  documentType     String
+  title            String
+  content          Json
+  status           DocumentStatus @default(DRAFT)
+  version          Int            @default(1)
+  parentDocumentId String?
+  generatedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id])
+  hashEntry      HashChainEntry?
+  parentDocument Document?       @relation("DocumentVersions", fields: [parentDocumentId], references: [id])
+  childDocuments Document[]      @relation("DocumentVersions")
+
+  @@index([userId])
+  @@index([domainEngine])
+  @@index([status])
+  @@index([parentDocumentId])
+  @@index([createdAt])
+}
+
+enum DomainEngine {
+  MANUFACTURING @map("SMART_FACTORY")
+  ENVIRONMENT   @map("TMS")
+  DIGITAL       @map("AI_VOUCHER")
+  EXPORT        @map("GLOBAL_TENDER")
+  FINANCE
+  STARTUP
+}
+
+enum DocumentStatus {
+  DRAFT
+  GENERATED
+  VERIFIED
+  SUBMITTED
+  REJECTED
+}
+
+// ============================================
+// Hash Chain Models (VERIFY Feature)
+// ============================================
+
+model HashChainEntry {
+  id           String   @id @default(cuid())
+  documentId   String   @unique
+  documentHash String   @db.VarChar(64) // SHA-256 hex string
+  previousHash String?  @db.VarChar(64)
+  signature    String   @db.Text
+  metadata     Json?
+  timestamp    DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentHash])
+  @@index([timestamp])
+}
+
+// ============================================
+// Application Models (APPLY Feature)
+// ============================================
+
+model Application {
+  id             String            @id @default(cuid())
+  userId         String
+  announcementId String
+  title          String
+  status         ApplicationStatus @default(QUEUE)
+  submittedAt    DateTime?
+  resultAt       DateTime?
+  notes          String?           @db.Text
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([announcementId])
+}
+
+enum ApplicationStatus {
+  QUEUE // 대기열에 있음
+  SUBMITTED // 제출됨
+  ACCEPTED // 선정됨
+  REJECTED // 탈락됨
+}
+
+// ============================================
+// Equipment Monitoring Models (MONITOR Feature)
+// ============================================
+
+model Equipment {
+  id              String          @id @default(cuid())
+  name            String
+  code            String          @unique
+  status          EquipmentStatus @default(NORMAL)
+  location        String
+  operator        String
+  operatorInitial String          @db.VarChar(2)
+  lastChecked     DateTime?
+  nextMaintenance DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  sensorReadings SensorReading[]
+  oeeRecords     OEERecord[]
+
+  @@index([status])
+  @@index([code])
+}
+
+enum EquipmentStatus {
+  NORMAL
+  WARNING
+  CRITICAL
+  MAINTENANCE
+}
+
+model SensorReading {
+  id          String     @id @default(cuid())
+  equipmentId String
+  type        SensorType
+  value       Float
+  unit        String     @db.VarChar(10)
+  status      String     @db.VarChar(20)
+  timestamp   DateTime   @default(now())
+
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId])
+  @@index([timestamp])
+  @@index([type])
+}
+
+enum SensorType {
+  VIBRATION // mm/s
+  TEMPERATURE // °C
+  CURRENT // A
+  NOISE // dB
+}
+
+model OEERecord {
+  id           String   @id @default(cuid())
+  equipmentId  String
+  availability Float // 0-100
+  performance  Float // 0-100
+  quality      Float // 0-100
+  overall      Float // 0-100 (calculated)
+  recordedAt   DateTime @default(now())
+
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@index([equipmentId])
+  @@index([recordedAt])
+}
+
+// ============================================
+// Audit Log (Security)
+// ============================================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  details    Json?
+  ipAddress  String?  @db.VarChar(45)
+  userAgent  String?  @db.Text
+  timestamp  DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+}
+
+// ============================================
+// Beta Waitlist (Landing Page)
+// ============================================
+
+model BetaWaitlist {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  company   String?
+  industry  String? // Industry Block 선택 (FOOD, TEXTILE, etc.)
+  source    String? // 유입 경로 (landing, referral, etc.)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
+  @@index([industry])
+}
+
+// ============================================
+// Company Block (3-Layer Block Engine - Layer 2)
+// ============================================
+
+model CompanyBlock {
+  id             String        @id @default(cuid())
+  userId         String
+  companyName    String
+  businessNumber String? // 사업자등록번호
+  industryBlock  IndustryBlock @default(GENERAL)
+
+  // CompanyProfile JSON (skill-engine 타입 구조)
+  profile Json
+
+  // 압축 통계 (Mem0 패턴)
+  originalTokens   Int       @default(0)
+  compressedTokens Int       @default(0)
+  compressionRatio Float     @default(0)
+  lastCompressedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  facts CompanyFact[]
+
+  @@unique([userId, businessNumber])
+  @@index([userId])
+  @@index([industryBlock])
+  @@index([companyName])
+}
+
+model CompanyFact {
+  id             String          @id @default(cuid())
+  companyBlockId String
+  type           CompanyFactType
+  content        String          @db.Text
+  confidence     Float           @default(1.0)
+  source         FactSource      @default(USER_INPUT)
+  relatedId      String? // 관련 문서/이벤트 ID
+  expiresAt      DateTime? // 만료 시각 (선택)
+  createdAt      DateTime        @default(now())
+
+  companyBlock CompanyBlock @relation(fields: [companyBlockId], references: [id], onDelete: Cascade)
+
+  @@index([companyBlockId, type])
+  @@index([companyBlockId, createdAt])
+  @@index([expiresAt])
+}
+
+enum IndustryBlock {
+  FOOD // 식품/음료 (KSIC 10, 11)
+  TEXTILE // 섬유/의류 (KSIC 13, 14)
+  METAL // 금속/철강 (KSIC 24, 25)
+  CHEMICAL // 화학/소재 (KSIC 20, 22)
+  ELECTRONICS // 전자/반도체 (KSIC 26, 27)
+  MACHINERY // 기계/장비 (KSIC 28, 29)
+  AUTOMOTIVE // 자동차/부품 (KSIC 30)
+  BIO_PHARMA // 바이오/제약 (KSIC 21)
+  ENVIRONMENT // 환경/에너지 (KSIC 35, 38)
+  GENERAL // 일반제조 (기타)
+}
+
+enum CompanyFactType {
+  PROFILE // 기본 정보
+  CERTIFICATION // 보유 인증
+  APPLICATION // 신청 이력
+  PREFERENCE // 학습된 선호
+  REJECTION_PATTERN // 탈락 패턴
+  SUCCESS_PATTERN // 성공 패턴
+  CAPABILITY // 기술 역량
+}
+
+enum FactSource {
+  USER_INPUT // 사용자 직접 입력
+  DOCUMENT_PARSED // 문서에서 추출
+  EMAIL_DETECTED // 이메일에서 감지
+  AI_INFERRED // AI 추론
+}
+
+// ============================================
+// Payment & Subscription Models (Toss Payments)
+// ============================================
+
+model Subscription {
+  id     String             @id @default(cuid())
+  userId String             @unique
+  plan   SubscriptionPlan   @default(TRIAL)
+  status SubscriptionStatus @default(ACTIVE)
+
+  // 빌링 정보
+  billingKey  String? // Toss 자동결제 빌링키
+  customerKey String? // Toss 고객 고유 키
+
+  // 기간
+  currentPeriodStart DateTime  @default(now())
+  currentPeriodEnd   DateTime
+  trialEndsAt        DateTime?
+
+  // 취소 정보
+  canceledAt   DateTime?
+  cancelReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments     Payment[]
+  usageRecords UsageRecord[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([plan])
+}
+
+model Payment {
+  id             String @id @default(cuid())
+  subscriptionId String
+  userId         String
+
+  // Toss 결제 정보
+  paymentKey String?        @unique // Toss 결제 고유 키
+  orderId    String         @unique // 주문 ID (QETTA 생성)
+  orderName  String // 주문명
+  method     PaymentMethod? // 결제 수단
+  status     PaymentStatus  @default(PENDING)
+
+  // 금액
+  amount   Int // 결제 금액 (원)
+  currency String @default("KRW")
+
+  // 결제 상세
+  approvedAt  DateTime? // 승인 시각
+  receiptUrl  String? // 영수증 URL
+  cardNumber  String? // 마스킹된 카드번호
+  cardCompany String? // 카드사
+
+  // 실패 정보
+  failureCode    String?
+  failureMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  // P0-FIX-6: 최적화된 복합 인덱스
+  @@index([subscriptionId])
+  @@index([userId])
+  @@index([userId, status, createdAt]) // 결제 내역 조회 최적화
+  @@index([status])
+  @@index([createdAt])
+}
+
+model UsageRecord {
+  id             String @id @default(cuid())
+  subscriptionId String
+  userId         String
+
+  // 사용량 정보
+  resourceType UsageResourceType
+  quantity     Int               @default(1)
+  periodStart  DateTime
+  periodEnd    DateTime
+
+  // 메타데이터
+  metadata Json? // 추가 정보 (documentId, programId 등)
+
+  createdAt DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  // P0-FIX-6: 최적화된 복합 인덱스
+  @@index([subscriptionId, periodStart, periodEnd])
+  @@index([userId, resourceType])
+  @@index([userId, resourceType, periodStart]) // 사용량 조회 최적화
+  @@index([createdAt])
+}
+
+enum SubscriptionPlan {
+  TRIAL // 15건/14일, ₩0
+  STARTER // 50건/월, ₩99,000
+  GROWTH // 150건/월, ₩199,000 (PMF 핵심 타겟)
+  SCALE // 500건/월, ₩499,000
+  UNLIMITED // 무제한, ₩990,000
+}
+
+enum SubscriptionStatus {
+  ACTIVE // 활성
+  PAST_DUE // 결제 연체
+  CANCELED // 취소됨
+  UNPAID // 미결제
+  TRIALING // 체험 중
+}
+
+enum PaymentMethod {
+  CARD // 카드 결제
+  VIRTUAL_ACCOUNT // 가상계좌
+  TRANSFER // 계좌이체
+  MOBILE_PHONE // 휴대폰
+  EASY_PAY // 간편결제 (토스페이, 카카오페이 등)
+}
+
+enum PaymentStatus {
+  PENDING // 결제 대기
+  IN_PROGRESS // 진행 중
+  DONE // 결제 완료
+  CANCELED // 취소됨
+  PARTIAL_CANCELED // 부분 취소
+  ABORTED // 중단됨
+  EXPIRED // 만료됨
+}
+
+enum UsageResourceType {
+  DOCUMENT_GENERATION // 문서 생성
+  PROPOSAL_GENERATION // 제안서 생성
+  API_CALL // API 호출
+  STORAGE // 저장 공간 (MB)
+}
+
+// ============================================
+// Pending Payment Order (P0-FIX-1: Race Condition 방지)
+// ============================================
+
+model PendingPaymentOrder {
+  id           String             @id @default(cuid())
+  orderId      String             @unique // Toss orderId와 매칭
+  userId       String
+  plan         SubscriptionPlan
+  amount       Int // 서버가 계산한 정확한 금액
+  billingCycle String             @default("monthly") // monthly | yearly
+  status       PendingOrderStatus @default(PENDING)
+  expiresAt    DateTime // 30분 후 만료
+  createdAt    DateTime           @default(now())
+  confirmedAt  DateTime?
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([status, expiresAt])
+}
+
+enum PendingOrderStatus {
+  PENDING // 결제 대기
+  CONFIRMED // 결제 확인됨
+  EXPIRED // 만료됨
+  CANCELED // 취소됨
+}
+
+// ============================================
+// Processed Webhook Event (P0-FIX-2: 멱등성 보장)
+// ============================================
+
+model ProcessedWebhookEvent {
+  id          String   @id @default(cuid())
+  eventId     String   @unique // Toss 이벤트 고유 ID 또는 생성된 ID
+  eventType   String // PAYMENT_STATUS_CHANGED, BILLING_PAYMENT 등
+  processedAt DateTime @default(now())
+  metadata    Json? // 원본 payload 요약 (디버깅용)
+
+  @@index([eventType])
+  @@index([processedAt])
+}
+
+// ============================================
+// Proposal Job (P0-FIX-5: Job 영속성)
+// ============================================
+
+model ProposalJob {
+  id             String            @id @default(cuid())
+  userId         String
+  companyBlockId String
+  programId      String
+  programName    String
+  status         ProposalJobStatus @default(PENDING)
+
+  // 결과 데이터
+  resultContent  String? @db.Text
+  resultSections Json?
+  tokensUsed     Int?
+  modelUsed      String?
+
+  // 에러 정보
+  errorCode    String?
+  errorMessage String?
+
+  // 타임스탬프
+  createdAt   DateTime  @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ProposalJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ============================================
+// Widget v2.0 - B2B2B White-label Partners
+// ============================================
+
+model WidgetPartner {
+  id             String            @id @default(cuid())
+  name           String
+  slug           String            @unique
+  apiKey         String            @unique
+  brandColor     String            @default("#6366F1")
+  logoUrl        String?
+  allowedDomains String[]          @default([])
+  plan           WidgetPartnerPlan @default(BASIC)
+  monthlyQuota   Int               @default(100)
+  currentUsage   Int               @default(0)
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  widgetDocuments WidgetDocument[]
+  widgetTemplates WidgetTemplate[]
+  widgetAnalytics WidgetAnalytics[]
+
+  @@index([slug])
+  @@index([apiKey])
+  @@index([isActive])
+}
+
+enum WidgetPartnerPlan {
+  BASIC // 100건/월
+  STANDARD // 500건/월
+  ENTERPRISE // 무제한
+}
+
+// ============================================
+// Widget v2.0 - Generated Documents
+// ============================================
+
+model WidgetDocument {
+  id               String               @id @default(cuid())
+  partnerId        String
+  documentType     WidgetDocumentType
+  title            String
+  status           WidgetDocumentStatus @default(PENDING)
+  inputData        Json                 @default("{}")
+  outputUrl        String?
+  outputFormat     String               @default("docx")
+  pageCount        Int?
+  processingTimeMs Int?
+  timeSavedMinutes Int?
+  claudeTokensUsed Int?
+  errorMessage     String?
+  createdAt        DateTime             @default(now())
+  completedAt      DateTime?
+
+  partner         WidgetPartner     @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  widgetAnalytics WidgetAnalytics[]
+
+  @@index([partnerId])
+  @@index([status])
+  @@index([documentType])
+  @@index([createdAt])
+}
+
+enum WidgetDocumentType {
+  RESULT_REPORT // 결과보고서 (8시간 → 30분)
+  PERFORMANCE_REPORT // 실적보고서 (4시간 → 30분)
+  SUSTAINABILITY_PLAN // 자활계획서 (12시간 → 30분)
+  SETTLEMENT_REPORT // 정산보고서 (6시간 → 30분)
+  BUSINESS_PLAN // 사업계획서 (16시간 → 30분)
+}
+
+enum WidgetDocumentStatus {
+  PENDING // 대기
+  VALIDATING // 검증 중
+  GENERATING // 생성 중
+  COMPLETED // 완료
+  FAILED // 실패
+}
+
+// ============================================
+// Widget v2.0 - Document Templates
+// ============================================
+
+model WidgetTemplate {
+  id                  String             @id @default(cuid())
+  partnerId           String? // null = 공개 템플릿
+  documentType        WidgetDocumentType
+  name                String
+  description         String?
+  schema              Json // 필드 정의
+  promptTemplate      String             @db.Text
+  isPublic            Boolean            @default(false)
+  avgProcessingTimeMs Int                @default(60000)
+  createdAt           DateTime           @default(now())
+
+  partner WidgetPartner? @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+
+  @@index([documentType])
+  @@index([partnerId])
+  @@index([isPublic])
+}
+
+// ============================================
+// Widget v2.0 - Analytics
+// ============================================
+
+model WidgetAnalytics {
+  id         String          @id @default(cuid())
+  partnerId  String
+  eventType  WidgetEventType
+  documentId String?
+  metadata   Json            @default("{}")
+  createdAt  DateTime        @default(now())
+
+  partner  WidgetPartner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  document WidgetDocument? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([partnerId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([partnerId, createdAt])
+}
+
+enum WidgetEventType {
+  WIDGET_OPENED // 위젯 열림
+  DOCUMENT_STARTED // 문서 생성 시작
+  DOCUMENT_COMPLETED // 문서 생성 완료
+  DOCUMENT_FAILED // 문서 생성 실패
+  DOCUMENT_DOWNLOADED // 문서 다운로드
+  TIME_SAVED // 시간 절감 기록
+}

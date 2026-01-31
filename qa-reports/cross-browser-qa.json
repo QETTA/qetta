@@ -1,0 +1,344 @@
+[
+  {
+    "browser": "Chromium",
+    "tests": [
+      {
+        "name": "Backdrop Filter (Glass Morphism)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "CSS Gradients",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Linear Components Present",
+        "passed": true,
+        "details": {
+          "glassCards": 1,
+          "gradientOrbs": 0,
+          "hasLinearNavbar": true,
+          "hasGradients": true
+        },
+        "critical": true
+      },
+      {
+        "name": "CSS Transitions/Animations",
+        "passed": true,
+        "critical": false
+      },
+      {
+        "name": "Dark Theme (zinc-950)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Interactive Elements (hover/focus states)",
+        "passed": true,
+        "details": {
+          "totalInteractive": 20,
+          "withHover": 14,
+          "withFocus": 7
+        },
+        "critical": false
+      },
+      {
+        "name": "No Console Errors",
+        "passed": true,
+        "details": {
+          "errorCount": 0,
+          "errors": []
+        },
+        "critical": true
+      }
+    ],
+    "page": "Homepage",
+    "url": "http://localhost:3003/"
+  },
+  {
+    "browser": "Chromium",
+    "tests": [
+      {
+        "name": "Backdrop Filter (Glass Morphism)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "CSS Gradients",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Linear Components Present",
+        "passed": true,
+        "details": {
+          "glassCards": 9,
+          "gradientOrbs": 0,
+          "hasLinearNavbar": true,
+          "hasGradients": true
+        },
+        "critical": true
+      },
+      {
+        "name": "CSS Transitions/Animations",
+        "passed": true,
+        "critical": false
+      },
+      {
+        "name": "Dark Theme (zinc-950)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Interactive Elements (hover/focus states)",
+        "passed": true,
+        "details": {
+          "totalInteractive": 28,
+          "withHover": 24,
+          "withFocus": 28
+        },
+        "critical": false
+      },
+      {
+        "name": "No Console Errors",
+        "passed": true,
+        "details": {
+          "errorCount": 0,
+          "errors": []
+        },
+        "critical": true
+      }
+    ],
+    "page": "Features",
+    "url": "http://localhost:3003/features"
+  },
+  {
+    "browser": "Chromium",
+    "tests": [
+      {
+        "name": "Backdrop Filter (Glass Morphism)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "CSS Gradients",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Linear Components Present",
+        "passed": true,
+        "details": {
+          "glassCards": 9,
+          "gradientOrbs": 0,
+          "hasLinearNavbar": true,
+          "hasGradients": true
+        },
+        "critical": true
+      },
+      {
+        "name": "CSS Transitions/Animations",
+        "passed": true,
+        "critical": false
+      },
+      {
+        "name": "Dark Theme (zinc-950)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Interactive Elements (hover/focus states)",
+        "passed": true,
+        "details": {
+          "totalInteractive": 28,
+          "withHover": 24,
+          "withFocus": 28
+        },
+        "critical": false
+      },
+      {
+        "name": "No Console Errors",
+        "passed": true,
+        "details": {
+          "errorCount": 0,
+          "errors": []
+        },
+        "critical": true
+      }
+    ],
+    "page": "Product",
+    "url": "http://localhost:3003/product"
+  },
+  {
+    "browser": "Firefox",
+    "tests": [
+      {
+        "name": "Backdrop Filter (Glass Morphism)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "CSS Gradients",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Linear Components Present",
+        "passed": true,
+        "details": {
+          "glassCards": 1,
+          "gradientOrbs": 0,
+          "hasLinearNavbar": true,
+          "hasGradients": true
+        },
+        "critical": true
+      },
+      {
+        "name": "CSS Transitions/Animations",
+        "passed": true,
+        "critical": false
+      },
+      {
+        "name": "Dark Theme (zinc-950)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Interactive Elements (hover/focus states)",
+        "passed": true,
+        "details": {
+          "totalInteractive": 20,
+          "withHover": 14,
+          "withFocus": 7
+        },
+        "critical": false
+      },
+      {
+        "name": "No Console Errors",
+        "passed": true,
+        "details": {
+          "errorCount": 0,
+          "errors": []
+        },
+        "critical": true
+      }
+    ],
+    "page": "Homepage",
+    "url": "http://localhost:3003/"
+  },
+  {
+    "browser": "Firefox",
+    "tests": [
+      {
+        "name": "Backdrop Filter (Glass Morphism)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "CSS Gradients",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Linear Components Present",
+        "passed": true,
+        "details": {
+          "glassCards": 9,
+          "gradientOrbs": 0,
+          "hasLinearNavbar": true,
+          "hasGradients": true
+        },
+        "critical": true
+      },
+      {
+        "name": "CSS Transitions/Animations",
+        "passed": true,
+        "critical": false
+      },
+      {
+        "name": "Dark Theme (zinc-950)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Interactive Elements (hover/focus states)",
+        "passed": true,
+        "details": {
+          "totalInteractive": 28,
+          "withHover": 24,
+          "withFocus": 28
+        },
+        "critical": false
+      },
+      {
+        "name": "No Console Errors",
+        "passed": true,
+        "details": {
+          "errorCount": 0,
+          "errors": []
+        },
+        "critical": true
+      }
+    ],
+    "page": "Features",
+    "url": "http://localhost:3003/features"
+  },
+  {
+    "browser": "Firefox",
+    "tests": [
+      {
+        "name": "Backdrop Filter (Glass Morphism)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "CSS Gradients",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Linear Components Present",
+        "passed": true,
+        "details": {
+          "glassCards": 9,
+          "gradientOrbs": 0,
+          "hasLinearNavbar": true,
+          "hasGradients": true
+        },
+        "critical": true
+      },
+      {
+        "name": "CSS Transitions/Animations",
+        "passed": true,
+        "critical": false
+      },
+      {
+        "name": "Dark Theme (zinc-950)",
+        "passed": true,
+        "critical": true
+      },
+      {
+        "name": "Interactive Elements (hover/focus states)",
+        "passed": true,
+        "details": {
+          "totalInteractive": 28,
+          "withHover": 24,
+          "withFocus": 28
+        },
+        "critical": false
+      },
+      {
+        "name": "No Console Errors",
+        "passed": true,
+        "details": {
+          "errorCount": 0,
+          "errors": []
+        },
+        "critical": true
+      }
+    ],
+    "page": "Product",
+    "url": "http://localhost:3003/product"
+  }
+]

@@ -1,0 +1,151 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "submit": "Submit",
+    "reset": "Reset",
+    "learnMore": "Learn more"
+  },
+  "navigation": {
+    "home": "Home",
+    "pricing": "Pricing",
+    "company": "About",
+    "apply": "Apply",
+    "settings": "Settings",
+    "login": "Log in",
+    "logout": "Log out",
+    "signup": "Sign up"
+  },
+  "auth": {
+    "loginTitle": "Log in",
+    "loginSubtitle": "Sign in to your account",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signupHere": "Sign up",
+    "loginHere": "Log in",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithKakao": "Continue with Kakao"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "subtitle": "Choose the plan that fits your business",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "annualDiscount": "Save 20% with annual billing",
+    "perMonth": "/mo",
+    "trial": {
+      "name": "Trial",
+      "description": "Try QETTA for free",
+      "documents": "15 docs / 14 days"
+    },
+    "starter": {
+      "name": "Starter",
+      "description": "Basic plan for small teams",
+      "documents": "50 docs / month"
+    },
+    "growth": {
+      "name": "Growth",
+      "description": "For growing businesses",
+      "documents": "150 docs / month"
+    },
+    "scale": {
+      "name": "Scale",
+      "description": "For large-scale operations",
+      "documents": "500 docs / month"
+    },
+    "unlimited": {
+      "name": "Unlimited",
+      "description": "For enterprises without limits",
+      "documents": "Unlimited"
+    },
+    "features": {
+      "aiGeneration": "AI Proposal Generation",
+      "templateLibrary": "Template Library",
+      "collaborators": "Team Collaboration",
+      "prioritySupport": "Priority Support",
+      "customBranding": "Custom Branding",
+      "apiAccess": "API Access"
+    },
+    "cta": {
+      "startTrial": "Start Free Trial",
+      "choosePlan": "Choose Plan",
+      "contactSales": "Contact Sales"
+    }
+  },
+  "proposal": {
+    "title": "Proposal Generation",
+    "newProposal": "New Proposal",
+    "programName": "Program Name",
+    "selectProgram": "Select Program",
+    "companyInfo": "Company Info",
+    "generateButton": "Generate Proposal",
+    "generating": "Generating proposal...",
+    "downloadDocx": "Download DOCX",
+    "exportToHancom": "Export to Hancom Docs",
+    "preview": "Preview",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    }
+  },
+  "company": {
+    "title": "About QETTA",
+    "mission": "A new standard for government support applications",
+    "vision": "Revolutionizing success rates with AI for suppliers",
+    "team": "Our Team",
+    "contact": "Contact Us"
+  },
+  "billing": {
+    "title": "Billing",
+    "currentPlan": "Current Plan",
+    "usage": "Usage",
+    "usageOf": "{used} / {total} documents",
+    "billingHistory": "Billing History",
+    "paymentMethod": "Payment Method",
+    "changePlan": "Change Plan",
+    "cancelSubscription": "Cancel Subscription",
+    "invoices": "Invoices"
+  },
+  "errors": {
+    "networkError": "Network error occurred",
+    "serverError": "Server error occurred",
+    "unauthorized": "Authentication required",
+    "forbidden": "Access denied",
+    "notFound": "Page not found",
+    "validationError": "Please check your input",
+    "rateLimitExceeded": "Rate limit exceeded",
+    "subscriptionRequired": "Subscription required for this feature",
+    "usageLimitExceeded": "Monthly usage limit exceeded"
+  },
+  "accessibility": {
+    "skipToMain": "Skip to main content",
+    "skipToNav": "Skip to navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "expandSection": "Expand section",
+    "collapseSection": "Collapse section",
+    "loading": "Loading",
+    "loadingComplete": "Loading complete"
+  },
+  "metadata": {
+    "title": "QETTA - Government Support AI Assistant",
+    "description": "From application writing to submission, AI is with you.",
+    "keywords": "government support, AI, proposal, application, automation"
+  }
+}

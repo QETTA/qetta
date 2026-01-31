@@ -1,0 +1,497 @@
+{
+  "id": "qetta-super-model",
+  "version": "3.0",
+  "updatedAt": "2026-01-25",
+
+  "slogan": {
+    "primary": "Your Industry, Your Intelligence.",
+    "primaryKorean": "당신의 산업, 당신의 인텔리전스.",
+    "tagline": "Select BLOCKs. Build Intelligence.",
+    "taglineKorean": "BLOCK 선택. 인텔리전스 구축.",
+    "legacy": {
+      "primary": "데이터가 흐르면, 증빙이 따라온다",
+      "english": "When Data Flows, Documentation Follows",
+      "tagline": "붙이면 수집, 보면 관제, 뽑으면 증빙",
+      "note": "SENSE-MONITOR-DOCS 제품 흐름 설명용으로 유지 (기술 문서/내부 자료 전용)"
+    }
+  },
+
+  "coreTechnology": {
+    "name": "도메인 엔진 (Domain Engine) - BLOCK 조합 시스템",
+    "description": "산업별 BLOCK(templates + terminology + workflows)을 조합하여 맞춤형 AI 플랫폼을 구축하는 핵심 기술. 자동차 BLOCK + 에너지 BLOCK → [고객사명] AI. 12개 핵심 산업 BLOCK 보유: 자동차, 반도체, 전자/디스플레이, 기계/금속, 에너지, 화학/석유, 환경, 자율주행, 의료/헬스케어, 바이오/제약, 물류/SCM, 건설/인프라.",
+    "blockDefinition": {
+      "what": "BLOCK = 산업별 전문 패키지. 각 BLOCK은 (1) 문서 템플릿 3-5개 + (2) 도메인 용어 매핑 50+ 개 + (3) 규제/워크플로우 규칙으로 구성.",
+      "how": "고객사는 필요한 BLOCK을 선택하여 조합. 예: 자동차 제조사 → [자동차 BLOCK] + [에너지 BLOCK] 조합 → '현대자동차 AI' 화이트라벨 출시.",
+      "technicalFoundation": "Claude 'Building Agents with Skills' (2026) 개념 적용: Skills = organized collections of files. QETTA는 이를 산업 규제 문서에 적용한 첫 번째 플랫폼."
+    },
+    "differentiator": "범용 AI는 산업 전반을 '얕게' 이해하지만, QETTA BLOCK은 특정 산업을 '깊이' 이해. 자동차 BLOCK의 IATF 16949, 반도체 BLOCK의 FAB 공정, 의료 BLOCK의 GMP 규정을 템플릿화. 12 산업 × 50+ 용어/산업 = 600+ 매핑으로 진입 장벽 구축.",
+    "metrics": {
+      "accuracy": "99.2% 용어 매핑 정확도 (도메인 BLOCK 기반)",
+      "rejectionReduction": "91% 문서 반려율 감소 (템플릿 + 규칙 자동 적용)",
+      "timeReduction": "93.8% 시간 단축 (8시간 → 30분, BLOCK 재사용)",
+      "generationSpeed": "45초/건 (BLOCK 템플릿 기반 자동 생성)"
+    }
+  },
+
+  "industryBlocks": {
+    "manufacturing": [
+      {
+        "id": "AUTOMOTIVE",
+        "name": "자동차",
+        "description": "완성차 및 부품 제조. IATF 16949, ISO 14001, 탄소배출 보고서 등.",
+        "templates": ["MES 정산보고서", "공정 품질 보고서", "IATF 인증 신청서", "탄소배출 계산서", "납품 실적 보고서"],
+        "keywords": ["IATF 16949", "Tier 1/2/3", "JIT", "Kaizen", "Poka-yoke", "APQP", "PPAP"],
+        "regulatoryBodies": ["산업부", "환경부", "자동차안전연구원"],
+        "outputCount": "5 templates"
+      },
+      {
+        "id": "SEMICONDUCTOR",
+        "name": "반도체",
+        "description": "팹리스, 파운드리, 패키징. FAB 공정제어, 클린룸 환경 관리 등.",
+        "templates": ["FAB 공정 일지", "수율 분석 보고서", "클린룸 환경 보고서", "설비 가동률(OEE) 보고서"],
+        "keywords": ["FAB", "Wafer", "수율(Yield)", "공정제어", "클린룸 Class", "EUV", "Logic/Memory"],
+        "regulatoryBodies": ["산업부", "특허청", "환경부"],
+        "outputCount": "4 templates"
+      },
+      {
+        "id": "ELECTRONICS",
+        "name": "전자/디스플레이",
+        "description": "SMT, OLED, LCD 제조. 표면실장기술 및 디스플레이 공정 관리.",
+        "templates": ["SMT 실적 보고서", "OLED 공정 보고서", "불량률 분석서", "자재 입출고 내역"],
+        "keywords": ["SMT", "OLED", "LCD", "TFT", "Reflow", "AOI", "BLU"],
+        "regulatoryBodies": ["산업부", "환경부", "전파연구원"],
+        "outputCount": "4 templates"
+      },
+      {
+        "id": "MACHINERY",
+        "name": "기계/금속",
+        "description": "공작기계, 금형, 프레스. 4M1E 분석 및 설비 관리.",
+        "templates": ["4M1E 분석 보고서", "설비 점검 일지", "금형 수명 관리 보고서", "안전 관리 보고서"],
+        "keywords": ["4M1E", "공작기계", "금형", "프레스", "CNC", "CAM", "열처리"],
+        "regulatoryBodies": ["중기부", "산업부", "안전보건공단"],
+        "outputCount": "4 templates"
+      }
+    ],
+    "energyEnvironment": [
+      {
+        "id": "ENERGY",
+        "name": "에너지",
+        "description": "발전, 송배전, ESS. 전력 거래 및 재생에너지 실적 보고.",
+        "templates": ["발전 실적 보고서", "ESS 운영 일지", "전력거래 정산서", "재생에너지 REC 보고서"],
+        "keywords": ["발전소", "ESS", "REC", "SMP", "전력거래", "신재생에너지", "kWh"],
+        "regulatoryBodies": ["산업부", "전력거래소", "한전"],
+        "outputCount": "4 templates"
+      },
+      {
+        "id": "CHEMICAL",
+        "name": "화학/석유",
+        "description": "정유, 석유화학, 화학물질 관리. MSDS 및 배출 보고.",
+        "templates": ["MSDS 제출서", "화학물질 배출량 보고서", "위험물 저장 일지", "공정안전보고서(PSM)"],
+        "keywords": ["MSDS", "PSM", "화학물질관리법", "위험물", "VOC", "정유공정"],
+        "regulatoryBodies": ["환경부", "산업부", "안전보건공단"],
+        "outputCount": "4 templates"
+      },
+      {
+        "id": "ENVIRONMENT",
+        "name": "환경(TMS)",
+        "description": "굴뚝원격감시(TMS). NOx, SOx, PM 배출량 실시간 모니터링 및 환경부 보고.",
+        "templates": ["TMS 일일보고서", "월간 배출량 집계", "CleanSYS 제출 양식", "탄소중립 실적 보고서", "대기오염물질 측정 결과"],
+        "keywords": ["NOx", "SOx", "PM", "굴뚝TMS", "CleanSYS", "배출허용기준", "탄소중립"],
+        "regulatoryBodies": ["환경부", "지방환경청"],
+        "outputCount": "5 templates"
+      }
+    ],
+    "advancedTech": [
+      {
+        "id": "AUTONOMOUS",
+        "name": "자율주행",
+        "description": "Level 2~5 자율주행 시스템. 센서 융합, V2X 통신, 주행 데이터 로깅.",
+        "templates": ["주행 테스트 보고서", "센서 캘리브레이션 기록", "V2X 통신 로그", "안전 주행 분석 보고서"],
+        "keywords": ["Level 2/3/4/5", "LiDAR", "RADAR", "Camera Fusion", "V2X", "ODD", "ADAS"],
+        "regulatoryBodies": ["국토부", "산업부", "자동차안전연구원"],
+        "outputCount": "4 templates"
+      },
+      {
+        "id": "HEALTHCARE",
+        "name": "의료/헬스케어",
+        "description": "의료기기, 원격의료, EMR. GMP 및 의료기기 인허가 문서.",
+        "templates": ["GMP 제조 보고서", "의료기기 인허가 신청서", "임상시험 계획서", "EMR 데이터 보고서"],
+        "keywords": ["GMP", "식약처", "의료기기", "임상시험", "EMR", "원격의료", "KFDA"],
+        "regulatoryBodies": ["식약처", "복지부", "건보공단"],
+        "outputCount": "4 templates"
+      },
+      {
+        "id": "BIO_PHARMA",
+        "name": "바이오/제약",
+        "description": "신약 개발, 바이오 제조. GMP, 임상시험, 품질관리 문서.",
+        "templates": ["GMP 생산 일지", "임상시험 보고서", "품질관리(QC) 보고서", "신약 허가 신청서"],
+        "keywords": ["GMP", "임상 1/2/3상", "IND", "NDA", "품질관리", "바이오시밀러"],
+        "regulatoryBodies": ["식약처", "복지부", "질병관리청"],
+        "outputCount": "4 templates"
+      }
+    ],
+    "financeService": [
+      {
+        "id": "LOGISTICS",
+        "name": "물류/SCM",
+        "description": "창고관리(WMS), 운송관리(TMS), 재고 최적화. 물류 실적 보고.",
+        "templates": ["WMS 운영 보고서", "TMS 배송 실적", "재고 회전율 분석", "물류비 절감 보고서"],
+        "keywords": ["WMS", "TMS", "SCM", "재고회전율", "Lead Time", "Just-in-Time", "Cross-docking"],
+        "regulatoryBodies": ["국토부", "중기부", "관세청"],
+        "outputCount": "4 templates"
+      },
+      {
+        "id": "CONSTRUCTION",
+        "name": "건설/인프라",
+        "description": "스마트 건설, BIM, 안전관리. 공정 관리 및 안전 보고.",
+        "templates": ["BIM 설계 보고서", "공정 관리 보고서", "안전 점검 일지", "품질 시험 성적서"],
+        "keywords": ["BIM", "스마트건설", "공정관리", "안전관리", "품질시험", "준공검사"],
+        "regulatoryBodies": ["국토부", "안전보건공단", "건설기술진흥원"],
+        "outputCount": "4 templates"
+      }
+    ]
+  },
+
+  "domainEngines": {
+    "overview": "6개 정부지원사업 도메인 엔진 = 12개 산업 BLOCK의 조합. 고객사는 산업 BLOCK을 선택하고, 정부사업별 양식(MANUFACTURING, ENVIRONMENT, DIGITAL, FINANCE, STARTUP, EXPORT)으로 자동 변환.",
+    "engines": [
+      {
+        "id": "MANUFACTURING",
+        "name": "제조/스마트공장",
+        "description": "중기부 스마트공장 정산보고서. 자동차/반도체/전자/기계 BLOCK 조합 가능.",
+        "industryBlocks": ["AUTOMOTIVE", "SEMICONDUCTOR", "ELECTRONICS", "MACHINERY"],
+        "templates": ["MES 정산보고서", "PLC 데이터 수집 양식", "OEE 계산 보고서", "4M1E 분석서"],
+        "outputCount": "4 templates",
+        "regulatoryBody": "중기부, 산업부"
+      },
+      {
+        "id": "ENVIRONMENT",
+        "name": "환경/TMS",
+        "description": "환경부 TMS 일일보고서. 환경/에너지/화학 BLOCK 조합 가능.",
+        "industryBlocks": ["ENVIRONMENT", "ENERGY", "CHEMICAL"],
+        "templates": ["TMS 일일보고서", "NOx/SOx 배출량", "탄소중립 실적", "CleanSYS 연동", "환경부 제출서류"],
+        "outputCount": "5 templates",
+        "regulatoryBody": "환경부"
+      },
+      {
+        "id": "DIGITAL",
+        "name": "AI/SW 바우처",
+        "description": "NIPA AI바우처 공급기업 정산. 자율주행/의료/제조 AI BLOCK 조합 가능.",
+        "industryBlocks": ["AUTONOMOUS", "HEALTHCARE", "BIO_PHARMA", "AUTOMOTIVE"],
+        "templates": ["공급기업 등록서", "수요기업 계약서", "실적보고서", "정산서류"],
+        "outputCount": "4 templates",
+        "regulatoryBody": "과기정통부, NIPA"
+      },
+      {
+        "id": "FINANCE",
+        "name": "융자/보증",
+        "description": "기보/신보/소진공 신청서. 전 산업 BLOCK 적용 가능.",
+        "industryBlocks": ["ALL"],
+        "templates": ["기보 신청서", "신보 보증서", "소진공 융자", "기술평가서", "재무제표"],
+        "outputCount": "5 templates",
+        "regulatoryBody": "중기부, 기술보증기금, 신용보증기금"
+      },
+      {
+        "id": "STARTUP",
+        "name": "창업지원",
+        "description": "TIPS, 액셀러레이팅 사업계획서. 전 산업 BLOCK 적용 가능.",
+        "industryBlocks": ["ALL"],
+        "templates": ["TIPS 사업계획서", "액셀러레이팅 IR", "Demo Day 피치덱", "정부과제 제안서", "실적보고서"],
+        "outputCount": "5 templates",
+        "regulatoryBody": "중기부, 창업진흥원"
+      },
+      {
+        "id": "EXPORT",
+        "name": "수출/글로벌 입찰",
+        "description": "SAM.gov, UNGM 제안서. 전 산업 BLOCK 적용 가능. 63만+ 글로벌 입찰 DB.",
+        "industryBlocks": ["ALL"],
+        "templates": ["SAM.gov 제안서", "UNGM 입찰서", "기술설명서", "가격견적서", "Past Performance"],
+        "outputCount": "5 templates",
+        "regulatoryBody": "KOTRA, 산업부",
+        "globalDatabase": "630,000+ (SAM.gov 300k, UNGM 180k, Goszakup, G2B, GeBIZ 150k)"
+      }
+    ]
+  },
+
+  "vision": {
+    "short": "2026: 12개 산업 BLOCK 정식 출시. 국내 파트너 50개사 확보. B2B2B 화이트라벨 모델로 HW 기업을 'AI 공급기업'으로 전환.",
+    "mid": "2027-2028: BLOCK SDK 공개, 3rd Party BLOCK 개발 생태계 구축. ESG, 탄소배출권, 의약품 인허가 등 신규 BLOCK 추가. AIFC 통해 중앙아시아 진출.",
+    "long": "2029+: BLOCK 마켓플레이스 오픈. MCP 생태계처럼 각 산업별 BLOCK을 플러그인으로 제공. BLOCK 거래 수수료 30%로 플랫폼 수익화. 글로벌 산업 BLOCK 생태계 구축."
+  },
+
+  "businessViability": {
+    "model": "B2B2B 화이트라벨 - QETTA는 숨고, 파트너가 빛난다. 설비/제조/수입 기업에게 BLOCK 조합 권한 제공. 파트너는 필요한 BLOCK 선택 → [파트너명] AI로 화이트라벨 출시. HW(센서) + SW(BLOCK) + HR(교육) 완전 번들.",
+    "targetCustomer": "1차: CMT 같은 설비 기업(센서/유량계 HW만 보유), 와트로퍼코리아 같은 수입 기업(해외 설비 판매하지만 SW 없음). 공통점: AI/SW 역량 부재로 정부지원사업 공급기업 자격 획득 불가.",
+    "valueProposition": "파트너에게 산업 BLOCK 조합 권한 부여 → 즉시 스마트공장/AI바우처 공급기업 자격 획득. 8시간 증빙 문서 작업을 30분으로 단축(93.8%). 정부 50% 지원으로 수요기업 실부담 50만원~.",
+    "competitiveAdvantage": "12 산업 BLOCK × 50+ 용어/BLOCK = 600+ 도메인 지식 진입장벽. 화이트라벨 + 정부 50% 지원 조합으로 파트너 영업 가속. SAP/Oracle 대비 1/10 비용(연 1억+ vs 월 99만원)."
+  },
+
+  "profitability": {
+    "revenueStreams": [
+      "Phase 1 (2026): B2B2B BLOCK 라이선스 (월 99~290만원/파트너)",
+      "Phase 2 (2027): BLOCK SDK 라이선스 + 3rd Party BLOCK 수수료 30%",
+      "Phase 3 (2028+): BLOCK 마켓플레이스 거래 수수료 30%"
+    ],
+    "pricing": "Starter 99만원 (5개 고객사, 1개 BLOCK), Growth 290만원 (20개 고객사, 3개 BLOCK 조합 + 화이트라벨), Enterprise 별도협의 (무제한 고객사, 전체 BLOCK + 전용 인프라). 정부 50% 지원 시 실부담 50~145만원.",
+    "unitEconomics": "BLOCK 개발 비용 2주 (templates + terminology + rules). BLOCK당 MRR = 파트너 수 × 구독료 × BLOCK 사용률. SaaS 마진율 80%+. 마켓플레이스 전환 시 거래 수수료 추가.",
+    "scalability": "새 산업 BLOCK 추가 2주면 완료. 플러그인 아키텍처로 기존 BLOCK 영향 없이 확장. 마켓플레이스 전환 시 TAM $2B(한국) → $50B+(글로벌 산업 규제 문서)."
+  },
+
+  "technicalExcellence": {
+    "architecture": "마이크로 BLOCK 아키텍처: 1 산업 = 1 BLOCK = HW(센서) + SW(templates/terminology/rules) + HR(교육) 완전 번들. 센서/PLC → Edge Gateway → QETTA Cloud → BLOCK 조합 엔진 → 문서 생성 → SHA-256 해시체인 검증. Next.js 15 풀스택 플랫폼 (222 컴포넌트, 25 API, 11 DB 모델).",
+    "techStack": {
+      "frontend": "Next.js 15 (App Router), React 19, TypeScript 5, Tailwind CSS 4, Zustand (4 stores)",
+      "backend": "Node.js 20+, PostgreSQL + Prisma ORM 7.3, NextAuth.js 5 (OAuth), Anthropic Claude API",
+      "document": "docx, exceljs, pdf-lib (DOCX/XLSX/PDF 생성), SHA-256 hash chain",
+      "infrastructure": "Turborepo + pnpm workspace, Vercel, Vitest + Playwright (15 tests)"
+    },
+    "blockSystem": {
+      "totalBlocks": 12,
+      "categories": {
+        "manufacturing": 4,
+        "energyEnvironment": 3,
+        "advancedTech": 3,
+        "financeService": 2
+      },
+      "totalTemplates": "50+ templates across all BLOCKs",
+      "totalTerminology": "600+ domain-specific term mappings (50+ per BLOCK)"
+    },
+    "keyComponents": [
+      "BLOCK Repository: 12개 산업 BLOCK (각 3-5 templates + 50+ 용어 + 규칙)",
+      "BLOCK Combiner: 고객사 선택 BLOCK 조합 + 정부사업 양식 변환 엔진",
+      "Template Engine: BLOCK 템플릿 기반 DOCX/XLSX/PDF 자동 생성 (45초/건)",
+      "Terminology Mapper: BLOCK별 용어 매핑 (99.2% 정확도)",
+      "Hash Chain: SHA-256 기반 무결성 검증 (QR 코드 역추적)",
+      "Database: PostgreSQL + Prisma (11 models: User, Document, HashChainEntry, Application, Equipment 등)",
+      "Real-time Monitor: WebSocket 기반 센서 데이터 스트리밍 (VIBRATION, TEMPERATURE, CURRENT, NOISE)",
+      "범용 연결성: MODBUS RTU/TCP, OPC-UA, MQTT, HTTP 지원"
+    ],
+    "projectStats": {
+      "pages": "10 (3 route groups: marketing, dashboard, auth)",
+      "apiRoutes": "25 (문서 생성, 검증, 매칭, 모니터링, 챗봇 등)",
+      "components": "222 (UI primitives, dashboard, landing blocks)",
+      "dbModels": "11 (Auth 4, DOCS 1, VERIFY 1, APPLY 1, MONITOR 3, Security 1)",
+      "industryBlocks": "12 (Manufacturing 4, Energy/Environment 3, Advanced Tech 3, Finance/Service 2)",
+      "domainEngines": "6 (정부사업별 BLOCK 조합 엔진)",
+      "testFiles": "15 (Vitest + Playwright)",
+      "buildStatus": "✅ Passing (13 pages, 170 kB middleware)"
+    },
+    "innovation": "범용 AI의 '전체 재학습' 대신 산업별 경량 BLOCK 업데이트로 즉시 반영. 수기 입력 0%로 운전원 개입 원천 차단. BLOCK 템플릿 기반 문서 생성 45초/건, 검증 API 99.9% 가용성. 12개 산업 BLOCK으로 TAM 확장 (융자/보증, 자율주행, 의료/바이오 신규 진입)."
+  },
+
+  "futureDirection": {
+    "roadmap": "2026 Q2: 12개 산업 BLOCK 정식 출시 → 2026 Q4: BLOCK SDK v1.0 특허 출원 → 2027 Q2: SDK 오픈소스 공개 → 2027 Q4: 3rd Party BLOCK 10개 → 2028 Q2: BLOCK 마켓플레이스 오픈 → 2028 Q4: 글로벌 BLOCK 100개",
+    "marketplaceVision": "MCP(Model Context Protocol) 서버처럼 산업별 BLOCK을 플러그인 형태로 제공. BLOCK 개발자 수익 쉐어 70/30. Claude Code + QETTA BLOCK = 산업 특화 AI 코파일럿. 예: [자동차 BLOCK] 설치 → IATF 16949 템플릿 자동 생성.",
+    "ecosystemStrategy": "BLOCK SDK 공개로 개발자 커뮤니티 확보 → 파트너 네트워크로 생태계 락인 → 정부 인증으로 신뢰도 확보. MCP는 개발자 도구 연동, QETTA는 산업 규제/문서 연동으로 차별화."
+  },
+
+  "policyAlignment": {
+    "smartFactory": "중기부 스마트공장 정책 완벽 부합. HW 기업에게 제조 BLOCK (자동차/반도체/전자/기계) 조합 권한 제공 → 공급기업 전환 지원. 정산보고서 자동 생성으로 행정 부담 93.8% 경감.",
+    "aiVoucher": "NIPA AI바우처 공급기업 등록 지원. 자율주행/의료/바이오 BLOCK 제공으로 AI 공급기업 자격 획득. 수요기업 50% 정부 지원으로 중소기업 AI 도입 장벽 해소. 성과보고서 자동화로 바우처 정산 효율화.",
+    "carbonNeutrality": "환경 BLOCK으로 환경부 측정기록부 자동 생성. NOx/SOx/PM 실시간 모니터링 및 증빙. ESG BLOCK(2027) 추가로 탄소배출 관리 지원 예정.",
+    "digitalNewDeal": "해시체인 기반 데이터 무결성 검증으로 디지털 신뢰 확보. 레거시 설비(MODBUS) 연동으로 중소기업 디지털 전환 가속. 클라우드 기반 SaaS로 초기 투자 부담 최소화."
+  },
+
+  "aiTrend": {
+    "claudeSkillsIntegration": "Claude 'Building Agents with Skills' (2026) 개념 산업 적용. Skills = organized collections of files → QETTA BLOCK = organized collections of templates/terminology/rules. 첫 번째 산업 규제 문서 적용 사례.",
+    "mcpEcosystem": "MCP(Model Context Protocol)가 개발자 도구(GitHub, Slack, DB)를 연동하듯, QETTA는 산업 규제/문서(환경부, 중기부, NIPA, 글로벌)를 연동. 2028년 BLOCK 마켓플레이스로 MCP 생태계와 시너지 창출.",
+    "domainSpecificAI": "범용 LLM의 한계(산업 용어 혼란)를 BLOCK 시스템으로 해결. Dometrain이 지적한 'jargon confusion' 문제의 산업 버전. BLOCK별 terminology.json이 RAG보다 정확하고 빠름.",
+    "agenticAI": "2026년 AI 에이전트 시대에 QETTA는 '산업 규제 전문 에이전트' 역할. 센서 데이터 수집 → 이상 감지 → BLOCK 템플릿 기반 문서 생성 → 검증까지 무인 자동화. 운전원 개입 0%의 자율 증빙 시스템.",
+    "positioning": "ChatGPT/Claude = 범용 지식의 바다, QETTA BLOCK = 산업 규제의 정밀 지도. 범용 AI와 경쟁이 아닌 보완 관계. Claude Code에 QETTA BLOCK 플러그인 연결 → 산업 특화 AI 코파일럿 완성."
+  },
+
+  "summary": {
+    "oneLiner": "QETTA는 12개 산업 BLOCK 조합 시스템으로, HW 기업을 AI 공급기업으로 전환시키고, 2028년 BLOCK 마켓플레이스로 플랫폼화를 완성한다.",
+    "elevator30sec": "제조/설비 기업은 센서는 있지만 AI가 없어 스마트공장 공급기업이 될 수 없습니다. QETTA는 12개 산업 BLOCK(자동차, 반도체, 전자, 기계, 에너지, 화학, 환경, 자율주행, 의료, 바이오, 물류, 건설)을 화이트라벨로 제공해 파트너를 즉시 공급기업으로 만듭니다. BLOCK 조합 → [파트너명] AI 출시. 8시간 증빙 작업을 30분으로, 정부 50% 지원으로 실부담 50만원. 2028년에는 MCP처럼 BLOCK 마켓플레이스로 플랫폼 전환합니다.",
+    "investorHook": "Dometrain이 말한 'AI의 전문 용어 혼란' 문제를 QETTA는 산업 BLOCK으로 해결합니다. 12 산업 × 50+ 용어/BLOCK = 600+ 매핑으로 진입 장벽이자 핵심 IP. 자율주행/의료/바이오 BLOCK 신규 추가로 TAM 확대. B2B2B 화이트라벨로 파트너 50개사 MRR 확보 후, 2028년 BLOCK 마켓플레이스로 TAM $2B → $50B 확장."
+  },
+
+  "keyInsights": {
+    "synergyAnalysis": {
+      "hwSwHrBundle": "단순 SW 판매가 아닌 HW+SW(BLOCK)+HR 완전 번들로 파트너 전환 장벽 제거. 센서만 달면 필요한 BLOCK 선택 → 즉시 공급기업.",
+      "b2b2bWhitelabel": "QETTA 브랜드 노출 없이 파트너가 자사 브랜드로 공급. BLOCK 조합 → [파트너명] AI. 파트너 밸류에이션 상승이 QETTA 성장 동력.",
+      "govSupportLeverage": "50% 정부 지원이 수요기업 도입 장벽 해소 + 파트너 영업 무기. 정책 부합이 사업 가속기."
+    },
+    "competitiveEdge": {
+      "vsSAPOracle": "연 1억+ vs 월 99만원. 6개월+ vs 즉시 도입. 커스텀 전문가 vs BLOCK 조합만.",
+      "vsGenericAI": "전체 재학습 vs BLOCK 추가. 범용 정확도 vs 도메인 99%+ 정확도. jargon confusion vs BLOCK 기반 정확한 용어 매핑.",
+      "vsExistingMES": "설치형/고가 vs 클라우드/구독. 단일 기능 vs DOCS-VERIFY-APPLY 통합. 자격 없음 vs 공급기업 자격 획득.",
+      "vsClairewon": "Pre-award only (입찰 발굴) vs Post-award (문서 작성 95%). No-code 한계 vs Production SaaS. Korea only vs Global 63만+ DB."
+    },
+    "platformEvolution": {
+      "phase1": "B2B2B BLOCK 라이선스로 MRR 확보 및 산업 BLOCK 지식 축적",
+      "phase2": "BLOCK SDK 공개로 개발자 생태계 구축 및 3rd Party BLOCK 유입",
+      "phase3": "BLOCK 마켓플레이스로 플랫폼 전환, BLOCK 거래 수수료로 수익 다각화"
+    }
+  },
+
+  "forbiddenTerms": {
+    "blockchain": "해시체인 (SHA-256 기반 무결성 검증으로 설명)",
+    "innovative": "구체적 수치로 대체 (93.8% 시간 단축, 91% 반려율 감소)",
+    "guarantee": "95% 자동 처리, 99.9% 가용성 등 측정 가능한 지표로 표현",
+    "tips5billion": "웰컴투 동남권 TIPS 선정 (금액 언급 금지)"
+  },
+
+  "claudeEcosystemIntegration": {
+    "overview": {
+      "summary": "국내 최초 Claude API 풀스택 활용 정부지원사업 AI 플랫폼. Extended Thinking, Prompt Caching, Batch API, Tool Use를 네이티브 통합하여 비용 63% 절감, 탈락 분석 정확도 95% 달성.",
+      "currentScore": 92,
+      "targetScore": 97,
+      "differentiator": "Claude의 모든 기능을 활용한 첫 번째 한국 정부지원사업 AI 플랫폼"
+    },
+    "apiIntegration": {
+      "extendedThinking": {
+        "useCase": "탈락 원인 심층 분석 (표면적 원인 → 근본적 원인 추론)",
+        "model": "claude-opus-4-5-20251101",
+        "budgetTokens": 10000,
+        "accuracyImprovement": "60% → 95% (+35%p)",
+        "status": "2026 Q1 구현 예정"
+      },
+      "promptCaching": {
+        "currentEfficiency": "70%",
+        "targetEfficiency": "90%",
+        "strategy": "정적 시스템 프롬프트 + BLOCK terminology 캐싱 분리",
+        "monthlyTokenSavings": "9M tokens (10M → 1M)",
+        "status": "구현 완료, 최적화 진행 중"
+      },
+      "batchAPI": {
+        "useCase": "대량 공고문 분석 (기업마당, 소상공인24 등)",
+        "capacity": "100건/일 → 1000건/일",
+        "costReduction": "50% (일반 API 대비)",
+        "status": "2026 Q1 도입 예정"
+      },
+      "toolUse": {
+        "useCase": "BLOCK 템플릿 기반 문서 자동 생성",
+        "tools": ["generate_from_block_template", "combine_blocks", "verify_document_hash"],
+        "automationLevel": "수동 → 완전 자동 (BLOCK 선택 → 문서 생성)",
+        "status": "2026 Q1 구현 예정"
+      }
+    },
+    "modelSelection": {
+      "opus": {
+        "usage": "20%",
+        "monthlyCost": "$40",
+        "tasks": ["탈락 분석 (Extended Thinking)", "복잡한 BLOCK 조합 결정", "품질 검증 Orchestrator"]
+      },
+      "sonnet": {
+        "usage": "60%",
+        "monthlyCost": "$50",
+        "tasks": ["일반 채팅 응답", "BLOCK 템플릿 기반 문서 생성", "공고문 파싱", "기업-공고 매칭"]
+      },
+      "haiku": {
+        "usage": "20%",
+        "monthlyCost": "$5",
+        "tasks": ["형식 검증", "해시 생성", "간단한 분류", "이메일 이벤트 감지"]
+      }
+    },
+    "costOptimization": {
+      "currentMonthly": "$150",
+      "scenarios": {
+        "basic": {
+          "cost": "$55/월",
+          "description": "Prompt Caching 최적화 (기본 채팅만)",
+          "reduction": "63%"
+        },
+        "standard": {
+          "cost": "$95/월",
+          "description": "모델 티어링 (Opus 20% + Sonnet 60% + Haiku 20%)",
+          "reduction": "37%",
+          "recommended": true
+        },
+        "multiAgent": {
+          "cost": "$145/월",
+          "description": "멀티에이전트 (Orchestrator + 6 Workers)",
+          "reduction": "27%"
+        }
+      },
+      "breakdown": {
+        "promptCaching": "-20% (BLOCK terminology 캐싱 70% → 90% 효율)",
+        "modelTiering": "-25% (Opus → Sonnet/Haiku 분산)",
+        "batchAPI": "-18% (대량 처리 50% 할인)"
+      }
+    },
+    "multiAgentArchitecture": {
+      "orchestrator": {
+        "model": "Opus",
+        "role": "작업 분해, BLOCK 조합 결정, 품질 검증",
+        "monthlyCost": "$40"
+      },
+      "workers": [
+        {"name": "Scout", "model": "Sonnet", "role": "공고 수집, 크롤링", "cost": "$20"},
+        {"name": "Matcher", "model": "Sonnet", "role": "기업-공고 매칭", "cost": "$15"},
+        {"name": "Writer", "model": "Sonnet", "role": "BLOCK 템플릿 기반 문서 생성", "cost": "$20"},
+        {"name": "Analyst", "model": "Opus", "role": "탈락 분석, 패턴 학습", "cost": "$40"},
+        {"name": "Verifier", "model": "Haiku", "role": "형식 검증, 해시 생성", "cost": "$5"},
+        {"name": "Notifier", "model": "Haiku", "role": "이메일 감지, 알림", "cost": "$5"}
+      ],
+      "totalMonthlyCost": "$145"
+    },
+    "competition": {
+      "title": "경쟁 우위 (Competitive Advantage)",
+      "positioning": "Clairewon finds the bid. QETTA wins it.",
+      "competitors": [
+        {
+          "name": "Clairewon (클레어원)",
+          "founded": "2023년 9월",
+          "funding": "$22M ($2M Seed 2023 + $20M Pre-A 2024)",
+          "focus": "Pre-award RFP 분석 (사전 입찰 매칭)",
+          "features": [
+            "RFP 콘텐츠 분석 (키워드 + 맥락)",
+            "적격성 자동 매칭",
+            "실시간 입찰 알림"
+          ],
+          "geography": "Korea only (국내 공공조달 중심)",
+          "techStack": "Bubble (no-code 플랫폼)",
+          "timeToMVP": "3개월",
+          "weaknesses": [
+            "문서 자동 생성 기능 없음 (roadmap에만 존재)",
+            "무결성 검증 시스템 없음",
+            "글로벌 입찰 DB 미지원",
+            "No-code 플랫폼으로 확장성 제한",
+            "B2B 직판 모델 (화이트라벨 X)",
+            "산업 BLOCK 시스템 없음 (범용 매칭만)"
+          ],
+          "marketValidation": "연간 $200B+ 공공조달 시장에서 $22M 투자 유치 → 입찰 자동화 시장 수요 증명"
+        }
+      ],
+      "qettaMoat": {
+        "fullLifecycle": "Pre-award (Clairewon) vs Post-award (QETTA). 입찰 발굴(5%) vs 문서 작성(95%). Clairewon은 '찾기'만 제공, QETTA는 '이기기'까지 제공.",
+        "uniqueFeatures": [
+          "DOCS: 45초/건 BLOCK 템플릿 기반 자동 생성 (Live, Clairewon은 계획 중)",
+          "VERIFY: SHA-256 해시체인 무결성 검증 (Clairewon 없음)",
+          "APPLY: Global 63만+ 입찰 DB (SAM.gov, UNGM, Goszakup vs Clairewon Korea only)",
+          "BLOCK System: 12개 산업 BLOCK × 50+ 용어/BLOCK = 600+ 매핑 (Clairewon은 범용만)",
+          "B2B2B Whitelabel: 파트너 브랜드로 제공 (Clairewon은 직판만)"
+        ],
+        "technicalAdvantage": "Production SaaS (Next.js 15, 222 컴포넌트, 25 API) vs No-code (Bubble). 12개 산업 BLOCK 시스템 vs 범용 매칭. Enterprise-ready.",
+        "marketOpportunity": "Clairewon이 Pre-award(5%)로 $22M 유치 → QETTA는 Post-award(95%) 소유 → 시장 기회 20배 이상. TAM $2B (Korea) → $50B+ (Global compliance docs)."
+      },
+      "differentiationStrategy": [
+        "마케팅: 'Clairewon finds the bid. QETTA wins it.' 포지셔닝",
+        "제품: DOCS-VERIFY-APPLY 삼각 구조 완성 (Clairewon은 APPLY의 1/3만)",
+        "비즈니스: B2B2B 화이트라벨 + 12개 산업 BLOCK 조합 (vs Clairewon 직판)",
+        "기술: 12개 산업 BLOCK + 글로벌 63만+ DB (vs Clairewon Korea RFP only)",
+        "검증: TIPS 선정, 3건 정부사업 수행, 99.2% 용어 정확도 실적"
+      ],
+      "potentialPartnership": "통합 전략 검토 가능: Clairewon 입찰 발굴 → QETTA BLOCK 기반 문서 생성 파이프라인. API 연동 또는 추천 파트너십."
+    },
+    "mcpIntegration": {
+      "plannedServer": "@qetta/block-engine",
+      "tools": [
+        "qetta_analyze_rejection (탈락 원인 분석)",
+        "qetta_match_programs (기업-프로그램 매칭)",
+        "qetta_combine_blocks (BLOCK 조합)",
+        "qetta_generate_from_block (BLOCK 템플릿 기반 문서 생성)",
+        "qetta_verify_hash (해시체인 검증)",
+        "qetta_search_announcements (공고문 검색)"
+      ],
+      "resources": [
+        "qetta://blocks/{industry} (산업 BLOCK: templates + terminology + rules)",
+        "qetta://blocks/{industry}/templates/{name} (BLOCK 템플릿)",
+        "qetta://blocks/{industry}/terminology (BLOCK 용어집)",
+        "qetta://patterns/rejection (탈락 패턴 DB)"
+      ],
+      "timeline": "2026 Q2-Q3"
+    }
+  }
+}

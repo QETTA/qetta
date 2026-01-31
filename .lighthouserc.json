@@ -1,0 +1,37 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "settings": {
+        "preset": "desktop"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:accessibility": ["error", { "minScore": 0.9 }],
+        "categories:best-practices": ["warn", { "minScore": 0.8 }],
+        "color-contrast": "error",
+        "document-title": "error",
+        "html-has-lang": "error",
+        "html-lang-valid": "error",
+        "link-name": "error",
+        "button-name": "error",
+        "image-alt": "error",
+        "label": "error",
+        "meta-viewport": "error",
+        "bypass": "warn",
+        "focus-traps": "warn",
+        "focusable-controls": "warn",
+        "interactive-element-affordance": "warn",
+        "logical-tab-order": "warn",
+        "managed-focus": "warn",
+        "offscreen-content-hidden": "warn",
+        "use-landmarks": "warn",
+        "visual-order-follows-dom": "warn"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

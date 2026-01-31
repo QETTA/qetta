@@ -1,0 +1,116 @@
+[
+  {
+    "name": "Homepage",
+    "url": "http://localhost:3003/",
+    "loadTime": 1041,
+    "metrics": {
+      "fcp": 332,
+      "lcp": 0,
+      "cls": 0,
+      "domContentLoaded": 516,
+      "loadComplete": 594,
+      "resourceCount": 29
+    },
+    "errors": 0,
+    "warnings": 1,
+    "perfScore": 100,
+    "a11yScore": 100,
+    "seoScore": 100,
+    "passed": true
+  },
+  {
+    "name": "Features",
+    "url": "http://localhost:3003/features",
+    "loadTime": 1331,
+    "metrics": {
+      "fcp": 572,
+      "lcp": 0,
+      "cls": 0,
+      "domContentLoaded": 505,
+      "loadComplete": 895,
+      "resourceCount": 29
+    },
+    "errors": 0,
+    "warnings": 1,
+    "perfScore": 100,
+    "a11yScore": 90,
+    "seoScore": 100,
+    "passed": true
+  },
+  {
+    "name": "Product",
+    "url": "http://localhost:3003/product",
+    "loadTime": 1232,
+    "metrics": {
+      "fcp": 564,
+      "lcp": 0,
+      "cls": 0,
+      "domContentLoaded": 521,
+      "loadComplete": 777,
+      "resourceCount": 29
+    },
+    "errors": 0,
+    "warnings": 1,
+    "perfScore": 100,
+    "a11yScore": 100,
+    "seoScore": 100,
+    "passed": true
+  },
+  {
+    "name": "HowItWorks",
+    "url": "http://localhost:3003/how-it-works",
+    "loadTime": 2852,
+    "metrics": {
+      "fcp": 2204,
+      "lcp": 0,
+      "cls": 0,
+      "domContentLoaded": 2134,
+      "loadComplete": 2398,
+      "resourceCount": 29
+    },
+    "errors": 0,
+    "warnings": 1,
+    "perfScore": 60,
+    "a11yScore": 90,
+    "seoScore": 100,
+    "passed": false
+  },
+  {
+    "name": "SolutionsCompanies",
+    "url": "http://localhost:3003/solutions/companies",
+    "loadTime": 2473,
+    "metrics": {
+      "fcp": 1828,
+      "lcp": 0,
+      "cls": 0,
+      "domContentLoaded": 1776,
+      "loadComplete": 2042,
+      "resourceCount": 29
+    },
+    "errors": 0,
+    "warnings": 1,
+    "perfScore": 60,
+    "a11yScore": 100,
+    "seoScore": 100,
+    "passed": false
+  },
+  {
+    "name": "SolutionsPartners",
+    "url": "http://localhost:3003/solutions/partners",
+    "loadTime": 2532,
+    "metrics": {
+      "fcp": 1856,
+      "lcp": 0,
+      "cls": 0,
+      "domContentLoaded": 1794,
+      "loadComplete": 2089,
+      "resourceCount": 29
+    },
+    "errors": 0,
+    "warnings": 1,
+    "perfScore": 60,
+    "a11yScore": 100,
+    "seoScore": 100,
+    "passed": false
+  }
+]

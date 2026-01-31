@@ -1,0 +1,171 @@
+/**
+ * ENERGY Industry BLOCK
+ * Category: energyEnvironment
+ */
+import type { EnrichedIndustryBlock } from './types'
+
+export const ENERGY_BLOCK: EnrichedIndustryBlock = {
+  id: 'ENERGY',
+  name: 'Energy & Power',
+  nameKo: '에너지/발전',
+  category: 'energyEnvironment',
+  description: 'Energy generation, power plant operations, renewable energy, and energy efficiency reporting',
+  descriptionKo: '에너지 생산, 발전소 운영, 신재생 에너지, 에너지 효율 보고서',
+
+  terminology: [
+    {
+      id: 'capacity-factor',
+      korean: '설비이용률',
+      english: 'Capacity Factor',
+      category: 'metric',
+      unit: '%',
+      description: '발전소 최대 발전량 대비 실제 발전량 비율',
+      aliases: ['이용률', 'capacity factor'],
+      validationRange: { min: 0, max: 100 },
+      examples: ['원전 90%', '태양광 15%'],
+    },
+    {
+      id: 'heat-rate',
+      korean: '열효율',
+      english: 'Heat Rate',
+      category: 'metric',
+      unit: 'kcal/kWh',
+      description: '단위 전력 생산에 필요한 열량',
+      aliases: ['heat rate', '열소비율'],
+      validationRange: { min: 1500, max: 3000 },
+      examples: ['2000 kcal/kWh', 'LNG 복합'],
+    },
+    {
+      id: 'rec',
+      korean: '신재생에너지 인증서',
+      english: 'Renewable Energy Certificate',
+      category: 'regulation',
+      description: '신재생에너지 공급 인증서',
+      aliases: ['REC', '공급인증서'],
+      regulatoryRef: '신에너지 및 재생에너지 개발·이용·보급 촉진법',
+      examples: ['태양광 REC', '풍력 REC'],
+    },
+    {
+      id: 'ess',
+      korean: '에너지 저장 장치',
+      english: 'Energy Storage System',
+      category: 'equipment',
+      unit: 'MWh',
+      description: '전력 저장 및 공급 시스템',
+      aliases: ['ESS', '배터리 저장'],
+      examples: ['리튬이온 ESS', 'Peak Shaving'],
+    },
+    {
+      id: 'demand-response',
+      korean: '수요 반응',
+      english: 'Demand Response',
+      category: 'program',
+      description: '전력 수요 감축 유도 프로그램',
+      aliases: ['DR', '수요관리'],
+      examples: ['피크 감축', 'CBL 기준'],
+    },
+    {
+      id: 'ppa',
+      korean: '전력구매계약',
+      english: 'Power Purchase Agreement',
+      category: 'contract',
+      description: '발전사업자와 전력 구매자 간 장기 계약',
+      aliases: ['PPA', '구매계약'],
+      examples: ['20년 고정가격', '기업 PPA'],
+    },
+    {
+      id: 'scada',
+      korean: '원격감시제어시스템',
+      english: 'Supervisory Control and Data Acquisition',
+      category: 'system',
+      description: '발전소 원격 감시 및 제어',
+      aliases: ['SCADA', '원격제어'],
+      examples: ['실시간 모니터링', '자동 제어'],
+    },
+  ],
+
+  templates: [
+    {
+      id: 'daily-generation-report',
+      name: 'Daily Generation Report',
+      nameKo: '일일 발전 보고서',
+      format: 'XLSX',
+      sections: [
+        '발전량 (MWh)',
+        '설비이용률',
+        '열효율',
+        '연료 소비량',
+        '이상 정지 내역',
+      ],
+      estimatedGenerationTime: 60,
+    },
+    {
+      id: 'rec-issuance-report',
+      name: 'REC Issuance Report',
+      nameKo: 'REC 발급 신청서',
+      format: 'HWP',
+      sections: [
+        '사업장 정보',
+        '월간 발전량',
+        '계량 데이터',
+        'REC 발급량 산정',
+        '첨부 서류',
+      ],
+      estimatedGenerationTime: 45,
+    },
+    {
+      id: 'ess-performance-report',
+      name: 'ESS Performance Report',
+      nameKo: 'ESS 운영 성과 보고서',
+      format: 'PDF',
+      sections: [
+        '충방전 이력',
+        '효율 분석',
+        'Peak Shaving 효과',
+        '수익 분석',
+        '안전성 점검',
+      ],
+      estimatedGenerationTime: 90,
+    },
+  ],
+
+  rules: [
+    {
+      id: 'rec-weight-calculation',
+      name: 'REC Weight Calculation',
+      description: 'REC 가중치 적용 규칙',
+      condition: 'renewable_energy_generated = true',
+      action: 'Calculate REC based on energy source weight (solar 0.7~1.2, wind 0.5~1.5)',
+      severity: 'info',
+      regulatoryRef: '신재생에너지 공급의무화제도 관리 및 운영지침',
+    },
+    {
+      id: 'capacity-factor-threshold',
+      name: 'Low Capacity Factor Alert',
+      description: '설비이용률 저조 시 점검 필요',
+      condition: 'capacity_factor < expected_threshold',
+      action: 'Conduct performance analysis and maintenance review',
+      severity: 'warning',
+      regulatoryRef: 'Internal operations standard',
+    },
+    {
+      id: 'ess-fire-safety',
+      name: 'ESS Fire Safety Compliance',
+      description: 'ESS 화재 안전 기준 준수',
+      condition: 'ess_installed = true',
+      action: 'Ensure fire detection system, extinguisher, and thermal monitoring',
+      severity: 'error',
+      regulatoryRef: '에너지저장장치 화재안전기준 (NFPC 955)',
+    },
+  ],
+
+  keywords: ['발전', 'REC', 'ESS', 'renewable', 'capacity factor', 'SCADA', '에너지'],
+  regulatoryBodies: ['산업통상자원부', '한국에너지공단', '전력거래소'],
+  color: 'amber',
+
+  tokenBudget: {
+    metadata: 50,
+    terminology: 500,
+    full: 2000,
+  },
+}

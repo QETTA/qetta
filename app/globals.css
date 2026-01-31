@@ -1,0 +1,355 @@
+@import "tailwindcss";
+
+/* ============================================
+   QETTA Design System Variables (Linear-inspired)
+   ============================================ */
+
+:root {
+  /* Background - Linear Woodsmoke */
+  --background: #08090A;
+  --background-secondary: #0D0E10;
+  --background-elevated: #141517;
+  --background-hover: #1A1D21;
+  --background-active: #22252A;
+
+  /* Text */
+  --foreground: #E6EDF3;
+  --foreground-secondary: #8A8F98;
+  --foreground-muted: #484F58;
+  --foreground-disabled: #343941;
+
+  /* Border */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-medium: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.20);
+
+  /* Brand (QETTA Titanium Silver) */
+  --brand: #71717A;        /* zinc-500 */
+  --brand-light: #A1A1AA;  /* zinc-400 */
+  --brand-dark: #52525B;   /* zinc-600 */
+
+  /* Code Diff colors (GitHub Dark) */
+  --diff-red: #F85149;
+  --diff-red-bg: rgba(248, 81, 73, 0.15);
+  --diff-green: #3FB950;
+  --diff-green-bg: rgba(63, 185, 80, 0.15);
+
+  /* Code Diff comment colors (Linear style) */
+  --diff-comment-before: #F97583;
+  --diff-comment-after: #85E89D;
+
+  /* Animation timing */
+  --animation-stagger: 0.05s;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-elevated: var(--background-elevated);
+  --color-background-hover: var(--background-hover);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-border: var(--border);
+  --color-border-medium: var(--border-medium);
+  --color-brand: var(--brand);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  /* Hero 타이포그래피 */
+  --font-size-hero: 90px;
+  --font-size-hero-sm: 56px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* ============================================
+   Linear Style Animations
+   ============================================ */
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(161, 161, 170, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(161, 161, 170, 0.5); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+  background-size: 200% 100%;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s ease-out forwards;
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 8s ease infinite;
+  background-size: 200% 200%;
+}
+
+/* Staggered animation delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* ============================================
+   Linear Style Scrollbar
+   ============================================ */
+
+.linear-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.linear-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.linear-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.linear-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   Linear Glass Effect
+   ============================================ */
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ============================================
+   Traffic Light Glow
+   ============================================ */
+
+.traffic-light-red { box-shadow: 0 0 4px #ff5f57; }
+.traffic-light-yellow { box-shadow: 0 0 4px #febc2e; }
+.traffic-light-green { box-shadow: 0 0 4px #28c840; }
+
+/* ============================================
+   Linear Code Diff Styles (100% Linear Match)
+   ============================================ */
+
+/* Linear-style code blocks - NO background, NO border (floating) */
+.linear-code-block {
+  background: transparent;
+  border: none;
+  padding: 16px 0;
+}
+
+.linear-code-line {
+  display: flex;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  padding: 1px 0;
+  /* Sequential animation */
+  opacity: 0;
+  animation: code-line-fade-in 0.4s ease-out forwards;
+}
+
+/* Per-line stagger delay (CSS custom property based) */
+.linear-code-line:nth-child(1) { animation-delay: calc(var(--animation-stagger) * 2); }
+.linear-code-line:nth-child(2) { animation-delay: calc(var(--animation-stagger) * 3); }
+.linear-code-line:nth-child(3) { animation-delay: calc(var(--animation-stagger) * 4); }
+.linear-code-line:nth-child(4) { animation-delay: calc(var(--animation-stagger) * 5); }
+.linear-code-line:nth-child(5) { animation-delay: calc(var(--animation-stagger) * 6); }
+.linear-code-line:nth-child(6) { animation-delay: calc(var(--animation-stagger) * 7); }
+.linear-code-line:nth-child(7) { animation-delay: calc(var(--animation-stagger) * 8); }
+.linear-code-line:nth-child(8) { animation-delay: calc(var(--animation-stagger) * 9); }
+.linear-code-line:nth-child(9) { animation-delay: calc(var(--animation-stagger) * 10); }
+.linear-code-line:nth-child(10) { animation-delay: calc(var(--animation-stagger) * 11); }
+.linear-code-line:nth-child(11) { animation-delay: calc(var(--animation-stagger) * 12); }
+
+@keyframes code-line-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.linear-line-number {
+  width: 28px;
+  text-align: right;
+  padding-right: 16px;
+  color: rgba(106, 115, 125, 0.6);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.linear-line-content {
+  flex: 1;
+  padding: 0 8px;
+  color: var(--foreground-secondary);
+}
+
+/* Added lines - subtle green background + left border */
+.linear-code-line--added {
+  background: rgba(46, 160, 67, 0.15);
+  border-left: 2px solid #3FB950;
+  margin-left: -2px;
+}
+
+/* Removed lines - subtle red background + left border */
+.linear-code-line--removed {
+  background: rgba(248, 81, 73, 0.15);
+  border-left: 2px solid #F85149;
+  margin-left: -2px;
+}
+
+/* Linear style: comment line background colors (Before = red, After = green) */
+/* Linear reference: 25-35% opacity for visibility */
+.linear-code-line--comment-before {
+  background: rgba(249, 117, 131, 0.25);
+  border-left: 2px solid #F97583;
+  margin-left: -2px;
+}
+
+.linear-code-line--comment-after {
+  background: rgba(133, 232, 157, 0.35);
+  border-left: 2px solid #85E89D;
+  margin-left: -2px;
+}
+
+
+/* ============================================
+   Linear Hero Typography
+   ============================================ */
+
+.text-hero-sm {
+  font-size: var(--font-size-hero-sm);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Responsive: md breakpoint (768px+) */
+@media (min-width: 768px) {
+  .md\:text-hero {
+    font-size: var(--font-size-hero);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+  }
+}
+
+.font-serif {
+  /* Georgia for Latin, Noto Sans KR for Korean */
+  font-family: Georgia, 'Times New Roman', var(--font-noto-sans-kr), sans-serif;
+}
+
+/* ============================================
+   Intersection Observer Based Animations
+   (framer-motion replacement)
+   ============================================ */
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger animation (for child elements) */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+.stagger-children.visible > *:nth-child(1) { transition-delay: 0.05s; }
+.stagger-children.visible > *:nth-child(2) { transition-delay: 0.1s; }
+.stagger-children.visible > *:nth-child(3) { transition-delay: 0.15s; }
+.stagger-children.visible > *:nth-child(4) { transition-delay: 0.2s; }
+.stagger-children.visible > *:nth-child(5) { transition-delay: 0.25s; }
+.stagger-children.visible > *:nth-child(6) { transition-delay: 0.3s; }
+
+.stagger-children.visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Slide variants */
+.animate-slide-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-slide-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-slide-left.visible,
+.animate-slide-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Scale variants */
+.animate-scale-up {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.animate-scale-up.visible {
+  opacity: 1;
+  transform: scale(1);
+}

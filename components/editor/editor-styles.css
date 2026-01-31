@@ -1,0 +1,158 @@
+/**
+ * QettaBlockEditor - Catalyst Dark Theme Styles
+ *
+ * These styles override Tiptap defaults to match the Catalyst Dark theme
+ * used throughout the QETTA dashboard.
+ *
+ * Color System (from dashboard-style.md):
+ * - Main background: bg-zinc-950
+ * - Panel background: bg-zinc-900
+ * - Text primary: text-white / text-zinc-200
+ * - Text secondary: text-zinc-400
+ * - Accent: violet-500/600
+ * - Borders: border-white/10
+ */
+
+/* Base editor container */
+.qetta-block-editor {
+  @apply text-zinc-200;
+}
+
+.qetta-readonly-editor {
+  @apply text-zinc-200;
+}
+
+/* Placeholder styling */
+.qetta-block-editor .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply text-zinc-500 float-left h-0 pointer-events-none;
+}
+
+/* Prose overrides for dark theme */
+.qetta-block-editor .ProseMirror,
+.qetta-readonly-editor .ProseMirror {
+  @apply min-h-[40px] outline-none;
+}
+
+/* Headings */
+.qetta-block-editor .ProseMirror h1,
+.qetta-readonly-editor .ProseMirror h1 {
+  @apply text-xl font-semibold text-white mb-3 mt-4;
+}
+
+.qetta-block-editor .ProseMirror h2,
+.qetta-readonly-editor .ProseMirror h2 {
+  @apply text-lg font-semibold text-white mb-2 mt-3;
+}
+
+.qetta-block-editor .ProseMirror h3,
+.qetta-readonly-editor .ProseMirror h3 {
+  @apply text-base font-medium text-zinc-100 mb-2 mt-3;
+}
+
+/* Paragraphs */
+.qetta-block-editor .ProseMirror p,
+.qetta-readonly-editor .ProseMirror p {
+  @apply text-sm text-zinc-300 leading-relaxed mb-2;
+}
+
+/* Lists */
+.qetta-block-editor .ProseMirror ul,
+.qetta-readonly-editor .ProseMirror ul {
+  @apply list-disc list-inside space-y-1 text-zinc-300 text-sm mb-2;
+}
+
+.qetta-block-editor .ProseMirror ol,
+.qetta-readonly-editor .ProseMirror ol {
+  @apply list-decimal list-inside space-y-1 text-zinc-300 text-sm mb-2;
+}
+
+.qetta-block-editor .ProseMirror li,
+.qetta-readonly-editor .ProseMirror li {
+  @apply text-zinc-300;
+}
+
+/* Inline code */
+.qetta-block-editor .ProseMirror code,
+.qetta-readonly-editor .ProseMirror code {
+  @apply bg-zinc-800 text-violet-400 px-1.5 py-0.5 rounded text-xs font-mono;
+}
+
+/* Code blocks */
+.qetta-block-editor .ProseMirror pre,
+.qetta-readonly-editor .ProseMirror pre {
+  @apply bg-zinc-800/80 rounded-lg p-3 my-2 overflow-x-auto ring-1 ring-white/10;
+}
+
+.qetta-block-editor .ProseMirror pre code,
+.qetta-readonly-editor .ProseMirror pre code {
+  @apply bg-transparent p-0 text-zinc-300 text-xs;
+}
+
+/* Blockquotes */
+.qetta-block-editor .ProseMirror blockquote,
+.qetta-readonly-editor .ProseMirror blockquote {
+  @apply border-l-2 border-violet-500/50 pl-4 my-2 italic text-zinc-400;
+}
+
+/* Horizontal rules */
+.qetta-block-editor .ProseMirror hr,
+.qetta-readonly-editor .ProseMirror hr {
+  @apply border-white/10 my-4;
+}
+
+/* Links */
+.qetta-block-editor .ProseMirror a,
+.qetta-readonly-editor .ProseMirror a {
+  @apply text-violet-400 hover:text-violet-300 underline underline-offset-2;
+}
+
+/* Strong / Bold */
+.qetta-block-editor .ProseMirror strong,
+.qetta-readonly-editor .ProseMirror strong {
+  @apply font-semibold text-white;
+}
+
+/* Emphasis / Italic */
+.qetta-block-editor .ProseMirror em,
+.qetta-readonly-editor .ProseMirror em {
+  @apply italic text-zinc-300;
+}
+
+/* Selection styling */
+.qetta-block-editor .ProseMirror ::selection,
+.qetta-readonly-editor .ProseMirror ::selection {
+  @apply bg-violet-500/30;
+}
+
+/* Focus ring for editable editor */
+.qetta-block-editor .ProseMirror:focus {
+  @apply ring-1 ring-violet-500/50 rounded-lg;
+}
+
+/* Task lists (if enabled) */
+.qetta-block-editor .ProseMirror ul[data-type='taskList'],
+.qetta-readonly-editor .ProseMirror ul[data-type='taskList'] {
+  @apply list-none pl-0;
+}
+
+.qetta-block-editor .ProseMirror ul[data-type='taskList'] li,
+.qetta-readonly-editor .ProseMirror ul[data-type='taskList'] li {
+  @apply flex items-start gap-2;
+}
+
+/* Tables (if enabled later) */
+.qetta-block-editor .ProseMirror table,
+.qetta-readonly-editor .ProseMirror table {
+  @apply w-full border-collapse my-2;
+}
+
+.qetta-block-editor .ProseMirror th,
+.qetta-readonly-editor .ProseMirror th {
+  @apply bg-zinc-800 text-zinc-200 font-medium text-left p-2 border border-white/10;
+}
+
+.qetta-block-editor .ProseMirror td,
+.qetta-readonly-editor .ProseMirror td {
+  @apply text-zinc-300 p-2 border border-white/10;
+}
