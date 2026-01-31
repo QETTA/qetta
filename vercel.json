@@ -47,7 +47,7 @@
     },
     {
       "path": "/api/cron/process-pending-payments",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 8 * * *"
     }
   ]
 }
