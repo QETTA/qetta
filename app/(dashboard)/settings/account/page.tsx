@@ -24,7 +24,7 @@ export default async function AccountPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-4xl">
       <PageHeader
         title="Account Settings"
         description="Manage security, API keys, and sessions"

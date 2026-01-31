@@ -63,26 +63,26 @@ export function PartnerHero({
   }, [])
 
   return (
-    <section className="pt-32 pb-20 sm:pt-40 sm:pb-24">
+    <section className="pt-24 pb-16 sm:pt-32 sm:pb-20 lg:pt-40 lg:pb-24">
       <Container>
         <div className="text-center">
           <div
             className={cn(
-              'mb-8 transition-all duration-500 ease-out',
+              'mb-6 sm:mb-8 transition-all duration-500 ease-out',
               'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0',
               isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
             )}
             style={{ transitionDelay: isMounted ? '0ms' : '0ms' }}
           >
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm text-zinc-300 ring-1 ring-white/10 backdrop-blur-lg">
-              <BadgeIcon className="w-4 h-4" />
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm text-zinc-300 ring-1 ring-white/10 backdrop-blur-lg">
+              <BadgeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{badgeText}</span>
             </span>
           </div>
 
           <h1
             className={cn(
-              'mx-auto max-w-5xl text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl',
+              'mx-auto max-w-5xl text-3xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl',
               'transition-all duration-500 ease-out',
               'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0',
               isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
@@ -90,7 +90,7 @@ export function PartnerHero({
             style={{ transitionDelay: isMounted ? '100ms' : '0ms' }}
           >
             <span className="block">{headline}</span>
-            <span className="block mt-2">
+            <span className="block mt-1 sm:mt-2">
               <span className="bg-gradient-to-r from-zinc-300 via-zinc-400 to-zinc-500 bg-clip-text text-transparent">
                 {headlineGradient}
               </span>
@@ -99,7 +99,7 @@ export function PartnerHero({
 
           <p
             className={cn(
-              'mx-auto mt-6 max-w-2xl text-lg text-zinc-400',
+              'mx-auto mt-4 sm:mt-6 max-w-2xl text-base sm:text-lg text-zinc-400',
               'transition-all duration-500 ease-out',
               'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0',
               isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
@@ -111,7 +111,7 @@ export function PartnerHero({
 
           <div
             className={cn(
-              'mt-10 flex items-center justify-center gap-4',
+              'mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4',
               'transition-all duration-500 ease-out',
               'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0',
               isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
@@ -120,13 +120,13 @@ export function PartnerHero({
           >
             <Link
               href={primaryCtaHref}
-              className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-zinc-950 shadow-lg hover:bg-zinc-100 transition-colors"
+              className="w-full sm:w-auto rounded-full bg-white px-6 sm:px-8 py-2.5 sm:py-3 text-sm font-semibold text-zinc-950 shadow-lg hover:bg-zinc-100 transition-colors text-center"
             >
               {primaryCta}
             </Link>
             <Link
               href="#benefits"
-              className="rounded-full bg-transparent px-8 py-3 text-sm font-semibold text-white ring-1 ring-white/20 hover:ring-white/30 transition-all"
+              className="w-full sm:w-auto rounded-full bg-transparent px-6 sm:px-8 py-2.5 sm:py-3 text-sm font-semibold text-white ring-1 ring-white/20 hover:ring-white/30 transition-all text-center"
             >
               Learn More
             </Link>
@@ -156,9 +156,9 @@ export function PainVsSolution({
   })
 
   return (
-    <section className="py-16 sm:py-20 border-y border-white/5">
+    <section className="py-12 sm:py-16 lg:py-20 border-y border-white/5">
       <Container>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12">
           <div
             ref={leftRef}
             className={cn(
@@ -167,12 +167,12 @@ export function PainVsSolution({
               leftVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-5'
             )}
           >
-            <h2 className="text-2xl font-semibold text-white mb-6">Are you experiencing these challenges?</h2>
-            <ul className="space-y-4">
+            <h2 className="text-xl sm:text-2xl font-semibold text-white mb-4 sm:mb-6">Are you experiencing these challenges?</h2>
+            <ul className="space-y-3 sm:space-y-4">
               {painPoints.map((pain) => (
                 <li key={pain} className="flex items-start gap-3">
-                  <div className="mt-1 w-2 h-2 rounded-full bg-red-500/50 flex-shrink-0" />
-                  <p className="text-zinc-400">{pain}</p>
+                  <div className="mt-1.5 sm:mt-1 w-2 h-2 rounded-full bg-red-500/50 flex-shrink-0" />
+                  <p className="text-sm sm:text-base text-zinc-400">{pain}</p>
                 </li>
               ))}
             </ul>
@@ -186,8 +186,8 @@ export function PainVsSolution({
               rightVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-5'
             )}
           >
-            <h2 className="text-2xl font-semibold text-white mb-6">QETTA provides the solution</h2>
-            <ul className="space-y-4">
+            <h2 className="text-xl sm:text-2xl font-semibold text-white mb-4 sm:mb-6">QETTA provides the solution</h2>
+            <ul className="space-y-3 sm:space-y-4">
               {solutions.map((solution) => (
                 <ChecklistItem key={solution} label={solution} color="zinc" />
               ))}
@@ -220,12 +220,12 @@ export function BenefitsGrid({
   })
 
   return (
-    <section id="benefits" className="py-16 sm:py-20">
+    <section id="benefits" className="py-12 sm:py-16 lg:py-20">
       <Container>
-        <div ref={headerRef} className="text-center mb-16">
+        <div ref={headerRef} className="text-center mb-10 sm:mb-12 lg:mb-16">
           <h2
             className={cn(
-              'text-3xl font-semibold text-white sm:text-4xl',
+              'text-2xl font-semibold text-white sm:text-3xl lg:text-4xl',
               'transition-all duration-500 ease-out',
               'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0',
               headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
@@ -235,7 +235,7 @@ export function BenefitsGrid({
           </h2>
           <p
             className={cn(
-              'mt-4 text-lg text-zinc-400',
+              'mt-3 sm:mt-4 text-base sm:text-lg text-zinc-400',
               'transition-all duration-500 ease-out',
               'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0',
               headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
@@ -246,26 +246,26 @@ export function BenefitsGrid({
           </p>
         </div>
 
-        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {benefits.map((benefit, index) => {
             const Icon = benefit.icon
             return (
               <div
                 key={benefit.title}
                 className={cn(
-                  'rounded-2xl bg-white/5 p-8 ring-1 ring-white/10 hover:ring-white/20 transition-all backdrop-blur-lg',
+                  'rounded-xl sm:rounded-2xl bg-white/5 p-5 sm:p-6 lg:p-8 ring-1 ring-white/10 hover:ring-white/20 transition-all backdrop-blur-lg',
                   'duration-300 ease-out',
                   'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0',
                   gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
                 )}
                 style={{ transitionDelay: gridVisible ? `${index * 50}ms` : '0ms' }}
               >
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-zinc-800 ring-1 ring-white/10 mb-6">
-                  <Icon className="w-6 h-6 text-zinc-400" />
+                <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-zinc-800 ring-1 ring-white/10 mb-4 sm:mb-6">
+                  <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">{benefit.title}</h3>
-                <p className="text-zinc-400 mb-4">{benefit.description}</p>
-                <p className="text-sm text-zinc-500">{benefit.detail}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-1.5 sm:mb-2">{benefit.title}</h3>
+                <p className="text-sm sm:text-base text-zinc-400 mb-3 sm:mb-4">{benefit.description}</p>
+                <p className="text-xs sm:text-sm text-zinc-500">{benefit.detail}</p>
               </div>
             )
           })}
@@ -284,9 +284,9 @@ export function StatsBar({ stats }: { stats: StatItem[] }) {
   })
 
   return (
-    <section className="py-16 sm:py-20 border-y border-white/5">
+    <section className="py-10 sm:py-16 lg:py-20 border-y border-white/5">
       <Container>
-        <div ref={ref} className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div ref={ref} className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 text-center">
           {stats.map((stat, i) => (
             <div
               key={stat.label}
@@ -297,8 +297,8 @@ export function StatsBar({ stats }: { stats: StatItem[] }) {
               )}
               style={{ transitionDelay: isVisible ? `${i * 50}ms` : '0ms' }}
             >
-              <p className="text-3xl font-semibold text-white sm:text-4xl">{stat.value}</p>
-              <p className="mt-2 text-sm text-zinc-500">{stat.label}</p>
+              <p className="text-2xl font-semibold text-white sm:text-3xl lg:text-4xl">{stat.value}</p>
+              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-500">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -316,12 +316,12 @@ export function StepsSection({ title, steps }: { title: string; steps: StepItem[
   })
 
   return (
-    <section className="py-16 sm:py-20 border-y border-white/5">
+    <section className="py-12 sm:py-16 lg:py-20 border-y border-white/5">
       <Container>
-        <h2 className="text-3xl font-semibold text-white text-center mb-12">{title}</h2>
+        <h2 className="text-2xl sm:text-3xl font-semibold text-white text-center mb-8 sm:mb-10 lg:mb-12">{title}</h2>
         <div
           ref={ref}
-          className={`grid grid-cols-1 gap-8 ${steps.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}
+          className={`grid grid-cols-1 gap-6 sm:gap-8 ${steps.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'}`}
         >
           {steps.map((item, i) => (
             <div
@@ -333,11 +333,11 @@ export function StepsSection({ title, steps }: { title: string; steps: StepItem[
               )}
               style={{ transitionDelay: isVisible ? `${i * 50}ms` : '0ms' }}
             >
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-zinc-400/10 text-zinc-300 font-semibold text-lg mb-4">
+              <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-zinc-400/10 text-zinc-300 font-semibold text-base sm:text-lg mb-3 sm:mb-4">
                 {item.step}
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
-              <p className="text-sm text-zinc-500">{item.desc}</p>
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-1.5 sm:mb-2">{item.title}</h3>
+              <p className="text-xs sm:text-sm text-zinc-500">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -355,27 +355,28 @@ export function PricingCTA() {
   })
 
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-12 sm:py-16 lg:py-20">
       <Container>
         <div
           ref={ref}
           className={cn(
-            'rounded-2xl bg-white/5 p-12 ring-1 ring-white/10 text-center backdrop-blur-lg',
+            'rounded-xl sm:rounded-2xl bg-white/5 p-6 sm:p-8 lg:p-12 ring-1 ring-white/10 text-center backdrop-blur-lg',
             'transition-all duration-300 ease-out',
             'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
           )}
         >
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">Pricing</h2>
-          <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
+          <h2 className="text-2xl font-semibold text-white sm:text-3xl lg:text-4xl">Pricing</h2>
+          <p className="mt-3 sm:mt-4 text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto">
             Starter (30-day free) - Professional - Enterprise
-            <br />
+            <br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>
             Choose the plan that fits your business.
           </p>
-          <div className="mt-8">
+          <div className="mt-6 sm:mt-8">
             <Link
               href="/pricing"
-              className="inline-flex rounded-full bg-white px-8 py-3 text-sm font-semibold text-zinc-950 shadow-lg hover:bg-zinc-100 transition-colors"
+              className="inline-flex rounded-full bg-white px-6 sm:px-8 py-2.5 sm:py-3 text-sm font-semibold text-zinc-950 shadow-lg hover:bg-zinc-100 transition-colors"
             >
               View Pricing
             </Link>
@@ -405,23 +406,23 @@ export function FinalCTA({
   })
 
   return (
-    <section className="py-20 sm:py-24">
+    <section className="py-16 sm:py-20 lg:py-24">
       <Container>
         <div
           ref={ref}
           className={cn(
-            'rounded-2xl bg-gradient-to-br from-zinc-400/10 via-zinc-500/5 to-transparent p-12 ring-1 ring-white/10 text-center backdrop-blur-lg',
+            'rounded-xl sm:rounded-2xl bg-gradient-to-br from-zinc-400/10 via-zinc-500/5 to-transparent p-6 sm:p-8 lg:p-12 ring-1 ring-white/10 text-center backdrop-blur-lg',
             'transition-all duration-300 ease-out',
             'motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
           )}
         >
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">{headline}</h2>
-          <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">{description}</p>
-          <div className="mt-10 flex items-center justify-center gap-4">
+          <h2 className="text-2xl font-semibold text-white sm:text-3xl lg:text-4xl">{headline}</h2>
+          <p className="mt-3 sm:mt-4 text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto">{description}</p>
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link
               href={ctaHref}
-              className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-zinc-950 shadow-lg hover:bg-zinc-100 transition-colors"
+              className="w-full sm:w-auto rounded-full bg-white px-6 sm:px-8 py-2.5 sm:py-3 text-sm font-semibold text-zinc-950 shadow-lg hover:bg-zinc-100 transition-colors text-center"
             >
               {ctaText}
             </Link>

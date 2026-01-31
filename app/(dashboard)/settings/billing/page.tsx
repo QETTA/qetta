@@ -82,10 +82,10 @@ export default async function BillingPage() {
   const billingData = await getBillingData(session.user.id)
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Billing</h1>
-        <p className="text-muted-foreground mt-2">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-6xl">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-white">Billing</h1>
+        <p className="text-sm sm:text-base text-zinc-400 mt-1 sm:mt-2">
           Manage your subscription plan and payment information
         </p>
       </div>

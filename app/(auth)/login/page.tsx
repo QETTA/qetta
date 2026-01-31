@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import { GlassCard } from '@/components/landing/blocks/shared/GlassCard'
-import { LoginForm } from '@/components/auth/login-form'
 
 export const metadata: Metadata = {
   title: 'Sign in | QETTA',
@@ -21,6 +21,15 @@ function LoginFormSkeleton() {
     </div>
   )
 }
+
+// Code-split auth form for better bundle size
+const LoginForm = dynamic(
+  () => import('@/components/auth/login-form').then(m => ({ default: m.LoginForm })),
+  {
+    loading: () => <LoginFormSkeleton />,
+    ssr: false, // Auth forms don't need SSR
+  }
+)
 
 export default function LoginPage() {
   return (

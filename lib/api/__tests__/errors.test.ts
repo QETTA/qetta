@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { APIError, createErrorResponse, handleAPIError } from '../errors'
+import { ERROR_MESSAGES } from '@/constants/messages'
 
 describe('APIError', () => {
   it('creates error with correct properties', () => {
@@ -43,7 +44,8 @@ describe('handleAPIError', () => {
     expect(response.status).toBe(500)
     const body = await response.json()
     expect(body.error.code).toBe('INTERNAL_ERROR')
-    expect(body.error.message).toBe('Something broke')
+    // Now returns Korean error message for consistency
+    expect(body.error.message).toBe(ERROR_MESSAGES.GENERIC)
   })
 
   it('handles non-Error (string) as 500', async () => {
@@ -51,7 +53,8 @@ describe('handleAPIError', () => {
     expect(response.status).toBe(500)
     const body = await response.json()
     expect(body.error.code).toBe('INTERNAL_ERROR')
-    expect(body.error.message).toBe('Internal server error')
+    // Now returns Korean error message for consistency
+    expect(body.error.message).toBe(ERROR_MESSAGES.GENERIC)
   })
 
   it('handles non-Error (number) as 500', async () => {

@@ -79,7 +79,7 @@ function SuccessContent() {
 
   if (status === 'loading') {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-lg">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-lg">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -93,7 +93,7 @@ function SuccessContent() {
 
   if (status === 'error') {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-lg">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-lg">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -120,11 +120,11 @@ function SuccessContent() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-lg">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-lg">
       <Card>
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
-            <CheckCircle2 className="h-10 w-10 text-green-600" />
+          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+            <CheckCircle2 className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
           </div>
           <CardTitle className="text-2xl">Payment Complete!</CardTitle>
           <CardDescription>Thank you for using QETTA Premium services</CardDescription>
@@ -166,7 +166,7 @@ export default function SuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto py-8 px-4 max-w-lg">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-lg">
           <Card>
             <CardContent className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin" />
