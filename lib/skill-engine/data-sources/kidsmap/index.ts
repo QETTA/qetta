@@ -6,6 +6,7 @@
  * ## 장소 데이터 API
  * - TourAPI (한국관광공사) - 놀이공원, 동물원, 박물관, 공원
  * - PlaygroundAPI (행정안전부) - 키즈카페, 실내놀이터
+ * - KakaoLocal (카카오맵) - 키워드/위치 기반 장소 검색
  *
  * ## 콘텐츠 크롤링 API
  * - YouTube - 영상 리뷰, 브이로그
@@ -16,15 +17,22 @@
  * ```ts
  * import {
  *   getKidsMapClient,
+ *   getKakaoLocalClient,
  *   getContentClient,
  *   PLACE_CATEGORIES,
  *   TOUR_API_AREA_CODES
  * } from '@/lib/skill-engine/data-sources/kidsmap'
  *
- * // 장소 검색
+ * // 장소 검색 (공공데이터)
  * const placeClient = getKidsMapClient()
  * const places = await placeClient.searchThemeParks({
  *   areaCode: TOUR_API_AREA_CODES.SEOUL
+ * })
+ *
+ * // 카카오맵 검색
+ * const kakaoClient = getKakaoLocalClient()
+ * const kidsCafes = await kakaoClient.searchKidsCafes({
+ *   x: 127.0, y: 37.5, radius: 5000
  * })
  *
  * // 콘텐츠 검색
@@ -34,9 +42,6 @@
  *   sources: ['YOUTUBE', 'NAVER_BLOG'],
  *   safeSearch: true,
  * })
- *
- * // 장소 기반 콘텐츠 검색
- * const reviews = await contentClient.searchByPlace('롯데월드')
  * ```
  *
  * @module kidsmap
@@ -181,3 +186,23 @@ export {
   getContentClient,
   initContentClient,
 } from './content-client'
+
+// ============================================
+// 카카오 클라이언트 export
+// ============================================
+
+export {
+  KakaoLocalClient,
+  getKakaoLocalClient,
+  initKakaoLocalClient,
+  KAKAO_CATEGORY_CODES,
+  KAKAO_KIDS_KEYWORDS,
+} from './kakao-client'
+
+export type {
+  KakaoClientConfig,
+  KakaoSearchParams,
+  KakaoPlaceResponse,
+  KakaoPlaceDocument,
+  KakaoCategoryCode,
+} from './kakao-client'
