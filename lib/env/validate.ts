@@ -180,6 +180,33 @@ export const ENV = {
   },
 
   /**
+   * Microsoft Azure AD Client ID.
+   * Optional - used for Microsoft/Azure AD login integration.
+   */
+  get AZURE_AD_CLIENT_ID(): string | undefined {
+    const value = process.env.AZURE_AD_CLIENT_ID
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  /**
+   * Microsoft Azure AD Client Secret.
+   * Optional - used for Microsoft/Azure AD login integration.
+   */
+  get AZURE_AD_CLIENT_SECRET(): string | undefined {
+    const value = process.env.AZURE_AD_CLIENT_SECRET
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  /**
+   * Microsoft Azure AD Tenant ID.
+   * Optional - 'common' for multi-tenant, or specific tenant ID for single-tenant.
+   */
+  get AZURE_AD_TENANT_ID(): string | undefined {
+    const value = process.env.AZURE_AD_TENANT_ID
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  /**
    * Resend API Key for email sending.
    * Optional - used for sending verification and password reset emails.
    */

@@ -15,6 +15,7 @@ import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 import GitHub from 'next-auth/providers/github'
+import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id'
 import type { NextAuthConfig } from 'next-auth'
 
 import { ENV } from '@/lib/env/validate'
@@ -49,6 +50,20 @@ if (ENV.GITHUB_CLIENT_ID && ENV.GITHUB_CLIENT_SECRET) {
     GitHub({
       clientId: ENV.GITHUB_CLIENT_ID,
       clientSecret: ENV.GITHUB_CLIENT_SECRET,
+      // SECURITY: allowDangerousEmailAccountLinking 제거
+      // 계정 연결은 signIn 콜백에서 안전하게 처리
+    })
+  )
+}
+
+// Microsoft Entra ID OAuth (환경 변수 설정 시)
+if (ENV.AZURE_AD_CLIENT_ID && ENV.AZURE_AD_CLIENT_SECRET) {
+  const tenantId = ENV.AZURE_AD_TENANT_ID || 'common' // 'common' for multi-tenant
+  oauthProviders.push(
+    MicrosoftEntraID({
+      clientId: ENV.AZURE_AD_CLIENT_ID,
+      clientSecret: ENV.AZURE_AD_CLIENT_SECRET,
+      issuer: `https://login.microsoftonline.com/${tenantId}/v2.0`,
       // SECURITY: allowDangerousEmailAccountLinking 제거
       // 계정 연결은 signIn 콜백에서 안전하게 처리
     })

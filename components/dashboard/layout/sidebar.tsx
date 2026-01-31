@@ -144,6 +144,7 @@ export const QettaLeftSidebar = memo(function QettaLeftSidebar({
         <button
           onClick={handleSearchClick}
           data-testid="sidebar-search-button"
+          data-tour="search-button"
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 text-zinc-400 hover:bg-white/10 ring-1 ring-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
           aria-label="Search (Cmd+K)"
         >
@@ -168,6 +169,7 @@ export const QettaLeftSidebar = memo(function QettaLeftSidebar({
                 href={item.href}
                 onClick={() => onTabChange(item.id as ProductTab)}
                 data-testid={`sidebar-tab-${item.id.toLowerCase()}`}
+                data-tour={`nav-${item.id.toLowerCase()}`}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-white/30 ${
                   activeTab === item.id
                     ? 'bg-white/10 text-white'

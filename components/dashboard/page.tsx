@@ -73,6 +73,7 @@ function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id
 
 import { useCallback, useMemo } from 'react'
 import { CrossFunctionalContext, type CrossFunctionalContextType } from './context'
+import { useOnboarding } from '@/components/onboarding'
 export { useCrossFunctional } from './context'
 
 // ============================================
@@ -86,9 +87,21 @@ interface QettaDashboardPageProps {
 export function QettaDashboardPage({ initialTab }: QettaDashboardPageProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const { isFirstVisit, startTour, preferences } = useOnboarding()
 
   // State
   const [activeTab, setActiveTabState] = useState<ProductTab>(initialTab)
+
+  // Auto-start welcome tour on first visit
+  useEffect(() => {
+    if (isFirstVisit && preferences.autoStartTour) {
+      // Small delay to allow the UI to render
+      const timer = setTimeout(() => {
+        startTour('welcome')
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [isFirstVisit, preferences.autoStartTour, startTour])
   const [selectedDocument, setSelectedDocument] = useState<string | null>('doc-1')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

@@ -3,13 +3,22 @@
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/catalyst/button'
 import { QETTA_METRICS, DISPLAY_METRICS } from '@/constants/metrics'
+import { useOnboarding } from '@/components/onboarding'
 
 type TabType = 'DOCS' | 'VERIFY' | 'APPLY' | 'MONITOR'
+
+interface QuickAction {
+  label: string
+  icon: string
+  onClick?: () => void
+  href?: string
+}
 
 interface EmptyStateProps {
   tab: TabType
   onAction?: () => void
   className?: string
+  showQuickActions?: boolean
 }
 
 const EMPTY_STATE_CONTENT: Record<
@@ -22,6 +31,7 @@ const EMPTY_STATE_CONTENT: Record<
     items: string[]
     itemType: 'steps' | 'features'
     cta: string
+    quickActions: QuickAction[]
   }
 > = {
   DOCS: {
@@ -36,6 +46,11 @@ const EMPTY_STATE_CONTENT: Record<
     ],
     itemType: 'steps',
     cta: '문서 생성 시작',
+    quickActions: [
+      { label: 'Watch Demo', icon: '▶️', href: '/demo' },
+      { label: 'View Templates', icon: '📋', href: '/docs/templates' },
+      { label: 'Import Data', icon: '📥', href: '/docs/import' },
+    ],
   },
   VERIFY: {
     icon: '🔐',
@@ -48,6 +63,10 @@ const EMPTY_STATE_CONTENT: Record<
     ],
     itemType: 'features',
     cta: '첫 검증 시작',
+    quickActions: [
+      { label: 'How It Works', icon: '❓', href: '/docs/verify-guide' },
+      { label: 'Scan QR Code', icon: '📷' },
+    ],
   },
   APPLY: {
     icon: '🌍',
@@ -60,6 +79,10 @@ const EMPTY_STATE_CONTENT: Record<
     ],
     itemType: 'features',
     cta: '입찰 검색 시작',
+    quickActions: [
+      { label: 'Set Preferences', icon: '⚙️', href: '/apply/settings' },
+      { label: 'Browse All', icon: '🔍', href: '/apply/browse' },
+    ],
   },
   MONITOR: {
     icon: '📊',
@@ -73,6 +96,10 @@ const EMPTY_STATE_CONTENT: Record<
     ],
     itemType: 'features',
     cta: '모니터링 설정',
+    quickActions: [
+      { label: 'Connect Equipment', icon: '🔌', href: '/monitor/connect' },
+      { label: 'View Demo Data', icon: '📈', href: '/monitor/demo' },
+    ],
   },
 }
 
@@ -80,47 +107,113 @@ const EMPTY_STATE_CONTENT: Record<
  * EmptyState - 대시보드 탭별 Empty State 컴포넌트
  *
  * QETTA 핵심 가치 제안을 포함한 Empty State를 표시합니다.
+ * 2026 트렌드: 애니메이션, Quick Actions, 투어 연동
  *
  * @example
  * <EmptyState tab="DOCS" onAction={() => navigate('/docs/new')} />
  */
-export function EmptyState({ tab, onAction, className }: EmptyStateProps) {
+export function EmptyState({ tab, onAction, className, showQuickActions = true }: EmptyStateProps) {
   const content = EMPTY_STATE_CONTENT[tab]
+  const { startTour, isFirstVisit } = useOnboarding()
+
+  const handleStartTour = () => {
+    // Map tab to tour ID
+    const tourMap: Record<TabType, 'docs' | 'verify' | 'apply' | 'monitor'> = {
+      DOCS: 'docs',
+      VERIFY: 'verify',
+      APPLY: 'apply',
+      MONITOR: 'monitor',
+    }
+    startTour(tourMap[tab])
+  }
 
   return (
     <div
       className={cn(
         'flex flex-col items-center justify-center py-12 px-6 text-center',
+        'animate-fade-in-up',
         className
       )}
     >
-      {/* Icon */}
-      <span className="text-5xl mb-4" role="img" aria-label={content.title}>
+      {/* Icon with pulse animation */}
+      <span
+        className="text-5xl mb-4 inline-block animate-float"
+        role="img"
+        aria-label={content.title}
+      >
         {content.icon}
       </span>
 
       {/* Title */}
       <h3 className="text-xl font-semibold text-white mb-2">{content.title}</h3>
 
-      {/* Key Metric */}
-      <p className="text-3xl font-bold text-white mb-2">{content.value}</p>
+      {/* Key Metric with highlight */}
+      <p className="text-3xl font-bold text-white mb-2 tabular-nums">
+        {content.value}
+      </p>
 
       {/* Subtitle */}
       <p className="text-zinc-400 mb-6 max-w-sm">{content.subtitle}</p>
 
-      {/* Items (Steps or Features) */}
-      <ul className="text-left text-sm text-zinc-400 space-y-2 mb-8 max-w-sm">
-        {content.items.map((item) => (
-          <li key={item} className="leading-relaxed">
+      {/* Items (Steps or Features) with stagger animation */}
+      <ul className="text-left text-sm text-zinc-400 space-y-2 mb-8 max-w-sm stagger-children visible">
+        {content.items.map((item, index) => (
+          <li
+            key={item}
+            className="leading-relaxed"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
             {item}
           </li>
         ))}
       </ul>
 
       {/* CTA Button */}
-      <Button onClick={onAction} className="bg-white text-zinc-950 hover:bg-zinc-100">
+      <Button
+        onClick={onAction}
+        className="bg-white text-zinc-950 hover:bg-zinc-100 mb-4"
+      >
         {content.cta}
       </Button>
+
+      {/* Quick Actions */}
+      {showQuickActions && content.quickActions.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+          {content.quickActions.map((action) => (
+            <button
+              key={action.label}
+              onClick={action.onClick}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg',
+                'text-xs text-zinc-400 hover:text-white',
+                'bg-zinc-800/50 hover:bg-zinc-800',
+                'border border-white/5 hover:border-white/10',
+                'transition-all duration-200'
+              )}
+            >
+              <span>{action.icon}</span>
+              <span>{action.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Tour prompt for first-time users */}
+      {isFirstVisit && (
+        <button
+          onClick={handleStartTour}
+          className={cn(
+            'mt-6 flex items-center gap-2 px-4 py-2 rounded-lg',
+            'text-sm text-zinc-400 hover:text-white',
+            'bg-zinc-900/50 hover:bg-zinc-800',
+            'border border-white/10 hover:border-white/20',
+            'transition-all duration-200'
+          )}
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-hint-beacon" />
+          <span>Take a quick tour</span>
+        </button>
+      )}
     </div>
   )
 }

@@ -98,6 +98,7 @@ export function QettaChatbot() {
           {/* Floating Action Button (Widget) */}
           <PopoverButton
             ref={buttonRef}
+            data-tour="ai-assistant"
             className={clsx(
               'fixed z-50 p-4 rounded-full shadow-lg transition-all',
               'focus:outline-none focus:ring-2 focus:ring-offset-2',

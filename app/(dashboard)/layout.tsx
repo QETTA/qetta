@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { cookies } from 'next/headers'
 import { DashboardSkeleton } from '@/components/dashboard/skeleton'
 import { PreviewBanner } from '@/components/dashboard/preview-banner'
+import { OnboardingProvider, TourOverlay } from '@/components/onboarding'
 
 export const metadata: Metadata = {
   title: {
@@ -21,7 +22,7 @@ export default async function DashboardLayout({
   const isPreviewMode = cookieStore.get('qetta_preview_mode')?.value === 'true'
 
   return (
-    <>
+    <OnboardingProvider>
       {/* Preview mode banner - fixed at top */}
       {isPreviewMode && <PreviewBanner />}
 
@@ -30,6 +31,9 @@ export default async function DashboardLayout({
           {children}
         </Suspense>
       </main>
-    </>
+
+      {/* Onboarding tour overlay */}
+      <TourOverlay />
+    </OnboardingProvider>
   )
 }
