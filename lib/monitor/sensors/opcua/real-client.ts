@@ -79,7 +79,7 @@ export function createRealOPCUAClient(
   nodeIds: string[] = []
 ): OPCUAClient {
   // Dynamic imports to avoid loading node-opcua in test/dev
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+   
   const {
     OPCUAClient: OPCUAClientClass,
     ClientSubscription,

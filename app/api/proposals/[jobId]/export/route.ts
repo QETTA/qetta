@@ -205,7 +205,7 @@ export const POST = withApiMiddleware(
     }
 
     // Parse options with safe JSON parsing
-    let options: Partial<ExportOptions> = {}
+    const options: Partial<ExportOptions> = {}
     try {
       const body = await request.json()
       // Validate expected fields to avoid type pollution

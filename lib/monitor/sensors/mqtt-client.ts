@@ -145,8 +145,8 @@ export function createSimulatedMQTTClient(
 ): MQTTClient {
   let state: MQTTConnectionState = 'disconnected'
   let topics: string[] = [...options.topics]
-  let messageHandlers: MessageHandler[] = []
-  let stateHandlers: StateChangeHandler[] = []
+  const messageHandlers: MessageHandler[] = []
+  const stateHandlers: StateChangeHandler[] = []
   let simulationInterval: ReturnType<typeof setInterval> | null = null
   let reconnectAttempts = 0
 
@@ -423,8 +423,8 @@ export function createMQTTSensorService(
 ): MQTTSensorService {
   const client = createMQTTClient(options)
   const aggregationInterval = options.aggregationInterval || 1000
-  let handlers: SensorReadingHandler[] = []
-  let pendingReadings: Map<string, SensorReading[]> = new Map()
+  const handlers: SensorReadingHandler[] = []
+  const pendingReadings: Map<string, SensorReading[]> = new Map()
   let aggregationTimer: ReturnType<typeof setInterval> | null = null
 
   // Process MQTT messages and aggregate by equipment

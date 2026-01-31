@@ -755,7 +755,7 @@ export function generatePreStartupPlan(
   context: BusinessPlanContext,
   program: GovSupportProgram = PRE_STARTUP_PACKAGE
 ): string {
-  let content = `
+  const content = `
 # ${program.name} 사업계획서
 
 **아이템명**: ${context.itemName}

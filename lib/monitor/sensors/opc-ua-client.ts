@@ -178,8 +178,8 @@ export interface BrowseResult {
  */
 function createSimulatedOPCUAClient(options: OPCUAClientOptions): OPCUAClient {
   let state: OPCUAConnectionState = 'disconnected'
-  let dataChangeHandlers: DataChangeHandler[] = []
-  let stateHandlers: OPCUAStateChangeHandler[] = []
+  const dataChangeHandlers: DataChangeHandler[] = []
+  const stateHandlers: OPCUAStateChangeHandler[] = []
   let subscriptionInterval: ReturnType<typeof setInterval> | null = null
 
   // Simulated node values (realistic smart factory data)
@@ -602,7 +602,7 @@ export function createOPCUASensorService(
   options: OPCUASensorServiceOptions
 ): OPCUASensorService {
   const client = createOPCUAClient(options)
-  let handlers: ((equipmentId: string, readings: SensorReading[]) => void)[] =
+  const handlers: ((equipmentId: string, readings: SensorReading[]) => void)[] =
     []
 
   // Aggregate readings by equipment

@@ -406,8 +406,8 @@ ${JSON.stringify(additionalData, null, 2)}
   }> {
     let eligibilityScore = 100
     let experienceScore = 50
-    let technicalScore = 50
-    let financialScore = 50
+    const technicalScore = 50
+    const financialScore = 50
     const risks: string[] = []
     const recommendations: string[] = []
 

@@ -299,7 +299,7 @@ export function generateDailyReportContent(data: TMSEmissionData): string {
   const exceededItems = measurements.filter((m) => m.status === 'exceeded')
   const warningItems = measurements.filter((m) => m.status === 'warning')
 
-  let content = `
+  const content = `
 # 일일 배출량 보고서
 
 ## 1. 측정 개요
