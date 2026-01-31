@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { QETTA_METRICS } from '@/lib/super-model'
 import { DISPLAY_METRICS } from '@/constants/metrics'
+import { cn } from '@/lib/utils'
 
 const GLOBAL_TENDER_COUNT = 630_000
 
@@ -50,13 +51,16 @@ const PLATFORMS = [
   },
 ] as const
 
-// Category filters
+// Category filters with counts (NCloud-style)
 const CATEGORIES = [
-  { id: 'all', name: 'All', icon: '📋' },
-  { id: 'env', name: 'Environment/Water', icon: '🌱' },
-  { id: 'factory', name: 'Smart Factory', icon: '🏭' },
-  { id: 'iot', name: 'IoT/Sensors', icon: '📡' },
-  { id: 'ai', name: 'AI/Data', icon: '🤖' },
+  { id: 'all', name: 'All', icon: '📋', count: 630000 },
+  { id: 'startup', name: 'Startup', icon: '🚀', count: 12450 },
+  { id: 'rd', name: 'R&D', icon: '🔬', count: 8920 },
+  { id: 'export', name: 'Export', icon: '🌍', count: 5340 },
+  { id: 'hr', name: 'HR/Training', icon: '👥', count: 3210 },
+  { id: 'finance', name: 'Finance', icon: '💰', count: 4580 },
+  { id: 'env', name: 'Environment', icon: '🌱', count: 2890 },
+  { id: 'factory', name: 'Smart Factory', icon: '🏭', count: 1950 },
 ] as const
 
 // Format number with K/M suffix
@@ -161,21 +165,28 @@ export function QettaGlobalSearch({ onSearch, onPlatformSelect }: QettaGlobalSea
           </button>
         </div>
 
-        {/* Quick filters */}
-        <div className="flex items-center gap-2 mt-2 overflow-x-auto pb-1">
+        {/* Quick filters - NCloud style pill tabs with counts */}
+        <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-2 scrollbar-hide">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full
-                         whitespace-nowrap transition-all ${
-                           selectedCategory === cat.id
-                             ? 'bg-white/10 text-white ring-1 ring-white/30'
-                             : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50'
-                         }`}
+              className={cn(
+                'flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full',
+                'whitespace-nowrap transition-all duration-200',
+                selectedCategory === cat.id
+                  ? 'bg-white text-zinc-900 shadow-sm'
+                  : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-300'
+              )}
             >
               <span>{cat.icon}</span>
               <span>{cat.name}</span>
+              <span className={cn(
+                'ml-1 text-xs tabular-nums',
+                selectedCategory === cat.id ? 'text-zinc-600' : 'text-zinc-500'
+              )}>
+                {formatCount(cat.count)}
+              </span>
             </button>
           ))}
         </div>

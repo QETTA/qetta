@@ -7,6 +7,7 @@ import { CTA_LABELS } from '@/constants/messages'
 import { HeroAnimatedContent, HeroProductAnimated } from './hero/HeroAnimatedContent'
 import { StatusPing, StatsGrid, type StatItem } from './shared'
 import { GradientOrb, DynamicBackground } from '@/components/linear'
+import { NewsletterCTA } from '../newsletter-cta'
 
 /**
  * HeroSection - Server component for static content rendering
@@ -63,6 +64,9 @@ export const HeroSection = memo(function HeroSection() {
                   {CTA_LABELS.FREE_TRIAL}
                 </Button>
               </div>
+
+              {/* Newsletter CTA */}
+              <NewsletterCTA />
 
               {/* Stats - QETTA Core Metrics from constants */}
               <StatsGrid
