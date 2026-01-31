@@ -1,30 +1,42 @@
 /**
  * KidsMap 데이터 소스 모듈
  *
- * 어린이 놀이 공간 정보를 위한 공공 데이터 API 클라이언트 모음
+ * 어린이 놀이 공간 정보를 위한 통합 데이터 수집 클라이언트
+ *
+ * ## 장소 데이터 API
+ * - TourAPI (한국관광공사) - 놀이공원, 동물원, 박물관, 공원
+ * - PlaygroundAPI (행정안전부) - 키즈카페, 실내놀이터
+ *
+ * ## 콘텐츠 크롤링 API
+ * - YouTube - 영상 리뷰, 브이로그
+ * - 네이버 블로그 - 후기, 체험기
+ * - 네이버 클립 - 짧은 영상
  *
  * @example
  * ```ts
- * import { getKidsMapClient, PLACE_CATEGORIES, TOUR_API_AREA_CODES } from '@/lib/skill-engine/data-sources/kidsmap'
+ * import {
+ *   getKidsMapClient,
+ *   getContentClient,
+ *   PLACE_CATEGORIES,
+ *   TOUR_API_AREA_CODES
+ * } from '@/lib/skill-engine/data-sources/kidsmap'
  *
- * const client = getKidsMapClient()
- *
- * // 서울 지역 테마파크 검색
- * const result = await client.searchThemeParks({
+ * // 장소 검색
+ * const placeClient = getKidsMapClient()
+ * const places = await placeClient.searchThemeParks({
  *   areaCode: TOUR_API_AREA_CODES.SEOUL
  * })
  *
- * // 키즈카페 검색
- * const kidsCafes = await client.searchKidsCafes({
- *   sidoCode: '11' // 서울
+ * // 콘텐츠 검색
+ * const contentClient = getContentClient()
+ * const contents = await contentClient.search({
+ *   keyword: '에버랜드 아이',
+ *   sources: ['YOUTUBE', 'NAVER_BLOG'],
+ *   safeSearch: true,
  * })
  *
- * // 통합 검색
- * const all = await client.search({
- *   categories: [PLACE_CATEGORIES.AMUSEMENT_PARK, PLACE_CATEGORIES.ZOO_AQUARIUM],
- *   areaCode: TOUR_API_AREA_CODES.SEOUL,
- *   pageSize: 50
- * })
+ * // 장소 기반 콘텐츠 검색
+ * const reviews = await contentClient.searchByPlace('롯데월드')
  * ```
  *
  * @module kidsmap
@@ -63,6 +75,30 @@ export type {
   KidsMapSearchFilters,
   KidsMapSearchResult,
   KidsMapErrorCode,
+
+  // 콘텐츠 타입
+  ContentSource,
+  ContentType,
+  NormalizedContent,
+  ContentSearchFilters,
+  ContentSearchResult,
+
+  // YouTube 타입
+  YouTubeClientConfig,
+  YouTubeSearchParams,
+  YouTubeApiResponse,
+  YouTubeVideoItem,
+  YouTubeVideoDetails,
+
+  // 네이버 타입
+  NaverClientConfig,
+  NaverSearchParams,
+  NaverBlogApiResponse,
+  NaverBlogItem,
+  NaverClipItem,
+
+  // 통합 설정
+  KidsMapFullClientConfig,
 } from './types'
 
 // ============================================
@@ -83,16 +119,19 @@ export {
   // PlaygroundAPI 코드
   PLAYGROUND_LOCATION_CODES,
 
+  // 콘텐츠 타입
+  CONTENT_TYPES,
+
   // 에러
   KidsMapApiError,
   KIDSMAP_ERROR_CODES,
 } from './types'
 
 // ============================================
-// 클라이언트 export
+// 장소 클라이언트 export
 // ============================================
 
-// 통합 클라이언트
+// 통합 장소 클라이언트
 export {
   KidsMapClient,
   getKidsMapClient,
@@ -112,3 +151,33 @@ export {
   getPlaygroundApiClient,
   initPlaygroundApiClient,
 } from './playground-client'
+
+// ============================================
+// 콘텐츠 클라이언트 export
+// ============================================
+
+// YouTube 클라이언트
+export {
+  YouTubeClient,
+  getYouTubeClient,
+  initYouTubeClient,
+  KIDS_SEARCH_PRESETS,
+} from './youtube-client'
+
+// 네이버 블로그/클립 클라이언트
+export {
+  NaverBlogClient,
+  NaverClipClient,
+  getNaverBlogClient,
+  getNaverClipClient,
+  initNaverBlogClient,
+  initNaverClipClient,
+  NAVER_KIDS_SEARCH_PRESETS,
+} from './naver-client'
+
+// 통합 콘텐츠 클라이언트
+export {
+  ContentClient,
+  getContentClient,
+  initContentClient,
+} from './content-client'

@@ -574,3 +574,314 @@ export const KIDSMAP_ERROR_CODES = {
 
 export type KidsMapErrorCode =
   (typeof KIDSMAP_ERROR_CODES)[keyof typeof KIDSMAP_ERROR_CODES]
+
+// ============================================
+// 콘텐츠 소스 타입 (YouTube, 네이버 블로그, 클립)
+// ============================================
+
+/** 콘텐츠 소스 구분 */
+export type ContentSource = 'YOUTUBE' | 'NAVER_BLOG' | 'NAVER_CLIP'
+
+/** 콘텐츠 타입 */
+export const CONTENT_TYPES = {
+  /** 유튜브 영상 */
+  VIDEO: 'video',
+  /** 블로그 포스트 */
+  BLOG_POST: 'blog_post',
+  /** 짧은 영상 (클립/쇼츠) */
+  SHORT_VIDEO: 'short_video',
+} as const
+
+export type ContentType = (typeof CONTENT_TYPES)[keyof typeof CONTENT_TYPES]
+
+// ============================================
+// 정규화된 콘텐츠 데이터
+// ============================================
+
+export interface NormalizedContent {
+  /** 고유 ID */
+  id: string
+
+  /** 출처 */
+  source: ContentSource
+
+  /** 콘텐츠 타입 */
+  type: ContentType
+
+  /** 원본 URL */
+  sourceUrl: string
+
+  /** 수집 시점 */
+  fetchedAt: string
+
+  /** 제목 */
+  title: string
+
+  /** 설명/내용 요약 */
+  description?: string
+
+  /** 썸네일 URL */
+  thumbnailUrl?: string
+
+  /** 작성자/채널명 */
+  author: string
+
+  /** 작성자 프로필 URL */
+  authorUrl?: string
+
+  /** 작성자 프로필 이미지 */
+  authorThumbnail?: string
+
+  /** 게시일 */
+  publishedAt: string
+
+  /** 조회수 */
+  viewCount?: number
+
+  /** 좋아요 수 */
+  likeCount?: number
+
+  /** 댓글 수 */
+  commentCount?: number
+
+  /** 영상 길이 (초) - 영상 콘텐츠용 */
+  duration?: number
+
+  /** 관련 장소 ID */
+  relatedPlaceId?: string
+
+  /** 관련 장소명 */
+  relatedPlaceName?: string
+
+  /** 태그/키워드 */
+  tags?: string[]
+
+  /** 원본 데이터 */
+  rawData: unknown
+}
+
+// ============================================
+// YouTube API 타입
+// ============================================
+
+/** YouTube API 설정 */
+export interface YouTubeClientConfig {
+  /** API 키 */
+  apiKey: string
+  /** 기본 페이지 크기 */
+  defaultPageSize?: number
+  /** 타임아웃 (ms) */
+  timeout?: number
+  /** 재시도 횟수 */
+  retryCount?: number
+  /** 캐시 TTL (분) */
+  cacheTtlMinutes?: number
+}
+
+/** YouTube 검색 파라미터 */
+export interface YouTubeSearchParams {
+  /** 검색 키워드 */
+  query: string
+  /** 페이지 크기 */
+  maxResults?: number
+  /** 페이지 토큰 */
+  pageToken?: string
+  /** 정렬 기준 */
+  order?: 'date' | 'rating' | 'relevance' | 'viewCount'
+  /** 영상 길이 */
+  videoDuration?: 'any' | 'short' | 'medium' | 'long'
+  /** 게시일 이후 */
+  publishedAfter?: string
+  /** 지역 코드 */
+  regionCode?: string
+  /** 안전 검색 */
+  safeSearch?: 'none' | 'moderate' | 'strict'
+}
+
+/** YouTube API 응답 */
+export interface YouTubeApiResponse {
+  kind: string
+  etag: string
+  nextPageToken?: string
+  prevPageToken?: string
+  pageInfo: {
+    totalResults: number
+    resultsPerPage: number
+  }
+  items: YouTubeVideoItem[]
+}
+
+/** YouTube 영상 아이템 */
+export interface YouTubeVideoItem {
+  kind: string
+  etag: string
+  id: {
+    kind: string
+    videoId: string
+  }
+  snippet: {
+    publishedAt: string
+    channelId: string
+    title: string
+    description: string
+    thumbnails: {
+      default?: { url: string; width: number; height: number }
+      medium?: { url: string; width: number; height: number }
+      high?: { url: string; width: number; height: number }
+    }
+    channelTitle: string
+    liveBroadcastContent: string
+    publishTime: string
+  }
+}
+
+/** YouTube 영상 상세 정보 */
+export interface YouTubeVideoDetails {
+  id: string
+  snippet: YouTubeVideoItem['snippet']
+  contentDetails: {
+    duration: string
+    dimension: string
+    definition: string
+    caption: string
+  }
+  statistics: {
+    viewCount: string
+    likeCount: string
+    commentCount: string
+  }
+}
+
+// ============================================
+// 네이버 API 타입
+// ============================================
+
+/** 네이버 API 설정 */
+export interface NaverClientConfig {
+  /** Client ID */
+  clientId: string
+  /** Client Secret */
+  clientSecret: string
+  /** 기본 페이지 크기 */
+  defaultPageSize?: number
+  /** 타임아웃 (ms) */
+  timeout?: number
+  /** 재시도 횟수 */
+  retryCount?: number
+  /** 캐시 TTL (분) */
+  cacheTtlMinutes?: number
+}
+
+/** 네이버 검색 파라미터 */
+export interface NaverSearchParams {
+  /** 검색 키워드 */
+  query: string
+  /** 결과 개수 (기본 10, 최대 100) */
+  display?: number
+  /** 시작 위치 (기본 1, 최대 1000) */
+  start?: number
+  /** 정렬 기준 */
+  sort?: 'sim' | 'date'
+}
+
+/** 네이버 블로그 검색 응답 */
+export interface NaverBlogApiResponse {
+  lastBuildDate: string
+  total: number
+  start: number
+  display: number
+  items: NaverBlogItem[]
+}
+
+/** 네이버 블로그 아이템 */
+export interface NaverBlogItem {
+  /** 블로그 제목 */
+  title: string
+  /** 블로그 URL */
+  link: string
+  /** 블로그 내용 요약 */
+  description: string
+  /** 블로거 이름 */
+  bloggername: string
+  /** 블로거 링크 */
+  bloggerlink: string
+  /** 게시일 (YYYYMMDD) */
+  postdate: string
+}
+
+/** 네이버 클립 아이템 (비공식 - 크롤링 기반) */
+export interface NaverClipItem {
+  /** 클립 ID */
+  clipId: string
+  /** 제목 */
+  title: string
+  /** 클립 URL */
+  url: string
+  /** 썸네일 URL */
+  thumbnailUrl: string
+  /** 작성자 */
+  author: string
+  /** 작성자 프로필 URL */
+  authorUrl?: string
+  /** 조회수 */
+  viewCount?: number
+  /** 좋아요 수 */
+  likeCount?: number
+  /** 영상 길이 (초) */
+  duration?: number
+  /** 게시일 */
+  publishedAt?: string
+}
+
+// ============================================
+// 콘텐츠 검색 필터
+// ============================================
+
+export interface ContentSearchFilters {
+  /** 검색 키워드 */
+  keyword: string
+  /** 콘텐츠 소스 */
+  sources?: ContentSource[]
+  /** 정렬 기준 */
+  sortBy?: 'date' | 'relevance' | 'viewCount'
+  /** 게시일 이후 (ISO 날짜) */
+  publishedAfter?: string
+  /** 페이지 번호 */
+  page?: number
+  /** 페이지 크기 */
+  pageSize?: number
+  /** 안전 검색 (어린이용) */
+  safeSearch?: boolean
+}
+
+// ============================================
+// 콘텐츠 검색 결과
+// ============================================
+
+export interface ContentSearchResult {
+  /** 콘텐츠 목록 */
+  contents: NormalizedContent[]
+  /** 총 건수 */
+  totalCount: number
+  /** 현재 페이지 */
+  currentPage: number
+  /** 다음 페이지 토큰 (YouTube용) */
+  nextPageToken?: string
+  /** 검색 시점 */
+  searchedAt: string
+  /** 캐시 여부 */
+  fromCache: boolean
+}
+
+// ============================================
+// 통합 클라이언트 설정
+// ============================================
+
+export interface KidsMapFullClientConfig extends KidsMapClientConfig {
+  /** YouTube API 키 */
+  youtubeApiKey?: string
+  /** 네이버 Client ID */
+  naverClientId?: string
+  /** 네이버 Client Secret */
+  naverClientSecret?: string
+}
