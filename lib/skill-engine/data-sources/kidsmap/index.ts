@@ -206,3 +206,53 @@ export type {
   KakaoPlaceDocument,
   KakaoCategoryCode,
 } from './kakao-client'
+
+// ============================================
+// 데이터 블록 모듈 export
+// ============================================
+
+export {
+  // 저장소
+  getPlaceBlockRepository,
+  getContentBlockRepository,
+  getBlockStatsRepository,
+
+  // 크롤러
+  scheduleCrawlJob,
+  scheduleFullCrawl,
+  scheduleRegionCrawl,
+  scheduleContentCrawl,
+  startCrawlWorker,
+  stopCrawlWorker,
+  getJobStatus,
+  getQueueStats,
+
+  // 유틸리티
+  generatePlaceDedupeHash,
+  generateContentDedupeHash,
+  calculateCompleteness,
+  calculateQualityGrade,
+} from './blocks'
+
+export type {
+  // 블록 타입
+  PlaceBlock,
+  ContentBlock,
+  BlockStatus,
+  QualityGrade,
+  FreshnessLevel,
+
+  // 크롤링 타입
+  CrawlJob,
+  CrawlJobType,
+  CrawlJobStatus,
+  CrawlJobConfig,
+  CrawlProgress,
+  CrawlResult,
+
+  // 필터/검색
+  PlaceBlockFilter,
+  ContentBlockFilter,
+  PaginatedResponse,
+  BlockStats,
+} from './blocks'
