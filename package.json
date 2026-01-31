@@ -35,7 +35,7 @@
     "@tiptap/react": "^3.18.0",
     "@tiptap/starter-kit": "^3.18.0",
     "@tiptap/suggestion": "^3.18.0",
-    "@types/bcryptjs": "^2.4.6",
+    "@types/bcryptjs": "^3.0.0",
     "@types/pg": "^8.16.0",
     "@upstash/redis": "^1.36.1",
     "bcryptjs": "^3.0.3",
