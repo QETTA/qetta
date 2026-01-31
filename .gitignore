@@ -53,3 +53,4 @@ performance-audit.mjs
 test-auth-pages.mjs
 test-linear-pages.mjs
 screenshots/
+.env*.local
