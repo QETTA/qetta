@@ -1,81 +1,74 @@
 import { test, expect } from '@playwright/test'
 
 /**
- * Signup and Email Verification Flow E2E Tests
- * Tests: /signup -> email sent -> /verify-email -> success
+ * Beta Signup Flow E2E Tests
+ * Tests: /signup -> beta form -> /docs (dashboard)
  */
-test.describe('Signup Flow', () => {
+test.describe('Beta Signup Flow', () => {
   const testEmail = `test-${Date.now()}@example.com`
-  const testPassword = 'TestPassword123!'
+  const testName = 'Test User'
+  const testCompany = 'Test Company'
 
-  test('signup page loads correctly', async ({ page }) => {
+  test('beta signup page loads correctly', async ({ page }) => {
     await page.goto('/signup')
 
     // Check page loaded
     await expect(page).toHaveURL('/signup')
 
-    // Check form elements
+    // Check beta form elements
+    await expect(page.getByLabel(/name/i)).toBeVisible()
     await expect(page.getByLabel(/email/i)).toBeVisible()
-    await expect(page.getByLabel(/password/i).first()).toBeVisible()
+    await expect(page.getByLabel(/company/i)).toBeVisible()
+    await expect(page.getByLabel(/industry/i)).toBeVisible()
   })
 
-  test('signup form validation - empty fields', async ({ page }) => {
+  test('beta signup form validation - empty fields', async ({ page }) => {
     await page.goto('/signup')
 
     // Try to submit empty form
-    const submitButton = page.getByRole('button', { name: /회원가입|sign up|register|가입/i })
+    const submitButton = page.getByRole('button', { name: /get instant access/i })
     await submitButton.click()
 
-    // Should show validation errors or stay on page
+    // Should stay on page (HTML5 validation)
     await expect(page).toHaveURL('/signup')
   })
 
-  test('signup form validation - invalid email', async ({ page }) => {
+  test('beta signup form validation - invalid email', async ({ page }) => {
     await page.goto('/signup')
 
-    // Fill invalid email
+    // Fill form with invalid email
+    await page.getByLabel(/name/i).fill(testName)
     await page.getByLabel(/email/i).fill('invalid-email')
-    await page.getByLabel(/password/i).first().fill(testPassword)
+    await page.getByLabel(/company/i).fill(testCompany)
+    await page.getByLabel(/industry/i).selectOption('consulting')
 
-    const submitButton = page.getByRole('button', { name: /회원가입|sign up|register|가입/i })
+    const submitButton = page.getByRole('button', { name: /get instant access/i })
     await submitButton.click()
 
-    // Should show email validation error
-    const errorMessage = page.locator('[class*="error"], [role="alert"], [class*="invalid"]')
-    await expect(errorMessage.or(page.locator('body'))).toBeVisible()
-  })
-
-  test('signup form validation - weak password', async ({ page }) => {
-    await page.goto('/signup')
-
-    // Fill valid email but weak password
-    await page.getByLabel(/email/i).fill(testEmail)
-    await page.getByLabel(/password/i).first().fill('123')
-
-    const submitButton = page.getByRole('button', { name: /회원가입|sign up|register|가입/i })
-    await submitButton.click()
-
-    // Should stay on page or show password error
+    // Should stay on page (HTML5 validation for email)
     await expect(page).toHaveURL('/signup')
   })
 
-  test('signup page has link to login', async ({ page }) => {
+  test('beta signup form shows all industry options', async ({ page }) => {
     await page.goto('/signup')
 
-    const loginLink = page.getByRole('link', { name: /로그인|sign in|login|이미 계정/i })
-    await expect(loginLink).toBeVisible()
+    // Check industry dropdown has options
+    const industrySelect = page.getByLabel(/industry/i)
+    await expect(industrySelect).toBeVisible()
 
-    await loginLink.click()
-    await expect(page).toHaveURL('/login')
+    // Verify some key industries are available
+    await expect(industrySelect.locator('option')).toHaveCount(11) // 10 industries + placeholder
   })
 
-  test('signup API endpoint responds correctly', async ({ request }) => {
-    // Test the register API endpoint
-    const response = await request.post('/api/auth/register', {
+  test('beta signup API endpoint responds correctly', async ({ request }) => {
+    // Test the beta signup API endpoint
+    const response = await request.post('/api/beta/signup', {
       headers: { 'Content-Type': 'application/json' },
       data: {
         email: '',
-        password: '',
+        name: '',
+        company: '',
+        industry: '',
       },
     })
 
@@ -83,12 +76,14 @@ test.describe('Signup Flow', () => {
     expect([400, 422]).toContain(response.status())
   })
 
-  test('signup API rejects invalid email format', async ({ request }) => {
-    const response = await request.post('/api/auth/register', {
+  test('beta signup API rejects invalid email format', async ({ request }) => {
+    const response = await request.post('/api/beta/signup', {
       headers: { 'Content-Type': 'application/json' },
       data: {
         email: 'not-an-email',
-        password: testPassword,
+        name: testName,
+        company: testCompany,
+        industry: 'consulting',
       },
     })
 

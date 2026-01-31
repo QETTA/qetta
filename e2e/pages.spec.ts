@@ -7,24 +7,23 @@ test.describe('Homepage', () => {
   test('Hero section is present', async ({ page }) => {
     await page.goto('/');
 
-    // Check for hero content
+    // Check for hero content - outcome-first messaging
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(page.getByText(/QETTA|intelligence|인텔리전스/i)).toBeVisible();
+    await expect(page.getByText(/8 Hours|30 Minutes|93\.8%/i)).toBeVisible();
   });
 
-  test('MinimalCTA section is present', async ({ page }) => {
+  test('CTA buttons are present', async ({ page }) => {
     await page.goto('/');
 
     // Check for CTA buttons
-    await expect(page.getByText(/무료로 시작|get started|start free/i)).toBeVisible();
-    await expect(page.getByText(/가격|pricing/i)).toBeVisible();
+    await expect(page.getByText(/try free beta|try dashboard/i)).toBeVisible();
   });
 
-  test('Trust indicators are visible', async ({ page }) => {
+  test('Trust section is visible', async ({ page }) => {
     await page.goto('/');
 
-    // Check for trust indicators
-    const trustText = page.getByText(/무료 체험|신용카드 불필요|언제든지 취소/i);
+    // Check for trust section metrics
+    const trustText = page.getByText(/time saved|less rejection|uptime|verified/i);
     await expect(trustText.first()).toBeVisible();
   });
 

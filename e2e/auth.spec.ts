@@ -44,26 +44,25 @@ test.describe('Auth Pages Dark Theme', () => {
     });
   }
 
-  test('Login form is functional', async ({ page }) => {
+  test('Beta signup form is functional (login page)', async ({ page }) => {
     await page.goto('/login');
 
-    // Check form elements exist
+    // Beta signup form elements
+    await expect(page.getByLabel(/name/i)).toBeVisible();
     await expect(page.getByLabel(/email/i)).toBeVisible();
-    await expect(page.getByLabel(/password/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /로그인|sign in|login/i })).toBeVisible();
-
-    // Check link to signup
-    await expect(page.getByRole('link', { name: /회원가입|sign up|register/i })).toBeVisible();
+    await expect(page.getByLabel(/company/i)).toBeVisible();
+    await expect(page.getByLabel(/industry/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /get instant access/i })).toBeVisible();
   });
 
-  test('Signup form is functional', async ({ page }) => {
+  test('Beta signup form is functional (signup page)', async ({ page }) => {
     await page.goto('/signup');
 
-    // Check form elements exist
+    // Beta signup form elements
+    await expect(page.getByLabel(/name/i)).toBeVisible();
     await expect(page.getByLabel(/email/i)).toBeVisible();
-    await expect(page.getByLabel(/password/i).first()).toBeVisible();
-
-    // Check link to login
-    await expect(page.getByRole('link', { name: /로그인|sign in|login/i })).toBeVisible();
+    await expect(page.getByLabel(/company/i)).toBeVisible();
+    await expect(page.getByLabel(/industry/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /get instant access/i })).toBeVisible();
   });
 });
