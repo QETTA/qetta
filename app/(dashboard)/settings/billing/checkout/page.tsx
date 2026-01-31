@@ -96,7 +96,7 @@ function CheckoutContent() {
 
   if (!orderId || !amount) {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-lg">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-lg">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
@@ -112,7 +112,7 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-lg">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-lg">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -190,7 +190,7 @@ export default function CheckoutPage() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto py-8 px-4 max-w-lg">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-lg">
           <Card>
             <CardContent className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin" />

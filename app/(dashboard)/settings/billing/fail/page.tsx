@@ -39,11 +39,11 @@ function FailContent() {
   const userMessage = ERROR_MESSAGES[code] || message
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-lg">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-lg">
       <Card>
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
-            <XCircle className="h-10 w-10 text-red-600" />
+          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+            <XCircle className="h-8 w-8 sm:h-10 sm:w-10 text-red-600" />
           </div>
           <CardTitle className="text-2xl">Payment Failed</CardTitle>
           <CardDescription>{userMessage}</CardDescription>
@@ -102,7 +102,7 @@ export default function FailPage() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto py-8 px-4 max-w-lg">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-lg">
           <Card>
             <CardContent className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin" />
