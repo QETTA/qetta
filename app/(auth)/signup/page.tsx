@@ -4,40 +4,40 @@ import dynamic from 'next/dynamic'
 import { GlassCard } from '@/components/landing/blocks/shared/GlassCard'
 
 export const metadata: Metadata = {
-  title: 'Sign up | QETTA',
-  description: 'Create your QETTA account.',
+  title: 'Join Beta | QETTA',
+  description: 'Get instant access to QETTA beta. Free trial for enterprises.',
 }
 
-function SignupFormSkeleton() {
+function BetaFormSkeleton() {
   return (
     <div className="w-full max-w-sm animate-pulse space-y-6">
-      <div className="h-8 w-24 mx-auto bg-zinc-800 rounded" />
+      <div className="h-8 w-32 mx-auto bg-zinc-800 rounded" />
       <div className="h-6 w-48 mx-auto bg-zinc-800 rounded" />
       <div className="space-y-4">
         <div className="h-10 bg-zinc-800 rounded" />
         <div className="h-10 bg-zinc-800 rounded" />
         <div className="h-10 bg-zinc-800 rounded" />
         <div className="h-10 bg-zinc-800 rounded" />
-        <div className="h-10 bg-zinc-800 rounded" />
+        <div className="h-11 bg-zinc-800 rounded" />
       </div>
     </div>
   )
 }
 
-// Code-split auth form for better bundle size
-const SignupForm = dynamic(
-  () => import('@/components/auth/signup-form').then(m => ({ default: m.SignupForm })),
+// Code-split beta form for better bundle size
+const BetaSignupForm = dynamic(
+  () => import('@/components/landing/beta-signup-form').then(m => ({ default: m.BetaSignupForm })),
   {
-    loading: () => <SignupFormSkeleton />,
-    ssr: false, // Auth forms don't need SSR
+    loading: () => <BetaFormSkeleton />,
+    ssr: false,
   }
 )
 
 export default function SignupPage() {
   return (
     <GlassCard variant="linear" padding="xl" className="w-full max-w-md">
-      <Suspense fallback={<SignupFormSkeleton />}>
-        <SignupForm />
+      <Suspense fallback={<BetaFormSkeleton />}>
+        <BetaSignupForm />
       </Suspense>
     </GlassCard>
   )

@@ -40,28 +40,28 @@ export const HeroSection = memo(function HeroSection() {
                 </span>
               </Badge>
 
-              {/* Hero Headline - Super-Model Aligned */}
+              {/* Hero Headline - Outcome-First (2026 B2B Best Practice) */}
               <h1 id="hero-heading" className="text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
-                <span className="block">Your Industry,</span>
+                <span className="block">8 Hours → 30 Minutes.</span>
                 <span className="mt-2 block bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-                  Your Intelligence.
+                  {DISPLAY_METRICS.timeSaved.value} Faster.
                 </span>
               </h1>
 
-              {/* Subheadline - Super-Model Tagline */}
+              {/* Subheadline - Customer Benefit Focus */}
               <p id="hero-description" className="mt-8 text-lg text-zinc-400 sm:text-xl max-w-2xl">
-                Select BLOCKs. Build Intelligence.
+                Government support documents, automated.
                 <br />
-                {DISPLAY_METRICS.timeSaved.value} time saved on government compliance documents. Transform {DISPLAY_METRICS.timeSaved.detail}.
+                Reduce rejection rates by {DISPLAY_METRICS.rejectionReduction.value}. Generate in {DISPLAY_METRICS.docSpeed.valueEn ?? DISPLAY_METRICS.docSpeed.value}.
               </p>
 
-              {/* CTA Buttons */}
+              {/* CTA Buttons - Beta Access */}
               <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:gap-6">
-                <Button href="/pricing" className="bg-white text-zinc-950 hover:bg-zinc-100 border-white">
-                  {CTA_LABELS.PARTNER}
-                </Button>
-                <Button href="/login" outline>
+                <Button href="/login" className="bg-white text-zinc-950 hover:bg-zinc-100 border-white">
                   {CTA_LABELS.FREE_TRIAL}
+                </Button>
+                <Button href="/docs" outline>
+                  Try Dashboard
                 </Button>
               </div>
 

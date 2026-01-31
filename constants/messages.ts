@@ -114,8 +114,9 @@ export const SUCCESS_MESSAGES = {
  */
 export const CTA_LABELS = {
   // Navigation
-  PARTNER: '파트너 되기',
-  FREE_TRIAL: '무료로 시작하기',
+  PARTNER: 'Schedule Demo',
+  FREE_TRIAL: 'Try Free Beta',
+  JOIN_BETA: 'Join Beta',
   RETRY: '다시 시도',
   HOME: '홈으로',
   BACK: '뒤로 가기',

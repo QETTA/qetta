@@ -2,16 +2,17 @@ import type { Metadata } from 'next'
 import { APP_URL } from '@/constants/urls'
 import { DISPLAY_METRICS, STRUCTURE_METRICS } from '@/constants/metrics'
 import { HeroSection } from '@/components/landing/blocks/HeroSection'
+import { TrustSection } from '@/components/landing/blocks/TrustSection'
 import { MinimalCTASection } from '@/components/landing/blocks/MinimalCTASection'
 
 export const metadata: Metadata = {
-  title: 'QETTA – Your Industry, Your Intelligence',
+  title: 'QETTA – 8 Hours → 30 Minutes | Government Document Automation',
   description:
-    'AI-powered government compliance document automation. 93.8% time saved, 91% error reduction, 630,000+ global tenders. Select BLOCKs. Build Intelligence.',
+    'Government support documents, 93.8% faster. Reduce rejection rates by 91%. Generate in 45 seconds. 630,000+ global tenders.',
   openGraph: {
-    title: 'QETTA – Your Industry, Your Intelligence',
+    title: 'QETTA – 8 Hours → 30 Minutes',
     description:
-      'AI-powered government compliance document automation. 93.8% time saved, 91% error reduction, 630,000+ global tenders.',
+      'Government support documents, 93.8% faster. Reduce rejection rates by 91%. Generate in 45 seconds.',
     url: APP_URL,
     siteName: 'QETTA',
     type: 'website',
@@ -38,7 +39,7 @@ export default function HomePage() {
     url: APP_URL,
     logo: `${APP_URL}/logo.png`,
     description: `Select BLOCKs. Build Intelligence. AI-powered government compliance document automation platform. ${DISPLAY_METRICS.timeSaved.value} time saved, ${DISPLAY_METRICS.rejectionReduction.value} error reduction, ${DISPLAY_METRICS.globalTenders.value} global tenders.`,
-    slogan: 'Your Industry, Your Intelligence.',
+    slogan: '8 Hours → 30 Minutes. Government documents, automated.',
     foundingDate: '2024',
     knowsAbout: [
       'Government Compliance',
@@ -102,6 +103,7 @@ export default function HomePage() {
 
       <div className="bg-zinc-950">
         <HeroSection />
+        <TrustSection />
         <MinimalCTASection />
       </div>
     </>

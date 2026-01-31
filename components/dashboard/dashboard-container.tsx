@@ -57,7 +57,7 @@ export function PageHeader({ title, description, icon, actions }: PageHeaderProp
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
       <div className="flex items-center gap-3 sm:gap-4">
         {icon && (
-          <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-zinc-500/20 to-fuchsia-500/20 ring-1 ring-zinc-500/30">
+          <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-zinc-500/20 to-zinc-600/20 ring-1 ring-zinc-500/30">
             {icon}
           </div>
         )}
