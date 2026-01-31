@@ -187,6 +187,14 @@ export const ENV = {
     const value = process.env.RESEND_API_KEY
     return value && value.trim() !== '' ? value : undefined
   },
+
+  /**
+   * Kakao Map JavaScript API Key.
+   * Required for map functionality.
+   */
+  get NEXT_PUBLIC_KAKAO_MAP_API_KEY(): string {
+    return requireEnv('NEXT_PUBLIC_KAKAO_MAP_API_KEY', 'Kakao Map integration')
+  },
 } as const
 
 /**
