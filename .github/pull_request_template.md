@@ -1,31 +1,33 @@
-## 요약
-<!-- 변경 사항을 간략히 설명해주세요 -->
+## Summary
+<!-- Briefly describe the changes -->
 
-## 변경 유형
-- [ ] 새 기능 (feature)
-- [ ] 버그 수정 (fix)
-- [ ] 리팩토링 (refactor)
-- [ ] 문서 (docs)
-- [ ] 테스트 (test)
-- [ ] 설정/빌드 (chore)
+## Change Type
+- [ ] New feature (feat)
+- [ ] Bug fix (fix)
+- [ ] Refactoring (refactor)
+- [ ] Documentation (docs)
+- [ ] Tests (test)
+- [ ] Build/Config (chore)
 
-## 관련 이슈
-<!-- 관련 이슈 번호 (예: Closes #123) -->
+## Related Issues
+<!-- Link related issues (e.g., Closes #123) -->
 
-## 테스트 계획
-<!-- 변경 사항을 어떻게 테스트했는지 설명해주세요 -->
-- [ ] 유닛 테스트 추가/수정
-- [ ] 로컬에서 빌드 성공 (`npm run build`)
-- [ ] 로컬에서 테스트 통과 (`npm test`)
+## Test Plan
+<!-- Describe how you tested the changes -->
+- [ ] Added/updated unit tests
+- [ ] Build passes locally (`npm run build`)
+- [ ] Tests pass locally (`npm test`)
+- [ ] E2E tests pass (`npm run e2e`)
 
-## 체크리스트
-- [ ] 코드가 프로젝트 스타일 가이드를 따릅니다
-- [ ] 셀프 리뷰를 완료했습니다
-- [ ] 필요한 경우 문서를 업데이트했습니다
-- [ ] 변경 사항이 새로운 경고를 발생시키지 않습니다
+## Checklist
+- [ ] Code follows project style guide
+- [ ] Self-review completed
+- [ ] Documentation updated if needed
+- [ ] No new warnings introduced
+- [ ] Commit messages follow conventional commits
 
-## 스크린샷 (UI 변경 시)
-<!-- UI 변경 사항이 있다면 스크린샷을 첨부해주세요 -->
+## Screenshots (for UI changes)
+<!-- Attach screenshots for UI changes -->
 
-## 추가 컨텍스트
-<!-- 리뷰어가 알아야 할 추가 정보가 있다면 작성해주세요 -->
+## Additional Context
+<!-- Any additional information for reviewers -->

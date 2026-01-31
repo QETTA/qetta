@@ -1,8 +1,6 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+# Dependencies
+node_modules/
+.pnp/
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -10,45 +8,78 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
+# Build outputs
+.next/
+out/
+build/
+dist/
 
-# next.js
-/.next/
-/out/
+# Testing
+coverage/
+test-results/
+playwright-report/
+blob-report/
 
-# production
-/build
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.local.example
 
-# misc
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
-*.pem
+Thumbs.db
 
-# debug
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
-.env.local
 
-# git worktrees
+# Vercel
+.vercel/
+
+# Sentry
+.sentryclirc
+
+# Prisma
+prisma/migrations/.migration_lock.toml
+
+# Git worktrees
 .worktrees/
 
-# QA utility scripts
+# Editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+# QA/Testing scripts (local only)
 cross-browser-qa.mjs
 lighthouse-audit.mjs
 lighthouse-audit.sh
 performance-audit.mjs
-test-auth-pages.mjs
-test-linear-pages.mjs
+test-*.mjs
 screenshots/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Claude Code
+.claude/settings.local.json
+.claude/memory/
+.claude/tasks/
+# Keep these tracked
+!.claude/patterns/
