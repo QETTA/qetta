@@ -433,5 +433,93 @@ Deployment is successful if:
 
 ---
 
+## 🤖 배포 자동화 (CI/CD)
+
+### GitHub Actions 워크플로우
+
+| 워크플로우 | 트리거 | 동작 |
+|-----------|--------|------|
+| `ci.yml` | PR, Push | Lint → Test → Build |
+| `deploy.yml` | Push | 환경별 자동 배포 |
+| `a11y.yml` | PR | 접근성 테스트 |
+| `security.yml` | PR | 보안 스캔 |
+
+### 배포 환경
+
+| 환경 | 브랜치 | URL | 트리거 |
+|------|--------|-----|--------|
+| **Preview** | PR | `*.vercel.app` | PR 생성 시 자동 |
+| **Staging** | `develop` | `staging.qetta.io` | develop push 시 |
+| **Production** | `main` | `qetta.io` | main push 시 |
+
+### 필요한 GitHub Secrets
+
+```bash
+# Vercel
+VERCEL_TOKEN          # Vercel API 토큰
+VERCEL_ORG_ID         # Vercel Organization ID
+VERCEL_PROJECT_ID     # Vercel Project ID
+
+# 알림 (선택)
+SLACK_WEBHOOK_URL     # Slack 알림용
+
+# 테스트 (선택)
+CODECOV_TOKEN         # 코드 커버리지 리포트
+```
+
+### Vercel 설정
+
+1. Vercel 프로젝트 연결:
+```bash
+npx vercel link
+```
+
+2. 환경 변수 설정:
+```bash
+# Production 환경 변수
+npx vercel env add ANTHROPIC_API_KEY production
+npx vercel env add DATABASE_URL production
+npx vercel env add NEXTAUTH_SECRET production
+npx vercel env add TOSS_CLIENT_KEY production
+npx vercel env add TOSS_SECRET_KEY production
+```
+
+3. GitHub 연동:
+- Vercel Dashboard → Settings → Git
+- GitHub 리포지토리 연결
+- 자동 배포 활성화
+
+### 배포 프로세스
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   PR 생성   │ ──▶ │  CI 체크    │ ──▶ │  Preview    │
+└─────────────┘     └─────────────┘     │  배포       │
+                                         └─────────────┘
+                                               │
+                                         ┌─────▼─────┐
+                                         │  리뷰/QA  │
+                                         └─────┬─────┘
+                                               │
+┌─────────────┐     ┌─────────────┐     ┌─────▼─────┐
+│ Production  │ ◀── │  main 머지  │ ◀── │  승인     │
+│ 배포        │     └─────────────┘     └───────────┘
+└─────────────┘
+```
+
+### 롤백
+
+**즉시 롤백 (Vercel Dashboard)**:
+1. Vercel Dashboard → Deployments
+2. 이전 배포 선택 → "..." → "Promote to Production"
+
+**Git 롤백**:
+```bash
+git revert HEAD
+git push origin main
+```
+
+---
+
 **Last Updated**: 2026-01-31
 **Next Review**: After 7 days of production data
