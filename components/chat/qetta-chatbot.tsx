@@ -26,43 +26,29 @@ import {
 import { ChatBubbleLeftRightIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import clsx from 'clsx'
 import { usePathname } from 'next/navigation'
-import {
-  type FormEvent,
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { QettaChatInput } from './qetta-chat-input'
 import { QettaChatMessages } from './qetta-chat-messages'
+import { QettaChatHeader } from './qetta-chat-header'
+import { useStreamingChat } from './hooks/use-streaming-chat'
 import { cn } from '@/lib/utils'
-
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-}
 
 export function QettaChatbot() {
   const pathname = usePathname()
   const isDark = pathname?.startsWith('/box') ?? false
 
   const { isOpen, startSession } = useChatStore()
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const abortControllerRef = useRef<AbortController | null>(null)
-  const messageIdCounter = useRef(0)
+  const {
+    messages,
+    input,
+    setInput,
+    isLoading,
+    error,
+    handleSubmit,
+  } = useStreamingChat()
+
   const panelId = useId()
   const buttonRef = useRef<HTMLButtonElement>(null)
-
-  // Generate unique message ID
-  const generateId = useCallback(() => {
-    messageIdCounter.current += 1
-    return `msg-${Date.now()}-${messageIdCounter.current}`
-  }, [])
 
   // Handle quick suggestion clicks
   useEffect(() => {
@@ -80,7 +66,7 @@ export function QettaChatbot() {
         handleSuggestion as EventListener
       )
     }
-  }, [])
+  }, [setInput])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -104,134 +90,6 @@ export function QettaChatbot() {
       startSession()
     }
   }, [isOpen, startSession])
-
-  // Clean up on unmount
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-    }
-  }, [])
-
-  // Submit handler with streaming
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    const trimmedInput = input.trim()
-    if (!trimmedInput || isLoading) return
-
-    // Cancel any existing request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-
-    const userMessage: Message = {
-      id: generateId(),
-      role: 'user',
-      content: trimmedInput,
-    }
-
-    const assistantMessage: Message = {
-      id: generateId(),
-      role: 'assistant',
-      content: '',
-    }
-
-    setMessages((prev) => [...prev, userMessage, assistantMessage])
-    setInput('')
-    setIsLoading(true)
-    setError(null)
-
-    const abortController = new AbortController()
-    abortControllerRef.current = abortController
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [...messages, userMessage].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
-        signal: abortController.signal,
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || `HTTP error ${response.status}`)
-      }
-
-      const reader = response.body?.getReader()
-      if (!reader) {
-        throw new Error('No response body')
-      }
-
-      const decoder = new TextDecoder()
-      let accumulatedContent = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = decoder.decode(value, { stream: true })
-        const lines = chunk.split('\n')
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6)
-            if (data === '[DONE]') continue
-
-            try {
-              const parsed = JSON.parse(data)
-              if (parsed.text) {
-                accumulatedContent += parsed.text
-                setMessages((prev) => {
-                  const updated = [...prev]
-                  const lastIndex = updated.length - 1
-                  if (updated[lastIndex]?.role === 'assistant') {
-                    updated[lastIndex] = {
-                      ...updated[lastIndex],
-                      content: accumulatedContent,
-                    }
-                  }
-                  return updated
-                })
-              }
-            } catch {
-              // Ignore JSON parse errors for malformed chunks
-            }
-          }
-        }
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        return // Request was cancelled
-      }
-
-      const errorMessage =
-        err instanceof Error ? err.message : 'An error occurred'
-      setError(errorMessage)
-
-      // Update last message with error
-      setMessages((prev) => {
-        const updated = [...prev]
-        const lastIndex = updated.length - 1
-        if (updated[lastIndex]?.role === 'assistant') {
-          updated[lastIndex] = {
-            ...updated[lastIndex],
-            content: `Sorry, an error occurred: ${errorMessage}\n\nPlease try again.`,
-          }
-        }
-        return updated
-      })
-    } finally {
-      setIsLoading(false)
-      abortControllerRef.current = null
-    }
-  }
 
   return (
     <Popover>
@@ -309,58 +167,7 @@ export function QettaChatbot() {
             {({ close }) => (
               <>
                 {/* Header */}
-                <div
-                  className={clsx(
-                    'flex items-center justify-between px-4 py-3',
-                    'border-b',
-                    isDark ? 'border-white/10' : 'border-gray-200'
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={clsx(
-                        'w-8 h-8 rounded-lg flex items-center justify-center',
-                        isDark
-                          ? 'bg-zinc-700'
-                          : 'bg-zinc-800'
-                      )}
-                    >
-                      <span className="text-sm font-bold text-white">Q</span>
-                    </div>
-                    <div>
-                      <h2
-                        className={clsx(
-                          'text-sm font-semibold',
-                          isDark ? 'text-white' : 'text-gray-900'
-                        )}
-                      >
-                        QETTA Assistant
-                      </h2>
-                      <p
-                        className={clsx(
-                          'text-xs',
-                          isDark ? 'text-zinc-400' : 'text-gray-500'
-                        )}
-                      >
-                        Ask anything
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Close button - visible on mobile */}
-                  <button
-                    onClick={() => close()}
-                    className={clsx(
-                      'p-2 rounded-lg sm:hidden',
-                      isDark
-                        ? 'text-zinc-400 hover:bg-white/10'
-                        : 'text-gray-400 hover:bg-gray-100'
-                    )}
-                    aria-label="Close chat"
-                  >
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
-                </div>
+                <QettaChatHeader isDark={isDark} onClose={close} />
 
                 {/* Messages */}
                 <QettaChatMessages
