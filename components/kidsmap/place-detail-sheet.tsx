@@ -83,6 +83,8 @@ export function PlaceDetailSheet() {
     window.open(url, '_blank')
   }, [selectedPlace])
 
+  const [shareStatus, setShareStatus] = useState<string | null>(null)
+
   const handleShare = useCallback(async () => {
     if (!selectedPlace) return
 
@@ -97,7 +99,8 @@ export function PlaceDetailSheet() {
         await navigator.share(shareData)
       } else {
         await navigator.clipboard.writeText(window.location.href)
-        alert('Link copied to clipboard')
+        setShareStatus('Link copied!')
+        setTimeout(() => setShareStatus(null), 2000)
       }
     } catch (error) {
       console.error('Share failed:', error)
@@ -322,12 +325,12 @@ export function PlaceDetailSheet() {
 
                   <button
                     onClick={handleShare}
-                    className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                    className="flex flex-col items-center justify-center gap-1 p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors relative"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
-                    <span className="text-xs font-medium">Share</span>
+                    <span className="text-xs font-medium">{shareStatus || 'Share'}</span>
                   </button>
                 </div>
               </div>

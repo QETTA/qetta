@@ -18,7 +18,8 @@
  * - Server API routes for data
  */
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import Link from 'next/link'
 import { useKakaoMap } from '@/hooks/use-kakao-map'
 import { useMapStore } from '@/stores/kidsmap/map-store'
 import { useFilterStore } from '@/stores/kidsmap/filter-store'
@@ -35,6 +36,8 @@ export default function KidsMapPage() {
   const { isLoaded, isLoading, error: sdkError } = useKakaoMapContext()
   const [isSearching, setIsSearching] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(null)
 
   // Stores
   const { center, zoom, userLocation, requestUserLocation } = useMapStore()
@@ -100,6 +103,16 @@ export default function KidsMapPage() {
       setIsSearching(false)
     }
   }, [center, filterCategory, ageGroups, maxDistance, openNow])
+
+  // ============================================
+  // Toast Helper
+  // ============================================
+
+  const showToast = useCallback((msg: string) => {
+    setToast(msg)
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    toastTimer.current = setTimeout(() => setToast(null), 2500)
+  }, [])
 
   // ============================================
   // Effects - Initial Load
@@ -216,6 +229,24 @@ export default function KidsMapPage() {
       {/* Kakao Map Container */}
       <div ref={mapRef} className="h-full w-full" />
 
+      {/* Back Navigation */}
+      <Link
+        href="/"
+        className="absolute top-4 left-4 z-10 flex items-center justify-center w-10 h-10 bg-white dark:bg-zinc-900 rounded-full shadow-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+        aria-label="Go back to home"
+      >
+        <svg className="h-5 w-5 text-zinc-700 dark:text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </Link>
+
+      {/* Live Status Region */}
+      <div aria-live="polite" className="sr-only">
+        {isSearching && 'Searching places...'}
+        {searchResult && !isSearching && `${searchResult.totalCount} places found`}
+        {searchError && `Error: ${searchError}`}
+      </div>
+
       {/* Search Status Overlay */}
       {isSearching && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-zinc-900/90 backdrop-blur-sm px-4 py-2 rounded-full border border-zinc-800 shadow-lg">
@@ -240,6 +271,13 @@ export default function KidsMapPage() {
             <span className="font-semibold text-white">{searchResult.totalCount}</span> places
             found
           </p>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 bg-zinc-900/95 backdrop-blur-sm px-4 py-2.5 rounded-lg border border-zinc-700 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <p className="text-sm text-white whitespace-nowrap">{toast}</p>
         </div>
       )}
 
@@ -271,7 +309,7 @@ export default function KidsMapPage() {
       </button>
 
       {/* Quick Filters */}
-      <div className="absolute top-4 left-4 right-4 sm:left-4 sm:right-auto max-w-2xl">
+      <div className="absolute top-16 left-4 right-4 max-w-2xl">
         <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm px-4 py-3 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-lg">
           <QuickFilter />
         </div>
