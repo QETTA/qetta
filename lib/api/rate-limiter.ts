@@ -193,113 +193,18 @@ export interface RateLimitResult {
   isAuthenticated: boolean
 }
 
-/**
- * JWT 토큰에서 페이로드 추출 및 서명 검증
- *
- * NextAuth의 NEXTAUTH_SECRET을 사용하여 JWT 서명을 검증합니다.
- * 서명 검증 실패 시 null을 반환하여 위조 토큰에 의한 rate limit 우회를 방지합니다.
- */
-async function verifyAndDecodeJwt(token: string): Promise<{ sub?: string; userId?: string; email?: string } | null> {
-  try {
-    // NextAuth의 decode 사용 (next-auth/jwt)
-    const { decode } = await import('next-auth/jwt')
-    const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET
+// ============================================
+// Re-export utilities for external use
+// ============================================
 
-    if (!secret) {
-      // secret이 없으면 JWT 검증 불가 — null 반환 (IP 기반 rate limit 적용)
-      return null
-    }
+export {
+  extractUserId,
+  extractIp,
+  getIdentifier,
+} from './rate-limiter-utils'
 
-    const decoded = await decode({ token, secret, salt: '' })
-    if (!decoded) return null
-
-    return {
-      sub: decoded.sub ?? undefined,
-      userId: (decoded as Record<string, unknown>).userId as string | undefined,
-      email: decoded.email ?? undefined,
-    }
-  } catch {
-    // next-auth decode 실패 시 null (위조 토큰 차단)
-    return null
-  }
-}
-
-/**
- * 요청에서 사용자 ID 추출 (JWT 서명 검증 포함)
- */
-async function extractUserId(request: Request): Promise<string | null> {
-  // 1. Authorization 헤더에서 Bearer 토큰 추출
-  const authHeader = request.headers.get('authorization')
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.slice(7)
-    const payload = await verifyAndDecodeJwt(token)
-
-    if (payload) {
-      return payload.userId || payload.sub || payload.email || null
-    }
-  }
-
-  // 2. Cookie에서 토큰 추출 (NextAuth.js v5 세션 쿠키)
-  const cookieHeader = request.headers.get('cookie')
-  if (cookieHeader) {
-    const sessionMatch = cookieHeader.match(/(?:authjs\.session-token|next-auth\.session-token|qetta-session)=([^;]+)/)
-    if (sessionMatch) {
-      const token = sessionMatch[1]
-      const payload = await verifyAndDecodeJwt(token)
-      if (payload) {
-        return payload.userId || payload.sub || payload.email || null
-      }
-    }
-  }
-
-  // SECURITY: X-User-Id 헤더는 외부에서 위조 가능하므로 신뢰하지 않음
-  // 내부 서비스 간 통신에서 필요한 경우 별도 인증 토큰 검증 필요
-
-  return null
-}
-
-/**
- * 요청에서 IP 추출
- */
-function extractIp(request: Request): string {
-  // Vercel, Cloudflare 등 프록시 환경 지원
-  const forwarded = request.headers.get('x-forwarded-for')
-  const realIp = request.headers.get('x-real-ip')
-  const cfIp = request.headers.get('cf-connecting-ip')
-  const vercelIp = request.headers.get('x-vercel-forwarded-for')
-
-  return cfIp || vercelIp || forwarded?.split(',')[0]?.trim() || realIp || 'unknown'
-}
-
-/**
- * 요청에서 식별자 추출
- *
- * @returns { identifier, isAuthenticated }
- */
-async function getIdentifier(
-  request: Request,
-  type: 'ip' | 'user' | 'global' = 'ip'
-): Promise<{ identifier: string; isAuthenticated: boolean }> {
-  if (type === 'global') {
-    return { identifier: 'global', isAuthenticated: false }
-  }
-
-  // 사용자 기반 식별
-  if (type === 'user') {
-    const userId = await extractUserId(request)
-
-    if (userId) {
-      return { identifier: `user:${userId}`, isAuthenticated: true }
-    }
-
-    const ip = extractIp(request)
-    return { identifier: `ip:${ip}`, isAuthenticated: false }
-  }
-
-  // IP 기반 식별
-  const ip = extractIp(request)
-  return { identifier: `ip:${ip}`, isAuthenticated: false }
-}
+// Import for internal use
+import { getIdentifier } from './rate-limiter-utils'
 
 /**
  * Rate Limit 체크
