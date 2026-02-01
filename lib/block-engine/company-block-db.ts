@@ -237,7 +237,8 @@ export async function getCompanyBlocksByUserId(userId: string): Promise<CompanyB
     orderBy: { updatedAt: 'desc' },
   })
 
-  return results.map(result => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma types unavailable without prisma generate
+  return results.map((result: any) => ({
     ...result,
     profile: fromJsonValue(result.profile),
     facts: result.facts,

@@ -45,7 +45,7 @@ export interface UseKakaoMapOptions {
 
 export interface UseKakaoMapReturn {
   /** Map container ref - attach to div element */
-  mapRef: React.RefObject<HTMLDivElement>
+  mapRef: React.RefObject<HTMLDivElement | null>
   /** Kakao Map instance */
   map: any | null
   /** Map is initialized and ready */

@@ -13,7 +13,7 @@
  * - page, pageSize: 페이지네이션
  */
 
-import { NextRequest, NextResponse } from 'next'
+import { NextRequest, NextResponse } from 'next/server'
 import { getPlaceBlockRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
 import type {
   PlaceCategory,
@@ -64,16 +64,17 @@ export async function GET(request: NextRequest) {
     // Get repository
     const repo = getPlaceBlockRepository()
 
-    // Search places
-    const result = await repo.search(filter, {
-      page,
-      pageSize,
-      sortBy: lat && lng ? 'distance' : 'quality',
-    })
+    // Search places (pagination is part of the filter)
+    filter.page = page
+    filter.pageSize = pageSize
+    const result = await repo.search(filter)
 
     // Calculate distance if location provided
+    type PlaceWithDistance = (typeof result.data)[number] & { distance?: number }
+    let places: PlaceWithDistance[] = result.data
+
     if (lat && lng) {
-      result.data = result.data.map((place) => {
+      places = places.map((place) => {
         if (place.data.latitude && place.data.longitude) {
           const distance = calculateDistance(
             lat,
@@ -87,14 +88,14 @@ export async function GET(request: NextRequest) {
       })
 
       // Filter by radius
-      result.data = result.data.filter(
+      places = places.filter(
         (place) => !place.distance || place.distance <= radius,
       )
     }
 
     // Filter by age groups (client-side for now)
     if (ageGroups.length > 0) {
-      result.data = result.data.filter((place) => {
+      places = places.filter((place) => {
         const recommended = place.data.recommendedAges || []
         return ageGroups.some((age) => recommended.includes(age))
       })
@@ -103,17 +104,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        places: result.data.map((block) => ({
+        places: places.map((block) => ({
           ...block.data,
           blockId: block.id,
           qualityGrade: block.qualityGrade,
           completeness: block.completeness,
-          distance: (block as any).distance,
+          distance: block.distance,
         })),
         total: result.total,
         page,
         pageSize,
-        hasMore: result.data.length === pageSize,
+        hasMore: places.length === pageSize,
       },
     })
   } catch (error) {

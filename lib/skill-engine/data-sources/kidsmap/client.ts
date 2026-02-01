@@ -98,18 +98,16 @@ export class KidsMapClient {
     const pageSize = filters?.pageSize || 50
 
     // 카테고리별 소스 결정
-    const needsTourApi = categories.some((c) =>
-      [
-        PLACE_CATEGORIES.AMUSEMENT_PARK,
-        PLACE_CATEGORIES.ZOO_AQUARIUM,
-        PLACE_CATEGORIES.MUSEUM,
-        PLACE_CATEGORIES.NATURE_PARK,
-      ].includes(c)
-    )
+    const tourCategories: PlaceCategory[] = [
+      PLACE_CATEGORIES.AMUSEMENT_PARK,
+      PLACE_CATEGORIES.ZOO_AQUARIUM,
+      PLACE_CATEGORIES.MUSEUM,
+      PLACE_CATEGORIES.NATURE_PARK,
+    ]
+    const needsTourApi = categories.some((c) => tourCategories.includes(c))
 
-    const needsPlaygroundApi = categories.some((c) =>
-      [PLACE_CATEGORIES.KIDS_CAFE].includes(c)
-    )
+    const playgroundCategories: PlaceCategory[] = [PLACE_CATEGORIES.KIDS_CAFE]
+    const needsPlaygroundApi = categories.some((c) => playgroundCategories.includes(c))
 
     // TourAPI 검색
     if (needsTourApi && this.tourClient) {

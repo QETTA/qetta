@@ -28,6 +28,11 @@ export interface PlaceMarker {
   placeName: string
   category: string
   isSelected: boolean
+  // Convenience accessors (used by useKakaoMap and map page)
+  lat: number
+  lng: number
+  title: string
+  onClick?: (id: string) => void
 }
 
 export interface MapState {

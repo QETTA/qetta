@@ -166,7 +166,8 @@ export async function POST(request: NextRequest) {
 
     // SECURITY: 트랜잭션으로 사용자 생성과 토큰 저장을 원자적으로 처리
     // 이메일 발송은 트랜잭션 외부에서 처리하여 발송 실패 시에도 사용자가 생성되도록 함
-    const result = await prisma.$transaction(async (tx) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma transaction client type unavailable without prisma generate
+    const result = await prisma.$transaction(async (tx: any) => {
       // 1. 사용자 생성
       const user = await tx.user.create({
         data: {

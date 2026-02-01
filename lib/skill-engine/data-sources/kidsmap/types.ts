@@ -98,6 +98,10 @@ export interface Amenities {
   babyChair?: boolean
   /** 수유 쿠션 */
   nursingCushion?: boolean
+  /** 실내 시설 */
+  indoor?: boolean
+  /** 야외 시설 */
+  outdoor?: boolean
 }
 
 /** 혼잡도 정보 (실시간 및 예측) */

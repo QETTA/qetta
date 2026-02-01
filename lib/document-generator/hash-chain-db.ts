@@ -67,7 +67,8 @@ export async function getAllHashChainEntriesFromDB(): Promise<HashChainEntry[]> 
       orderBy: { timestamp: 'asc' },
     })
 
-    return dbEntries.map((e) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma types unavailable without prisma generate
+    return dbEntries.map((e: any) => ({
       id: e.id,
       documentHash: e.documentHash,
       previousHash: e.previousHash,

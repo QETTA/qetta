@@ -215,9 +215,9 @@ async function crawlTourApi(
       onProgress({ currentSource: 'TOUR_API', currentPage: processed + 1 })
 
       // 어린이 관련 장소 검색
-      const result = await client.searchKidsPlaces({
-        areaCode,
-        numOfRows: config.pageSize,
+      const result = await client.search({
+        page: 1,
+        pageSize: config.pageSize,
       })
 
       places.push(...result.places)
@@ -254,7 +254,7 @@ async function crawlPlaygroundApi(
 
     // 키즈카페 검색
     const kidsCafes = await client.searchKidsCafes({
-      numOfRows: config.pageSize * config.maxPages,
+      pageSize: config.pageSize * config.maxPages,
     })
     places.push(...kidsCafes.places)
 
@@ -284,27 +284,12 @@ async function crawlKakaoLocal(
     try {
       onProgress({ currentSource: 'KAKAO_LOCAL', currentPage: processed + 1 })
 
-      const result = await client.searchByKeyword({
-        query: keyword,
+      const result = await client.searchByKeyword(keyword, {
         size: 15,
       })
 
-      // Kakao 결과를 NormalizedPlace로 변환
-      for (const doc of result.documents) {
-        places.push({
-          id: `kakao-${doc.id}`,
-          source: 'PLAYGROUND_API', // Kakao는 별도 소스로 처리
-          sourceUrl: doc.place_url,
-          fetchedAt: new Date().toISOString(),
-          name: doc.place_name,
-          category: inferCategory(doc.category_name),
-          address: doc.road_address_name || doc.address_name,
-          latitude: parseFloat(doc.y),
-          longitude: parseFloat(doc.x),
-          tel: doc.phone,
-          rawData: doc,
-        })
-      }
+      // Kakao 결과는 이미 NormalizedPlace로 반환됨
+      places.push(...result.places)
 
       processed++
       await delay(config.requestDelay)

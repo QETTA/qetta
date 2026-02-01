@@ -134,11 +134,16 @@ export default function KidsMapPage() {
       if (place.latitude && place.longitude) {
         addMarker({
           id: place.id,
+          position: { lat: place.latitude, lng: place.longitude },
+          placeId: place.id,
+          placeName: place.name,
+          category: place.category || '',
+          isSelected: false,
           lat: place.latitude,
           lng: place.longitude,
           title: place.name,
-          onClick: (placeId) => {
-            const selectedPlace = searchResult.places.find((p) => p.id === placeId)
+          onClick: (placeId: string) => {
+            const selectedPlace = searchResult.places.find((p: PlaceWithDistance) => p.id === placeId)
             if (selectedPlace) {
               selectPlace(selectedPlace)
             }
