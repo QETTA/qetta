@@ -5,6 +5,8 @@ export const metadata: Metadata = {
   description: 'KidsMap 프로필 및 설정',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function MyPageLayout({ children }: { children: React.ReactNode }) {
   return children
 }
