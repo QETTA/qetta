@@ -24,7 +24,7 @@ import { useMapStore } from '@/stores/kidsmap/map-store'
 import { useFilterStore } from '@/stores/kidsmap/filter-store'
 import { usePlaceStore } from '@/stores/kidsmap/place-store'
 import { useKakaoMapContext } from '@/contexts/kakao-map-context'
-import { PlaceDetailSheet } from '@/components/kidsmap/place-detail-sheet'
+import { PlaceDetailSheet, QuickFilter } from '@/components/kidsmap'
 import type { PlaceWithDistance } from '@/stores/kidsmap/place-store'
 
 // ============================================
@@ -265,10 +265,10 @@ export default function KidsMapPage() {
         </svg>
       </button>
 
-      {/* Quick Filters - Will be implemented next */}
-      <div className="absolute top-4 left-4">
-        <div className="bg-zinc-900/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-zinc-800 shadow-lg">
-          <p className="text-xs text-zinc-500">Quick filters coming soon</p>
+      {/* Quick Filters */}
+      <div className="absolute top-4 left-4 right-4 sm:left-4 sm:right-auto max-w-2xl">
+        <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm px-4 py-3 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-lg">
+          <QuickFilter />
         </div>
       </div>
 

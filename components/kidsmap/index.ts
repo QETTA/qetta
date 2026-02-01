@@ -5,3 +5,4 @@
  */
 
 export * from './place-detail-sheet'
+export * from './quick-filter'
