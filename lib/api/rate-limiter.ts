@@ -104,6 +104,30 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     identifier: 'ip',
   },
 
+  // KidsMap 장소 검색
+  'kidsmap-places': {
+    requests: 30,
+    authenticatedRequests: 120,
+    window: 60 * 1000,
+    identifier: 'ip',
+  },
+
+  // KidsMap AI 추천 (Claude API 비용 높음)
+  'kidsmap-recommendations': {
+    requests: 5,
+    authenticatedRequests: 20,
+    window: 60 * 1000,
+    identifier: 'ip',
+  },
+
+  // KidsMap 쿠폰
+  'kidsmap-coupons': {
+    requests: 10,
+    authenticatedRequests: 30,
+    window: 60 * 1000,
+    identifier: 'ip',
+  },
+
   // 기본값
   default: {
     requests: 100, // 비인증: 100회/분

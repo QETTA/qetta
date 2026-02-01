@@ -21,14 +21,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { getPlaceBlockRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
+import { rateLimit, createRateLimitResponse } from '@/lib/api/rate-limiter'
 import type { AgeGroup, PlaceCategory } from '@/lib/skill-engine/data-sources/kidsmap/types'
+
+const VALID_AGE_GROUPS: AgeGroup[] = ['infant', 'toddler', 'child', 'elementary']
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-})
+function getAnthropicClient() {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY is not configured')
+  }
+  return new Anthropic({ apiKey })
+}
 
 interface RecommendationRequest {
   userLocation: { lat: number; lng: number }
@@ -45,15 +52,39 @@ interface RecommendationRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const rateLimitResult = await rateLimit(request, 'kidsmap-recommendations')
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(rateLimitResult)
+    }
+
     const body: RecommendationRequest = await request.json()
 
-    // Validate
+    // Validate required fields
     if (!body.userLocation || !body.childAge) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Missing required fields: userLocation, childAge',
-        },
+        { success: false, error: 'Missing required fields: userLocation, childAge' },
+        { status: 400 },
+      )
+    }
+
+    // Validate age group (prevent prompt injection via enum)
+    if (!VALID_AGE_GROUPS.includes(body.childAge)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid childAge value' },
+        { status: 400 },
+      )
+    }
+
+    // Validate coordinates
+    if (
+      typeof body.userLocation.lat !== 'number' ||
+      typeof body.userLocation.lng !== 'number' ||
+      body.userLocation.lat < 33 || body.userLocation.lat > 43 ||
+      body.userLocation.lng < 124 || body.userLocation.lng > 132
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid coordinates (must be within Korea)' },
         { status: 400 },
       )
     }
@@ -82,9 +113,10 @@ export async function POST(request: NextRequest) {
     })
 
     // Build AI prompt
-    const prompt = buildRecommendationPrompt(body, filtered as any)
+    const prompt = buildRecommendationPrompt(body, filtered as unknown as PlaceBlock[])
 
     // Call Claude API
+    const anthropic = getAnthropicClient()
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
@@ -144,9 +176,21 @@ export async function POST(request: NextRequest) {
 // Utilities
 // ============================================
 
+interface PlaceBlock {
+  id: string
+  qualityGrade: string
+  data: {
+    name: string
+    category: string
+    address?: string
+    amenities?: Record<string, boolean>
+    recommendedAges?: string[]
+  }
+}
+
 function buildRecommendationPrompt(
   request: RecommendationRequest,
-  places: any[],
+  places: PlaceBlock[],
 ): string {
   const ageDescription = {
     infant: '영아 (0-2세)',

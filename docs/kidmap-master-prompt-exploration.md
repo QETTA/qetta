@@ -2,9 +2,26 @@
 
 > **목적**: Plan Mode 진입 전, AI가 KidsMap의 현재 코드·아키텍처·갭을 완전히 이해하도록 하는 탐색 프롬프트
 > **작성일**: 2026-02-01
-> **버전**: 3.1
+> **버전**: 4.0 (실행 완료)
 > **프로젝트**: KidsMap — AI 기반 어린이 놀이 공간 검색 플랫폼 (QETTA 내 독립 모듈)
-> **전문가 분석 보고서**: [`docs/kidmap-expert-analysis-report.md`](./kidmap-expert-analysis-report.md) (P0 버그 3건, 보안 4건, 15개 우선순위 항목)
+> **전문가 분석 보고서**: [`docs/kidmap-expert-analysis-report.md`](./kidmap-expert-analysis-report.md)
+> **팀 상황**: 3인 개발팀, 예산 없음, 정부지원사업으로 유입 확보 전략
+>
+> ### v4.0 실행 완료 사항
+> - [x] 브랜치 통합: `fix-infinite-loading` → `kidmap-master-prompt` 병합 완료
+> - [x] P0 크리티컬 버그 3건 수정 (Anthropic 키 크래시, DB enum 누락, 페이지네이션 깨짐)
+> - [x] 보안 취약점 4건 수정 (Rate Limiting 3개 엔드포인트, 입력 검증, 에러 메시지 정리)
+> - [x] 성능 최적화 (맵 검색 300ms debounce)
+> - [x] 테스트 추가 (FilterStore 10개 테스트 케이스)
+>
+> ### 남은 Plan Mode 과제
+> - [ ] Catalyst UI Kit 부분 채택 (Button, Badge, Dialog, Input)
+> - [ ] AI 추천 Redis 캐싱
+> - [ ] bulkUpsert 배치 최적화
+> - [ ] 테스트 커버리지 확대 (목표: 핵심 API 80%+)
+> - [ ] PostGIS 공간 인덱스 도입
+> - [ ] 마커 클러스터링
+> - [ ] 수도권 전체 확장
 
 ---
 

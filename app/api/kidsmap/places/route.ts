@@ -15,6 +15,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getPlaceBlockRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
+import { rateLimit, createRateLimitResponse } from '@/lib/api/rate-limiter'
 import type {
   PlaceCategory,
   FilterCategory,
@@ -26,6 +27,11 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const rateLimitResult = await rateLimit(request, 'kidsmap-places')
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(rateLimitResult)
+    }
     const { searchParams } = request.nextUrl
 
     // Query parameters
@@ -59,12 +65,14 @@ export async function GET(request: NextRequest) {
       filter.searchKeyword = query
     }
 
-    // Get repository
+    // Get repository — fetch all matching records, then filter/paginate client-side
+    // This avoids the bug where distance/age filters applied after DB pagination
+    // cause incomplete pages and inaccurate hasMore
     const repo = getPlaceBlockRepository()
 
-    // Search places (pagination is part of the filter)
-    filter.page = page
-    filter.pageSize = pageSize
+    const needsClientFilter = (lat && lng) || ageGroups.length > 0
+    filter.page = needsClientFilter ? 1 : page
+    filter.pageSize = needsClientFilter ? 500 : pageSize
     const result = await repo.search(filter)
 
     // Calculate distance if location provided
@@ -89,12 +97,19 @@ export async function GET(request: NextRequest) {
       places = places.filter((place) => !place.distance || place.distance <= radius)
     }
 
-    // Filter by age groups (client-side for now)
+    // Filter by age groups
     if (ageGroups.length > 0) {
       places = places.filter((place) => {
         const recommended = place.data.recommendedAges || []
         return ageGroups.some((age) => recommended.includes(age))
       })
+    }
+
+    // Client-side pagination after filtering
+    const totalFiltered = places.length
+    if (needsClientFilter) {
+      const start = (page - 1) * pageSize
+      places = places.slice(start, start + pageSize)
     }
 
     return NextResponse.json({
@@ -107,10 +122,12 @@ export async function GET(request: NextRequest) {
           completeness: block.completeness,
           distance: block.distance,
         })),
-        total: result.total,
+        total: needsClientFilter ? totalFiltered : result.total,
         page,
         pageSize,
-        hasMore: places.length === pageSize,
+        hasMore: needsClientFilter
+          ? page * pageSize < totalFiltered
+          : page * pageSize < result.total,
       },
     })
   } catch (error) {

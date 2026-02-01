@@ -126,11 +126,16 @@ export default function KidsMapPage() {
   }, [userLocation, requestUserLocation])
 
   useEffect(() => {
-    // Search when map is ready and center is set
-    if (isReady && center) {
+    // Debounce search: filter toggles fire rapidly, avoid excessive API calls
+    if (!isReady || !center) return
+
+    const timer = setTimeout(() => {
       searchPlaces()
-    }
-  }, [isReady, center, filterCategory, ageGroups, maxDistance, openNow])
+    }, 300)
+
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady, center, filterCategory, ageGroups, maxDistance, openNow, searchPlaces])
 
   // ============================================
   // Effects - Render Markers
