@@ -22,6 +22,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "db:setup": "npx tsx scripts/db-setup.ts",
+    "db:check": "npx tsx scripts/db-setup.ts check",
     "prepare": "husky",
     "validate": "npm run typecheck && npm run lint && npm run test"
   },

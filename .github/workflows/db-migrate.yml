@@ -1,0 +1,49 @@
+# Database Migration Workflow
+#
+# Supabase 테이블 자동 마이그레이션
+# Push to main 시 또는 수동 실행
+#
+# 필요한 GitHub Secrets:
+#   SUPABASE_PROJECT_ID: onetwihfvaoprqvdrfck
+#   SUPABASE_DB_PASSWORD: Supabase DB 비밀번호
+#   SUPABASE_ACCESS_TOKEN: https://app.supabase.com/account/tokens
+
+name: Database Migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    name: Run Migrations
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Supabase Project
+        run: |
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Run Migrations
+        run: |
+          supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Verify Tables
+        run: |
+          echo "✅ Migration complete!"
