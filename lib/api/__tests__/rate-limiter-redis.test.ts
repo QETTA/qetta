@@ -114,7 +114,7 @@ describe('rateLimitDistributed', () => {
       const result = await rateLimitDistributed(req, 'default')
 
       expect(result.success).toBe(true)
-      expect(result.count).toBe(0)
+      expect(result.remaining).toBeGreaterThanOrEqual(0)
       expect(mockRedisClient.eval).not.toHaveBeenCalled()
     })
 

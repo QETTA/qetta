@@ -6,7 +6,7 @@
  * @module security/sanitize
  */
 
-import DOMPurify from 'isomorphic-dompurify'
+import DOMPurify, { type Config as DOMPurifyConfig } from 'isomorphic-dompurify'
 
 // ============================================
 // DOMPurify 설정
@@ -42,21 +42,23 @@ const ALLOWED_ATTR = [
 /**
  * DOMPurify 기본 설정
  */
-const DEFAULT_CONFIG: DOMPurify.Config = {
+const DEFAULT_CONFIG: DOMPurifyConfig = {
   ALLOWED_TAGS,
   ALLOWED_ATTR,
   ALLOW_DATA_ATTR: false,
   ADD_ATTR: ['target'], // 링크에 target 허용
   FORBID_TAGS: ['script', 'style', 'iframe', 'frame', 'frameset', 'object', 'embed', 'form', 'input', 'button', 'select', 'textarea', 'svg', 'math'],
   FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit', 'onkeydown', 'onkeyup', 'onkeypress'],
+  RETURN_TRUSTED_TYPE: false, // Ensure string return type
 }
 
 /**
  * 엄격 모드 설정 (모든 HTML 태그 제거)
  */
-const STRICT_CONFIG: DOMPurify.Config = {
+const STRICT_CONFIG: DOMPurifyConfig = {
   ALLOWED_TAGS: [],
   ALLOWED_ATTR: [],
+  RETURN_TRUSTED_TYPE: false, // Ensure string return type
 }
 
 // ============================================
@@ -81,7 +83,7 @@ const STRICT_CONFIG: DOMPurify.Config = {
  * // => '<a>Click</a>' (javascript: 프로토콜 제거됨)
  * ```
  */
-export function sanitizeHtml(dirty: string, config?: DOMPurify.Config): string {
+export function sanitizeHtml(dirty: string, config?: DOMPurifyConfig): string {
   if (!dirty || typeof dirty !== 'string') {
     return ''
   }
@@ -440,7 +442,7 @@ export const normalizedString = z.string().transform(normalizeString)
 /**
  * 살균된 HTML 스키마 (허용된 태그만 유지)
  */
-export const sanitizedHtmlSchema = z.string().transform(sanitizeHtml)
+export const sanitizedHtmlSchema = z.string().transform((val) => sanitizeHtml(val))
 
 /**
  * 안전한 URL 스키마
@@ -453,7 +455,7 @@ export const safeUrlSchema = z.string().transform(sanitizeUrl).refine(
 /**
  * 안전한 파일명 스키마
  */
-export const safeFilenameSchema = z.string().transform(sanitizeFilename).refine(
+export const safeFilenameSchema = z.string().transform((val) => sanitizeFilename(val)).refine(
   (filename) => filename.length > 0,
   { message: '유효하지 않은 파일명입니다' }
 )
