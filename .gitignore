@@ -83,3 +83,5 @@ screenshots/
 .claude/tasks/
 # Keep these tracked
 !.claude/patterns/
+.vercel
+.env*.local
