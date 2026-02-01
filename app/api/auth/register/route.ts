@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
+import { rateLimit, createRateLimitResponse } from '@/lib/api/rate-limiter'
 import { ENV } from '@/lib/env/validate'
 import { hashPassword, validatePassword } from '@/lib/auth/password'
 import {
@@ -63,6 +64,12 @@ function isValidEmail(email: string): boolean {
  * ```
  */
 export async function POST(request: NextRequest) {
+  // Rate limiting: 5 requests/minute per IP
+  const rateLimitResult = await rateLimit(request, 'register')
+  if (!rateLimitResult.success) {
+    return createRateLimitResponse(rateLimitResult)
+  }
+
   try {
     // Database 필수 확인
     if (!ENV.HAS_DATABASE) {
@@ -226,22 +233,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 감사 로그 기록
-    await prisma.auditLog.create({
-      data: {
-        userId: result.user.id,
-        action: 'USER_REGISTER',
-        resource: 'User',
-        resourceId: result.user.id,
-        details: {
-          email: result.user.email,
-          method: 'credentials',
-          verificationEmailSent: emailSent,
+    // 감사 로그 기록 (실패해도 회원가입 성공 응답에 영향 없음)
+    try {
+      await prisma.auditLog.create({
+        data: {
+          userId: result.user.id,
+          action: 'USER_REGISTER',
+          resource: 'User',
+          resourceId: result.user.id,
+          details: {
+            email: result.user.email,
+            method: 'credentials',
+            verificationEmailSent: emailSent,
+          },
+          ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0] || null,
+          userAgent: request.headers.get('user-agent') || null,
         },
-        ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0] || null,
-        userAgent: request.headers.get('user-agent') || null,
-      },
-    })
+      })
+    } catch (auditError) {
+      logger.error('[Auth] Audit log failed (registration succeeded):', auditError)
+    }
 
     return NextResponse.json(
       {

@@ -97,6 +97,13 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     identifier: 'user',
   },
 
+  // 회원가입 (브루트포스/스팸 방지)
+  register: {
+    requests: 5,
+    window: 60 * 1000, // 1분
+    identifier: 'ip',
+  },
+
   // 기본값
   default: {
     requests: 100, // 비인증: 100회/분
@@ -213,11 +220,8 @@ async function extractUserId(request: Request): Promise<string | null> {
     }
   }
 
-  // 3. X-User-Id 커스텀 헤더 (내부 서비스 간 통신용)
-  const customUserId = request.headers.get('x-user-id')
-  if (customUserId) {
-    return customUserId
-  }
+  // SECURITY: X-User-Id 헤더는 외부에서 위조 가능하므로 신뢰하지 않음
+  // 내부 서비스 간 통신에서 필요한 경우 별도 인증 토큰 검증 필요
 
   return null
 }

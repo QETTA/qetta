@@ -68,7 +68,16 @@ export async function POST(request: Request) {
     }
 
     // 3. Payload 파싱
-    const payload: TossWebhookPayload = JSON.parse(rawBody)
+    let payload: TossWebhookPayload
+    try {
+      payload = JSON.parse(rawBody)
+    } catch {
+      logger.error('[Webhook] Invalid JSON payload')
+      return NextResponse.json(
+        { success: false, error: 'Invalid JSON' },
+        { status: 400 }
+      )
+    }
     const eventId = generateEventId(payload)
     logger.info(`[Webhook] Received event: ${payload.eventType}, eventId: ${eventId}`)
 
