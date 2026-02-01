@@ -14,7 +14,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getPlaceBlockRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
+import { getSimplePlaceRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
 import { rateLimit, createRateLimitResponse } from '@/lib/api/rate-limiter'
 import type {
   PlaceCategory,
@@ -52,27 +52,39 @@ export async function GET(request: NextRequest) {
       : []
     const ageGroups = ageGroupsParam ? (ageGroupsParam.split(',') as AgeGroup[]) : []
 
-    // Build filter
-    const filter: Record<string, unknown> = {
-      status: 'active' as const,
-    }
+    // Build filter for SimplePlaceRepository
+    const filter: {
+      categories?: PlaceCategory[]
+      keyword?: string
+      location?: { latitude: number; longitude: number; radiusKm: number }
+      page?: number
+      pageSize?: number
+    } = {}
 
     if (placeCategories.length > 0) {
       filter.categories = placeCategories
     }
 
     if (query) {
-      filter.searchKeyword = query
+      filter.keyword = query
     }
 
-    // Get repository — fetch all matching records, then filter/paginate client-side
-    // This avoids the bug where distance/age filters applied after DB pagination
-    // cause incomplete pages and inaccurate hasMore
-    const repo = getPlaceBlockRepository()
+    // Get repository — uses existing `places` table
+    const repo = getSimplePlaceRepository()
 
     const needsClientFilter = (lat && lng) || ageGroups.length > 0
     filter.page = needsClientFilter ? 1 : page
     filter.pageSize = needsClientFilter ? 500 : pageSize
+
+    // Add location filter if provided (for DB-side filtering)
+    if (lat && lng) {
+      filter.location = {
+        latitude: lat,
+        longitude: lng,
+        radiusKm: radius / 1000, // Convert meters to km
+      }
+    }
+
     const result = await repo.search(filter)
 
     // Calculate distance if location provided
