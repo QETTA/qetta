@@ -167,7 +167,7 @@ export interface GetPlaceDetailResult {
 export async function getPlaceDetail(placeId: string): Promise<GetPlaceDetailResult> {
   try {
     const repo = getPlaceBlockRepository()
-    const block = await repo.get(placeId)
+    const block = await repo.findById(placeId)
 
     if (!block) {
       return {

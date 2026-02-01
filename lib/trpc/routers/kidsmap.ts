@@ -199,7 +199,7 @@ export const kidsmapRouter = router({
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       const repo = getPlaceBlockRepository()
-      const block = await repo.get(input.id)
+      const block = await repo.findById(input.id)
 
       if (!block) {
         return null
@@ -220,15 +220,15 @@ export const kidsmapRouter = router({
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       const repo = getContentBlockRepository()
-      const block = await repo.get(input.id)
+      const block = await repo.findById(input.id)
 
       if (!block) {
         return null
       }
 
       return {
-        id: block.id,
         ...block.data,
+        blockId: block.id,
       }
     }),
 })

@@ -9,19 +9,19 @@
 
 import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
+import type { Session } from 'next-auth'
 
 // ============================================
 // Context
 // ============================================
 
 export interface TRPCContext {
-  session: Awaited<ReturnType<typeof getServerSession>> | null
+  session: Session | null
 }
 
 export async function createTRPCContext(): Promise<TRPCContext> {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   return { session }
 }
 

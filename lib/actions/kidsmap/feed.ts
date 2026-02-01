@@ -158,7 +158,7 @@ export interface GetContentDetailResult {
 export async function getContentDetail(contentId: string): Promise<GetContentDetailResult> {
   try {
     const repo = getContentBlockRepository()
-    const block = await repo.get(contentId)
+    const block = await repo.findById(contentId)
 
     if (!block) {
       return {
