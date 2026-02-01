@@ -100,7 +100,8 @@ export const GET = withAuth(async (request, session) => {
     }
 
     // 저장된 설정이 없으면 기본값 반환
-    const preferences = (user.notificationPreferences as NotificationPreferences | null) || DEFAULT_PREFERENCES
+    const preferences =
+      (user.notificationPreferences as NotificationPreferences | null) || DEFAULT_PREFERENCES
 
     return NextResponse.json(
       {
@@ -197,7 +198,8 @@ export const PATCH = withAuth(async (request, session) => {
     }
 
     // 기존 설정과 병합 (부분 업데이트)
-    const currentPreferences = (user.notificationPreferences as NotificationPreferences | null) || DEFAULT_PREFERENCES
+    const currentPreferences =
+      (user.notificationPreferences as NotificationPreferences | null) || DEFAULT_PREFERENCES
 
     const updatedPreferences: NotificationPreferences = {
       email: {
@@ -214,6 +216,7 @@ export const PATCH = withAuth(async (request, session) => {
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma JSON field
         notificationPreferences: updatedPreferences as any,
       },
       select: {
@@ -233,6 +236,7 @@ export const PATCH = withAuth(async (request, session) => {
         details: {
           changes: body,
           updatedPreferences,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma JSON field
         } as any,
         ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0] || null,
         userAgent: request.headers.get('user-agent') || null,

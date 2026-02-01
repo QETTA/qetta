@@ -44,12 +44,10 @@ export async function GET(request: NextRequest) {
     const placeCategories = placeCategoriesParam
       ? (placeCategoriesParam.split(',') as PlaceCategory[])
       : []
-    const ageGroups = ageGroupsParam
-      ? (ageGroupsParam.split(',') as AgeGroup[])
-      : []
+    const ageGroups = ageGroupsParam ? (ageGroupsParam.split(',') as AgeGroup[]) : []
 
     // Build filter
-    const filter: any = {
+    const filter: Record<string, unknown> = {
       status: 'active' as const,
     }
 
@@ -80,7 +78,7 @@ export async function GET(request: NextRequest) {
             lat,
             lng,
             place.data.latitude as number,
-            place.data.longitude as number,
+            place.data.longitude as number
           )
           return { ...place, distance }
         }
@@ -88,9 +86,7 @@ export async function GET(request: NextRequest) {
       })
 
       // Filter by radius
-      places = places.filter(
-        (place) => !place.distance || place.distance <= radius,
-      )
+      places = places.filter((place) => !place.distance || place.distance <= radius)
     }
 
     // Filter by age groups (client-side for now)
@@ -124,7 +120,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: 'Failed to search places',
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
@@ -136,21 +132,13 @@ export async function GET(request: NextRequest) {
 /**
  * Haversine distance calculation (km)
  */
-function calculateDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number {
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371 // Earth radius in km
   const dLat = toRad(lat2 - lat1)
   const dLon = toRad(lon2 - lon1)
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2)
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c * 1000 // Convert to meters
 }
