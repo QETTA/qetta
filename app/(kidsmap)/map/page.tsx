@@ -24,6 +24,7 @@ import { useMapStore } from '@/stores/kidsmap/map-store'
 import { useFilterStore } from '@/stores/kidsmap/filter-store'
 import { usePlaceStore } from '@/stores/kidsmap/place-store'
 import { useKakaoMapContext } from '@/contexts/kakao-map-context'
+import { PlaceDetailSheet } from '@/components/kidsmap/place-detail-sheet'
 import type { PlaceWithDistance } from '@/stores/kidsmap/place-store'
 
 // ============================================
@@ -271,30 +272,8 @@ export default function KidsMapPage() {
         </div>
       </div>
 
-      {/* Bottom Sheet - Will be implemented next */}
-      {selectedPlace && (
-        <div className="absolute bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 p-4 shadow-2xl">
-          <div className="max-w-4xl mx-auto">
-            <button
-              onClick={() => selectPlace(null)}
-              className="absolute top-2 right-2 text-zinc-400 hover:text-white"
-            >
-              ✕
-            </button>
-            <h2 className="text-xl font-semibold text-white mb-2">{selectedPlace.name}</h2>
-            <p className="text-zinc-400 text-sm mb-2">{selectedPlace.address}</p>
-            <p className="text-zinc-500 text-xs">
-              Distance:{' '}
-              {selectedPlace.distance
-                ? `${(selectedPlace.distance / 1000).toFixed(1)} km`
-                : 'N/A'}
-            </p>
-            <p className="text-xs text-zinc-600 mt-4">
-              Full bottom sheet component coming next
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Bottom Sheet for Place Details */}
+      <PlaceDetailSheet />
     </div>
   )
 }
