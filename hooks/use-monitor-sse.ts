@@ -23,24 +23,19 @@ interface MonitorEvent {
  * Custom hook for managing SSE connection to monitor data stream
  * Features:
  * - Exponential backoff reconnection (1s, 2s, 4s, 8s, ..., max 30s)
- * - Automatic cleanup on unmount
+ * - Automatic cleanup on unmount (including store reset)
  * - Error handling and status reporting
+ * - Uses getState() for actions to avoid unnecessary re-renders
  */
 export function useMonitorSSE() {
   const eventSourceRef = useRef<EventSource | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const reconnectAttemptsRef = useRef(0)
 
-  const {
-    updateSensorData,
-    updateOEE,
-    addAlert,
-    fullSync,
-    setConnectionStatus,
-    setError,
-  } = useMonitorDataStore()
-
   useEffect(() => {
+    // Use getState() for actions — stable references, no re-render dependency
+    const store = useMonitorDataStore.getState
+
     const connect = () => {
       try {
         const eventSource = new EventSource(SSE_ENDPOINT)
@@ -49,10 +44,10 @@ export function useMonitorSSE() {
         // Sensor update events
         eventSource.addEventListener('sensor-update', (event) => {
           try {
-            const receiveTime = performance.now() // Capture timestamp immediately
+            const receiveTime = performance.now()
             const data: MonitorEvent = JSON.parse(event.data)
             const { equipmentId, sensors } = data.data as SensorUpdateData
-            updateSensorData(equipmentId, sensors, receiveTime)
+            store().updateSensorData(equipmentId, sensors, receiveTime)
           } catch (err) {
             clientLogger.error('[SSE] sensor-update parse error:', err)
           }
@@ -61,10 +56,10 @@ export function useMonitorSSE() {
         // OEE update events
         eventSource.addEventListener('oee-update', (event) => {
           try {
-            const receiveTime = performance.now() // Capture timestamp immediately
+            const receiveTime = performance.now()
             const data: MonitorEvent = JSON.parse(event.data)
             const { equipmentId, oee } = data.data as OEEUpdateData
-            updateOEE(equipmentId, oee, receiveTime)
+            store().updateOEE(equipmentId, oee, receiveTime)
           } catch (err) {
             clientLogger.error('[SSE] oee-update parse error:', err)
           }
@@ -75,7 +70,7 @@ export function useMonitorSSE() {
           try {
             const data: MonitorEvent = JSON.parse(event.data)
             const alert = data.data as Alert
-            addAlert(alert)
+            store().addAlert(alert)
           } catch (err) {
             clientLogger.error('[SSE] alert parse error:', err)
           }
@@ -85,7 +80,7 @@ export function useMonitorSSE() {
         eventSource.addEventListener('full-sync', (event) => {
           try {
             const data: MonitorEvent = JSON.parse(event.data)
-            fullSync(data.data as MonitorData)
+            store().fullSync(data.data as MonitorData)
           } catch (err) {
             clientLogger.error('[SSE] full-sync parse error:', err)
           }
@@ -94,7 +89,7 @@ export function useMonitorSSE() {
         // Heartbeat events (connection keep-alive)
         eventSource.addEventListener('heartbeat', (event) => {
           try {
-            void JSON.parse(event.data) // Validate JSON format
+            void JSON.parse(event.data)
           } catch (err) {
             clientLogger.error('[SSE] heartbeat parse error:', err)
           }
@@ -102,29 +97,26 @@ export function useMonitorSSE() {
 
         // Connection opened
         eventSource.onopen = () => {
-          setConnectionStatus(true)
-          setError(null)
-          reconnectAttemptsRef.current = 0 // Reset backoff counter
+          store().setConnectionStatus(true)
+          store().setError(null)
+          reconnectAttemptsRef.current = 0
         }
 
         // Connection error
         eventSource.onerror = (err) => {
           clientLogger.error('[SSE] Connection error:', err)
-          setConnectionStatus(false)
-          setError('실시간 연결 끊김')
+          store().setConnectionStatus(false)
+          store().setError('실시간 연결 끊김')
           eventSource.close()
 
-          // Stop retrying after max attempts
           if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
             clientLogger.error('[SSE] Max reconnect attempts reached, giving up')
-            setError('연결 재시도 횟수 초과. 페이지를 새로고침해 주세요.')
+            store().setError('연결 재시도 횟수 초과. 페이지를 새로고침해 주세요.')
             return
           }
 
-          // Exponential backoff reconnection
           const delay = Math.min(
-            BASE_RECONNECT_DELAY *
-              Math.pow(2, reconnectAttemptsRef.current),
+            BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current),
             MAX_RECONNECT_DELAY
           )
           reconnectAttemptsRef.current++
@@ -135,28 +127,21 @@ export function useMonitorSSE() {
         }
       } catch (err) {
         clientLogger.error('[SSE] Failed to create EventSource:', err)
-        setError('SSE 연결 실패')
+        store().setError('SSE 연결 실패')
       }
     }
 
-    // Initial connection
     connect()
 
-    // Cleanup on unmount
+    // Cleanup on unmount: close connection and reset store
     return () => {
       eventSourceRef.current?.close()
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current)
       }
+      store().reset()
     }
-  }, [
-    updateSensorData,
-    updateOEE,
-    addAlert,
-    fullSync,
-    setConnectionStatus,
-    setError,
-  ])
+  }, []) // No dependencies — actions accessed via getState()
 
   return {
     isConnected: useMonitorDataStore((state) => state.isConnected),

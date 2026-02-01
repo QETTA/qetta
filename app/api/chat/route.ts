@@ -133,22 +133,22 @@ export async function POST(req: Request) {
       })
     }
 
-    // Create a ReadableStream for the response with Tool Use support
+    // Create a ReadableStream with true streaming + Tool Use support
     const encoder = new TextEncoder()
 
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          // Initial call with tools - typed for Anthropic API
           let currentMessages: MessageParam[] = [...anthropicMessages]
           let continueLoop = true
           let iteration = 0
-          const maxIterations = 5 // Prevent infinite loops
+          const maxIterations = 5
 
           while (continueLoop && iteration < maxIterations) {
             iteration++
 
-            const response = await anthropic.messages.create({
+            // Use true streaming API for real-time text delivery
+            const stream = anthropic.messages.stream({
               model: 'claude-sonnet-4-20250514',
               max_tokens: 4096,
               system: systemBlocks,
@@ -157,70 +157,66 @@ export async function POST(req: Request) {
               tool_choice: { type: 'auto' },
             })
 
-            // Process response content
-            for (const block of response.content) {
-              if (block.type === 'text') {
-                // Stream text content
-                const data = JSON.stringify({ text: block.text })
-                controller.enqueue(encoder.encode(`data: ${data}\n\n`))
-              } else if (block.type === 'tool_use') {
-                // Execute tool and notify client
-                const toolNotification = JSON.stringify({
-                  toolUse: {
-                    name: block.name,
-                    id: block.id,
-                    status: 'executing',
-                  },
-                })
-                controller.enqueue(encoder.encode(`data: ${toolNotification}\n\n`))
+            // Stream text deltas in real-time
+            stream.on('text', (text) => {
+              const data = JSON.stringify({ text })
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`))
+            })
 
-                // Execute the tool
-                const toolResult = await executeToolCall(block.name, block.input)
+            // Wait for the full message to check for tool use
+            const response = await stream.finalMessage()
 
-                // Send tool result notification
-                const resultNotification = JSON.stringify({
-                  toolResult: {
-                    name: block.name,
-                    id: block.id,
-                    success: toolResult.success,
-                    data: toolResult.data,
-                  },
-                })
-                controller.enqueue(encoder.encode(`data: ${resultNotification}\n\n`))
+            // Process tool use blocks (if any)
+            const toolUseBlocks = response.content.filter(
+              (block): block is Anthropic.Messages.ToolUseBlock => block.type === 'tool_use'
+            )
 
-                // Add assistant response and tool result to messages
-                currentMessages = [
-                  ...currentMessages,
-                  {
-                    role: 'assistant' as const,
-                    content: response.content,
-                  },
-                  {
-                    role: 'user' as const,
-                    content: [
-                      {
-                        type: 'tool_result' as const,
-                        tool_use_id: block.id,
-                        content: safeSerializeToolResult(toolResult),
-                      },
-                    ],
-                  },
-                ]
-              }
+            for (const block of toolUseBlocks) {
+              // Notify client of tool execution
+              const toolNotification = JSON.stringify({
+                toolUse: { name: block.name, id: block.id, status: 'executing' },
+              })
+              controller.enqueue(encoder.encode(`data: ${toolNotification}\n\n`))
+
+              // Execute the tool
+              const toolResult = await executeToolCall(block.name, block.input)
+
+              // Send tool result
+              const resultNotification = JSON.stringify({
+                toolResult: {
+                  name: block.name,
+                  id: block.id,
+                  success: toolResult.success,
+                  data: toolResult.data,
+                },
+              })
+              controller.enqueue(encoder.encode(`data: ${resultNotification}\n\n`))
+
+              // Append to messages for next iteration
+              currentMessages = [
+                ...currentMessages,
+                { role: 'assistant' as const, content: response.content },
+                {
+                  role: 'user' as const,
+                  content: [
+                    {
+                      type: 'tool_result' as const,
+                      tool_use_id: block.id,
+                      content: safeSerializeToolResult(toolResult),
+                    },
+                  ],
+                },
+              ]
             }
 
-            // Check if we should continue (tool_use means continue, otherwise stop)
             continueLoop = response.stop_reason === 'tool_use'
           }
 
-          // Send done signal
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()
         } catch (error) {
           logger.error('Streaming error:', error)
-          const errorData = JSON.stringify({
-            error: 'Streaming error occurred',
-          })
+          const errorData = JSON.stringify({ error: 'Streaming error occurred' })
           controller.enqueue(encoder.encode(`data: ${errorData}\n\n`))
           controller.close()
         }
