@@ -120,6 +120,14 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
     identifier: 'ip',
   },
 
+  // KidsMap 피드
+  'kidsmap-feed': {
+    requests: 60,
+    authenticatedRequests: 200,
+    window: 60 * 1000,
+    identifier: 'ip',
+  },
+
   // KidsMap 쿠폰
   'kidsmap-coupons': {
     requests: 10,

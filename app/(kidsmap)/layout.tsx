@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { KakaoMapProvider } from '@/contexts/kakao-map-context'
+import { TabBar } from '@/components/kidsmap/tab-bar'
 
 export const metadata: Metadata = {
   title: {
@@ -11,5 +12,12 @@ export const metadata: Metadata = {
 }
 
 export default function KidsMapLayout({ children }: { children: React.ReactNode }) {
-  return <KakaoMapProvider>{children}</KakaoMapProvider>
+  return (
+    <KakaoMapProvider>
+      <div className="pb-14">
+        {children}
+      </div>
+      <TabBar />
+    </KakaoMapProvider>
+  )
 }
