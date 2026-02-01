@@ -1,5 +1,12 @@
 import { withSentryConfig } from '@sentry/nextjs'
+import bundleAnalyzer from '@next/bundle-analyzer'
 import type { NextConfig } from 'next'
+
+// Bundle analyzer configuration
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+  openAnalyzer: true,
+})
 
 const nextConfig: NextConfig = {
   // 압축 활성화
@@ -91,6 +98,9 @@ const sentryConfig = {
 }
 
 // Sentry DSN이 설정된 경우에만 Sentry 래핑
-export default process.env.SENTRY_DSN
+// Bundle analyzer는 ANALYZE=true 환경변수로 활성화
+const configWithSentry = process.env.SENTRY_DSN
   ? withSentryConfig(nextConfig, sentryConfig)
   : nextConfig
+
+export default withBundleAnalyzer(configWithSentry)
