@@ -51,7 +51,13 @@ export function useOnlineStatus(options: UseOnlineStatusOptions = {}): OnlineSta
     return true // SSR에서는 온라인으로 가정
   })
 
-  const [lastOnlineAt, setLastOnlineAt] = useState<Date | null>(null)
+  const [lastOnlineAt, setLastOnlineAt] = useState<Date | null>(() => {
+    // 초기 상태가 온라인이면 현재 시간으로 설정
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      return new Date()
+    }
+    return null
+  })
   const [statusChangedAt, setStatusChangedAt] = useState<Date | null>(null)
   const [offlineDuration, setOfflineDuration] = useState<number | null>(null)
 
@@ -84,11 +90,6 @@ export function useOnlineStatus(options: UseOnlineStatusOptions = {}): OnlineSta
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-
-    // 초기 상태 설정
-    if (navigator.onLine) {
-      setLastOnlineAt(new Date())
-    }
 
     // 이벤트 리스너 등록
     window.addEventListener('online', handleOnline)
