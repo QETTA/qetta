@@ -42,7 +42,6 @@ import type {
 
 import {
   PLACE_CATEGORIES,
-  TOUR_API_CONTENT_TYPE,
   KidsMapApiError,
   KIDSMAP_ERROR_CODES,
 } from './types'

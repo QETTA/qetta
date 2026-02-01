@@ -16,14 +16,9 @@
  * - CLOVA AI: 콘텐츠 분석 (선택적)
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type {
   PlaceBlock,
   ContentBlock,
-  CrawlJob,
-  CrawlJobConfig,
-  CrawlResult,
-  BlockStats,
   QualityGrade,
   FreshnessLevel,
 } from './types'
@@ -388,7 +383,8 @@ export class BlockOptimizer {
   /**
    * 캐시 워밍
    */
-  async warmCache(options: {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async warmCache(_options: {
     topPlaces?: number
     recentContents?: number
   }): Promise<{ cachedPlaces: number; cachedContents: number }> {
@@ -539,8 +535,6 @@ export class BlockMigrator {
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i]
       const filename = `kidsmap/${type}/batch_${Date.now()}_${i}.json`
-      const content = JSON.stringify(batch, null, 2)
-
       // TODO: S3 호환 API로 업로드
       console.log(`[Migration] Uploading ${filename} (${batch.length} items)`)
       migrated += batch.length

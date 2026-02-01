@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Build AI prompt
-    const prompt = buildRecommendationPrompt(body, filtered as any)
+    const prompt = buildRecommendationPrompt(body, filtered as unknown as PlaceBlockWithData[])
 
     // Call Claude API
     const message = await anthropic.messages.create({
@@ -145,9 +145,22 @@ export async function POST(request: NextRequest) {
 // Utilities
 // ============================================
 
+interface PlaceBlockWithData {
+  id: string
+  data: {
+    name?: string
+    category?: string
+    address?: string
+    amenities?: Record<string, unknown>
+    recommendedAges?: string[]
+    [key: string]: unknown
+  }
+  qualityGrade: string
+}
+
 function buildRecommendationPrompt(
   request: RecommendationRequest,
-  places: any[],
+  places: PlaceBlockWithData[],
 ): string {
   const ageDescription = {
     infant: '영아 (0-2세)',

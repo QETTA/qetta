@@ -18,8 +18,6 @@ import { Fragment, useCallback, useState, useEffect, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { usePlaceStore } from '@/stores/kidsmap/place-store'
 import { cn } from '@/lib/utils'
-import type { PlaceWithDistance } from '@/stores/kidsmap/place-store'
-
 // ============================================
 // Main Component
 // ============================================
@@ -35,11 +33,8 @@ export function PlaceDetailSheet() {
   const isFav = selectedPlace ? isFavorite(selectedPlace.id) : false
 
   // Reset drag state when opening
-  useEffect(() => {
-    if (isOpen) {
-      setDragY(0)
-    }
-  }, [isOpen])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { if (isOpen) setDragY(0) }, [isOpen])
 
   // Touch handlers for drag gesture
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -243,8 +238,8 @@ export function PlaceDetailSheet() {
                       {selectedPlace.amenities.strollerAccess && (
                         <AmenityBadge icon="🚼" label="Stroller Access" />
                       )}
-                      {(selectedPlace.amenities as any)?.indoor && <AmenityBadge icon="🏠" label="Indoor" />}
-                      {(selectedPlace.amenities as any)?.outdoor && <AmenityBadge icon="🌳" label="Outdoor" />}
+                      {'indoor' in selectedPlace.amenities && !!selectedPlace.amenities.indoor && <AmenityBadge icon="🏠" label="Indoor" />}
+                      {'outdoor' in selectedPlace.amenities && !!selectedPlace.amenities.outdoor && <AmenityBadge icon="🌳" label="Outdoor" />}
                     </div>
                   </div>
                 )}

@@ -17,7 +17,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPlaceBlockRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
 import type {
   PlaceCategory,
-  FilterCategory,
   AgeGroup,
 } from '@/lib/skill-engine/data-sources/kidsmap/types'
 
@@ -33,12 +32,10 @@ export async function GET(request: NextRequest) {
     const lat = searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : null
     const lng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : null
     const radius = searchParams.get('radius') ? parseInt(searchParams.get('radius')!) : 5000
-    const filterCategory = searchParams.get('category') as FilterCategory | null
     const placeCategoriesParam = searchParams.get('placeCategories')
     const ageGroupsParam = searchParams.get('ageGroups')
     const page = parseInt(searchParams.get('page') || '1')
     const pageSize = parseInt(searchParams.get('pageSize') || '20')
-    const openNow = searchParams.get('openNow') === 'true'
 
     // Parse arrays
     const placeCategories = placeCategoriesParam
@@ -49,7 +46,7 @@ export async function GET(request: NextRequest) {
       : []
 
     // Build filter
-    const filter: any = {
+    const filter: Record<string, unknown> = {
       status: ['active'] as const,
     }
 
@@ -87,7 +84,10 @@ export async function GET(request: NextRequest) {
 
       // Filter by radius
       result.data = result.data.filter(
-        (place) => !(place as any).distance || (place as any).distance <= radius,
+        (place) => {
+          const p = place as unknown as Record<string, unknown>
+          return !p.distance || (p.distance as number) <= radius
+        },
       )
     }
 
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
           blockId: block.id,
           qualityGrade: block.qualityGrade,
           completeness: block.completeness,
-          distance: (block as any).distance,
+          distance: (block as unknown as Record<string, unknown>).distance,
         })),
         total: result.total,
         page,
