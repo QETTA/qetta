@@ -2,7 +2,7 @@
 
 > **목적**: Plan Mode 진입 전, AI가 KidsMap의 현재 코드·아키텍처·갭을 완전히 이해하도록 하는 탐색 프롬프트
 > **작성일**: 2026-02-01
-> **버전**: 4.0 (실행 완료)
+> **버전**: 5.0 (Sprint 4 완료)
 > **프로젝트**: KidsMap — AI 기반 어린이 놀이 공간 검색 플랫폼 (QETTA 내 독립 모듈)
 > **전문가 분석 보고서**: [`docs/kidmap-expert-analysis-report.md`](./kidmap-expert-analysis-report.md)
 > **팀 상황**: 3인 개발팀, 예산 없음, 정부지원사업으로 유입 확보 전략
@@ -14,6 +14,26 @@
 > - [x] 성능 최적화 (맵 검색 300ms debounce)
 > - [x] 테스트 추가 (FilterStore 10개 테스트 케이스)
 >
+> ### v5.0 실행 완료 사항 (Sprint 2-4)
+>
+> #### Sprint 2: 콘텐츠 피드 확장
+> - [x] TikTok 스타일 풀스크린 Shorts 뷰어 (스와이프 + 키보드 네비게이션)
+> - [x] Trending API (`/api/kidsmap/feed/trending`) — viewCount 정렬
+> - [x] 장소-콘텐츠 연결 탭 (`PlaceContentsTab`) — 바텀시트 내 관련 콘텐츠
+> - [x] 북마크 스토어 (Zustand + localStorage persist) + 저장 페이지
+>
+> #### Sprint 3: 검색 + 마이페이지 + SEO
+> - [x] 피드 검색바 (400ms debounce) + keyword/placeId 필터 API
+> - [x] 마이페이지 scaffold (next-auth 연동, 프로필, 메뉴)
+> - [x] Content-to-Visit CTA 카드 (장소 연결 UI)
+> - [x] SEO 메타데이터 + OG 태그 (feed/saved/mypage 레이아웃)
+>
+> #### Sprint 4: 안정화 + 테스트 + 접근성
+> - [x] TypeScript strict 에러 6건 수정
+> - [x] Unit 테스트 28개 (feed-store 11 + bookmark-store 7 + 기존 10)
+> - [x] FeedErrorBoundary + FeedGridSkeleton + FeedShortsSkeleton + ContentDetailSkeleton
+> - [x] 접근성(a11y): aria-label, aria-current, role="feed", keyboard nav
+>
 > ### 남은 Plan Mode 과제
 > - [ ] Catalyst UI Kit 부분 채택 (Button, Badge, Dialog, Input)
 > - [ ] AI 추천 Redis 캐싱
@@ -22,6 +42,9 @@
 > - [ ] PostGIS 공간 인덱스 도입
 > - [ ] 마커 클러스터링
 > - [ ] 수도권 전체 확장
+> - [ ] 커뮤니티 기능 (부모 리뷰, 사진)
+> - [ ] PWA / 오프라인 모드
+> - [ ] 업주 대시보드 (B2B)
 
 ---
 
@@ -111,12 +134,19 @@ Plan Mode에 진입하기 전, 다음 6가지 축으로 현재 상태를 완전�
 - Cache: Redis (Upstash) + LRU Cache
 - Infra: Vercel, BullMQ (크롤링 잡)
 
-## 구현 완료된 파일 (34파일, 11,229줄)
+## 구현 완료된 파일 (~55파일, ~13,000줄+)
 
 ### Pages (app/(kidsmap)/)
 | 파일 | 줄 | 역할 |
 |------|-----|------|
 | map/page.tsx | 322 | 메인 맵 페이지 (전체 화면 카카오맵 + 필터 + 바텀시트) |
+| feed/page.tsx | ~200 | 콘텐츠 피드 (그리드/숏폼 듀얼 모드, 에러바운더리, 스켈레톤) |
+| feed/[id]/page.tsx | ~150 | 콘텐츠 상세 (YouTube/Naver 임베드, 장소 CTA 카드) |
+| feed/layout.tsx | ~20 | 피드 SEO 메타데이터 + OG 태그 |
+| saved/page.tsx | ~80 | 북마크 저장 목록 |
+| saved/layout.tsx | ~20 | 저장 SEO 메타데이터 |
+| mypage/page.tsx | 95 | 마이페이지 (next-auth 프로필, 통계, 메뉴) |
+| mypage/layout.tsx | ~20 | 마이페이지 SEO 메타데이터 |
 | layout.tsx | 15 | KidsMap 레이아웃 |
 | loading.tsx | 10 | 로딩 스켈레톤 |
 | error.tsx | 37 | 에러 바운더리 |
@@ -127,12 +157,25 @@ Plan Mode에 진입하기 전, 다음 6가지 축으로 현재 상태를 완전�
 | places/route.ts | 148 | 장소 검색 API (위치 기반, 카테고리, 연령, 반경) |
 | recommendations/route.ts | 226 | AI 추천 API (Claude, 날씨/시간/연령 맥락) |
 | coupons/route.ts | 32 | 쿠폰 API |
+| feed/route.ts | ~120 | 피드 API (정렬/필터/키워드/placeId) |
+| feed/[id]/route.ts | ~80 | 콘텐츠 상세 API + 조회수 증가 |
+| feed/trending/route.ts | ~80 | 트렌딩 API (viewCount 정렬) |
 
 ### Components (components/kidsmap/)
 | 파일 | 줄 | 역할 |
 |------|-----|------|
-| place-detail-sheet.tsx | 394 | 장소 상세 바텀시트 (Google Maps 스타일) |
+| place-detail-sheet.tsx | 394+ | 장소 상세 바텀시트 + PlaceContentsTab 통합 |
+| place-contents-tab.tsx | ~100 | 장소 관련 콘텐츠 탭 |
 | quick-filter.tsx | 189 | 퀵 필터 (야외/실내/공공/식당, 원탭) |
+| tab-bar.tsx | 47 | 하단 탭바 (지도/피드/저장/마이, a11y) |
+| feed/content-card.tsx | ~120 | 콘텐츠 카드 (그리드 모드) |
+| feed/shorts-card.tsx | ~80 | 숏폼 카드 (9:16) |
+| feed/content-player.tsx | ~150 | YouTube/Naver 임베드 플레이어 |
+| feed/fullscreen-viewer.tsx | ~200 | TikTok 풀스크린 뷰어 (터치 스와이프 + 키보드) |
+| feed/search-bar.tsx | ~60 | 검색바 (400ms debounce) |
+| feed/feed-skeleton.tsx | 47 | 로딩 스켈레톤 (그리드/숏폼/상세) |
+| feed/feed-error-boundary.tsx | 55 | 피드 에러 바운더리 (재시도 버튼) |
+| feed/index.ts | 10 | 피드 배럴 export |
 | index.ts | 8 | 배럴 export |
 
 ### Stores (stores/kidsmap/)
@@ -141,6 +184,15 @@ Plan Mode에 진입하기 전, 다음 6가지 축으로 현재 상태를 완전�
 | map-store.ts | 198 | 지도 상태 (center, zoom, userLocation) |
 | filter-store.ts | 244 | 필터 상태 (카테고리, 연령, 거리, 영업 중) |
 | place-store.ts | 209 | 장소 상태 (검색결과, 선택장소, 즐겨찾기, 최근방문, AI추천) |
+| feed-store.ts | ~150 | 피드 상태 (items, 모드, 정렬, 필터, 키워드, 페이지네이션) |
+| bookmark-store.ts | ~80 | 북마크 상태 (localStorage persist, toggle, Set 기반 조회) |
+
+### Tests (stores/kidsmap/__tests__/)
+| 파일 | 테스트 | 역할 |
+|------|--------|------|
+| filter-store.test.ts | 10 | 필터 스토어 테스트 |
+| feed-store.test.ts | 11 | 피드 스토어 테스트 (fetch mock, async) |
+| bookmark-store.test.ts | 7 | 북마크 스토어 테스트 |
 
 ### Data Sources (lib/skill-engine/data-sources/kidsmap/)
 | 파일 | 줄 | 역할 |
@@ -230,10 +282,11 @@ infant(0-2세), toddler(3-5세), child(6-9세), elementary(10-12세)
 | 오프라인 모드 | ? | PWA/ServiceWorker |
 
 ### 1.2 기술 부채
-- any 타입 사용 현황 (fix-infinite-loading에서 일부 수정됨)
-- 에러 핸들링 패턴
-- 테스트 커버리지 (현재 1개 테스트 파일만 존재)
-- 성능 병목 (무한 로딩 이슈가 있었음)
+- any 타입 사용 현황 (v4.0에서 일부 수정, v5.0에서 KidsMap strict 에러 6건 추가 수정)
+- 에러 핸들링 패턴 (v5.0: FeedErrorBoundary 추가)
+- 테스트 커버리지 (v5.0: 3개 테스트 파일, 28개 테스트 케이스)
+- 성능 병목 (무한 로딩 수정 완료, 스켈레톤 로딩 추가)
+- 접근성 (v5.0: 탭바 + 피드 a11y 적용)
 
 ### 1.3 미통합 리소스
 - Catalyst UI Kit (zip 상태, 미사용)
@@ -272,18 +325,20 @@ infant(0-2세), toddler(3-5세), child(6-9세), elementary(10-12세)
 
 AS-IS와 TO-BE 사이의 갭:
 
-| 카테고리 | 갭 항목 | 심각도 | 복잡도 |
-|----------|---------|--------|--------|
-| UX | Catalyst/Compass 미적용 (현재 자체 UI) | 중간 | L |
-| 데이터 | 크롤링 파이프라인 실제 가동 여부 불명 | 높음 | M |
-| AI | 추천 품질·정확도 검증 미비 | 중간 | M |
-| 테스트 | 1개 테스트만 존재 | 높음 | L |
-| 성능 | 무한 로딩 이슈 (수정됨, 재발 가능성) | 높음 | S |
-| 지역 | 서울/성남 외 지역 미지원 | 중간 | L |
-| 인증 | QETTA 인증과 통합 방식 불명 | 중간 | M |
-| 오프라인 | PWA/오프라인 미지원 | 낮음 | L |
-| 커뮤니티 | 사용자 리뷰/사진 기능 없음 | 중간 | XL |
-| 수익화 | 비즈니스 모델 미정 | 높음 | - |
+| 카테고리 | 갭 항목 | 심각도 | 복잡도 | 상태 |
+|----------|---------|--------|--------|------|
+| UX | Catalyst/Compass 미적용 (현재 자체 UI) | 중간 | L | 미착수 |
+| 데이터 | 크롤링 파이프라인 실제 가동 여부 불명 | 높음 | M | 미착수 |
+| AI | 추천 품질·정확도 검증 미비 | 중간 | M | 미착수 |
+| 테스트 | ~~1개 테스트만 존재~~ 3파일 28테스트 | ~~높음~~ 중간 | L | **v5.0 개선** |
+| 성능 | ~~무한 로딩~~ 스켈레톤/에러바운더리 적용 | ~~높음~~ 낮음 | S | **v5.0 완료** |
+| 콘텐츠 | 피드 시스템 (카드/숏폼/풀스크린/검색/북마크) | - | - | **v5.0 완료** |
+| 지역 | 서울/성남 외 지역 미지원 | 중간 | L | 미착수 |
+| 인증 | ~~통합 방식 불명~~ next-auth 마이페이지 연동 | ~~중간~~ 낮음 | M | **v5.0 개선** |
+| 오프라인 | PWA/오프라인 미지원 | 낮음 | L | 미착수 |
+| 커뮤니티 | 사용자 리뷰/사진 기능 없음 | 중간 | XL | 미착수 |
+| 수익화 | 비즈니스 모델 미정 | 높음 | - | 미착수 |
+| 접근성 | ~~a11y 미적용~~ 탭바+피드 aria/keyboard 적용 | ~~중간~~ 낮음 | S | **v5.0 완료** |
 
 ---
 
