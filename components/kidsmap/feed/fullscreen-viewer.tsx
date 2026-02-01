@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ContentPlayer } from './content-player'
+import { useBookmarkStore } from '@/stores/kidsmap/bookmark-store'
+import { shareContent, getContentShareUrl } from '@/lib/kidsmap/share-utils'
 import type { FeedItem } from '@/stores/kidsmap/feed-store'
 import type { ContentSource } from '@/lib/skill-engine/data-sources/kidsmap/types'
 import { clsx } from 'clsx'
@@ -40,6 +42,9 @@ export function FullscreenViewer({
   const touchStartTime = useRef(0)
   const [translateY, setTranslateY] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [shareToast, setShareToast] = useState<string | null>(null)
+  const isBookmarked = useBookmarkStore((s) => s.isBookmarked(items[currentIndex]?.id ?? ''))
+  const toggleBookmark = useBookmarkStore((s) => s.toggleBookmark)
 
   const currentItem = items[currentIndex]
 
@@ -220,6 +225,7 @@ export function FullscreenViewer({
 
       {/* Side action buttons (TikTok-style) */}
       <div className="absolute right-3 bottom-40 z-10 flex flex-col items-center gap-5">
+        {/* Like (display source count) */}
         <ActionButton
           icon={
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,6 +234,7 @@ export function FullscreenViewer({
           }
           label={currentItem.likeCount ? formatViews(currentItem.likeCount) : '좋아요'}
         />
+        {/* Share */}
         <ActionButton
           icon={
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,24 +242,37 @@ export function FullscreenViewer({
             </svg>
           }
           label="공유"
-          onClick={() => {
-            if (navigator.share) {
-              navigator.share({
-                title: currentItem.title,
-                url: currentItem.sourceUrl,
-              })
+          onClick={async () => {
+            const result = await shareContent({
+              title: currentItem.title,
+              text: `${currentItem.title} - ${currentItem.author}`,
+              url: getContentShareUrl(currentItem.id),
+            })
+            if (result === 'copied') {
+              setShareToast('링크 복사됨')
+              setTimeout(() => setShareToast(null), 2000)
             }
           }}
         />
+        {/* Save/Bookmark */}
         <ActionButton
           icon={
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-6 w-6" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
           }
-          label="저장"
+          label={isBookmarked ? '저장됨' : '저장'}
+          isActive={isBookmarked}
+          onClick={() => toggleBookmark(currentItem)}
         />
       </div>
+
+      {/* Share toast */}
+      {shareToast && (
+        <div className="absolute bottom-24 left-1/2 z-20 -translate-x-1/2 rounded-full bg-white/90 px-4 py-2 text-xs font-medium text-gray-900 shadow-lg">
+          {shareToast}
+        </div>
+      )}
 
       {/* Navigation hints */}
       {currentIndex > 0 && (
@@ -283,15 +303,17 @@ function ActionButton({
   icon,
   label,
   onClick,
+  isActive,
 }: {
   icon: React.ReactNode
   label: string
   onClick?: () => void
+  isActive?: boolean
 }) {
   return (
     <button onClick={onClick} className="flex flex-col items-center gap-1">
-      <div className="text-white">{icon}</div>
-      <span className="text-[10px] text-white/70">{label}</span>
+      <div className={isActive ? 'text-red-400' : 'text-white'}>{icon}</div>
+      <span className={clsx('text-[10px]', isActive ? 'text-red-400' : 'text-white/70')}>{label}</span>
     </button>
   )
 }

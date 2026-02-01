@@ -17,6 +17,7 @@
 import { Fragment, useCallback, useState, useEffect, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { usePlaceStore } from '@/stores/kidsmap/place-store'
+import { shareContent, getPlaceShareUrl } from '@/lib/kidsmap/share-utils'
 import { cn } from '@/lib/utils'
 import { PlaceContentsTab } from './place-contents-tab'
 import type { PlaceWithDistance } from '@/stores/kidsmap/place-store'
@@ -89,22 +90,15 @@ export function PlaceDetailSheet() {
   const handleShare = useCallback(async () => {
     if (!selectedPlace) return
 
-    const shareData = {
+    const result = await shareContent({
       title: selectedPlace.name,
       text: `${selectedPlace.name} - ${selectedPlace.address || 'KidsMap'}`,
-      url: window.location.href,
-    }
+      url: getPlaceShareUrl(selectedPlace.id),
+    })
 
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData)
-      } else {
-        await navigator.clipboard.writeText(window.location.href)
-        setShareStatus('Link copied!')
-        setTimeout(() => setShareStatus(null), 2000)
-      }
-    } catch (error) {
-      console.error('Share failed:', error)
+    if (result === 'copied') {
+      setShareStatus('링크 복사됨!')
+      setTimeout(() => setShareStatus(null), 2000)
     }
   }, [selectedPlace])
 
@@ -176,7 +170,7 @@ export function PlaceDetailSheet() {
                   <button
                     onClick={handleClose}
                     className="flex-shrink-0 p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    aria-label="Close"
+                    aria-label="닫기"
                   >
                     <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -194,7 +188,7 @@ export function PlaceDetailSheet() {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       </svg>
-                      <span>{(selectedPlace.distance / 1000).toFixed(1)} km away</span>
+                      <span>{(selectedPlace.distance / 1000).toFixed(1)}km 거리</span>
                     </div>
                   )}
                   {selectedPlace.address && (
@@ -213,7 +207,7 @@ export function PlaceDetailSheet() {
                 {selectedPlace.recommendedAges && selectedPlace.recommendedAges.length > 0 && (
                   <div className="mb-4">
                     <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-2">
-                      Recommended Ages
+                      추천 연령
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedPlace.recommendedAges.map((age) => (
@@ -232,23 +226,23 @@ export function PlaceDetailSheet() {
                 {selectedPlace.amenities && (
                   <div className="mb-4">
                     <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-2">
-                      Amenities
+                      편의시설
                     </h3>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedPlace.amenities.parking && (
-                        <AmenityBadge icon="🅿️" label="Parking" />
+                        <AmenityBadge icon="🅿️" label="주차장" />
                       )}
                       {selectedPlace.amenities.nursingRoom && (
-                        <AmenityBadge icon="🍼" label="Nursing Room" />
+                        <AmenityBadge icon="🍼" label="수유실" />
                       )}
                       {selectedPlace.amenities.diaperChangingStation && (
-                        <AmenityBadge icon="👶" label="Diaper Station" />
+                        <AmenityBadge icon="👶" label="기저귀 교환대" />
                       )}
                       {selectedPlace.amenities.strollerAccess && (
-                        <AmenityBadge icon="🚼" label="Stroller Access" />
+                        <AmenityBadge icon="🚼" label="유모차 접근 가능" />
                       )}
-                      {selectedPlace.amenities.indoor && <AmenityBadge icon="🏠" label="Indoor" />}
-                      {selectedPlace.amenities.outdoor && <AmenityBadge icon="🌳" label="Outdoor" />}
+                      {selectedPlace.amenities.indoor && <AmenityBadge icon="🏠" label="실내" />}
+                      {selectedPlace.amenities.outdoor && <AmenityBadge icon="🌳" label="야외" />}
                     </div>
                   </div>
                 )}
@@ -257,24 +251,24 @@ export function PlaceDetailSheet() {
                 {selectedPlace.restaurantMetadata?.hasPlayroom && (
                   <div className="mb-4 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                     <h3 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-2">
-                      🎮 Restaurant with Playroom
+                      🎮 놀이방 있는 식당
                     </h3>
                     <div className="space-y-1 text-sm">
                       {selectedPlace.restaurantMetadata.playroomSize && (
                         <p className="text-zinc-700 dark:text-zinc-300">
-                          Playroom: {selectedPlace.restaurantMetadata.playroomSize}평
+                          놀이방 크기: {selectedPlace.restaurantMetadata.playroomSize}평
                         </p>
                       )}
                       {selectedPlace.restaurantMetadata.kidsMenuAvailable && (
-                        <p className="text-zinc-700 dark:text-zinc-300">✓ Kids menu available</p>
+                        <p className="text-zinc-700 dark:text-zinc-300">✓ 키즈 메뉴 제공</p>
                       )}
                       {selectedPlace.restaurantMetadata.babyChairCount && (
                         <p className="text-zinc-700 dark:text-zinc-300">
-                          Baby chairs: {selectedPlace.restaurantMetadata.babyChairCount}
+                          유아용 의자: {selectedPlace.restaurantMetadata.babyChairCount}개
                         </p>
                       )}
                       {selectedPlace.restaurantMetadata.reservation?.available && (
-                        <p className="text-zinc-700 dark:text-zinc-300">✓ Reservations accepted</p>
+                        <p className="text-zinc-700 dark:text-zinc-300">✓ 예약 가능</p>
                       )}
                     </div>
                   </div>
@@ -319,7 +313,7 @@ export function PlaceDetailSheet() {
                     <svg className="w-5 h-5" fill={isFav ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
-                    <span className="text-xs font-medium">{isFav ? 'Saved' : 'Save'}</span>
+                    <span className="text-xs font-medium">{isFav ? '저장됨' : '저장'}</span>
                   </button>
 
                   <button
@@ -329,7 +323,7 @@ export function PlaceDetailSheet() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                     </svg>
-                    <span className="text-xs font-medium">Directions</span>
+                    <span className="text-xs font-medium">길찾기</span>
                   </button>
 
                   <button
@@ -339,7 +333,7 @@ export function PlaceDetailSheet() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                     </svg>
-                    <span className="text-xs font-medium">{shareStatus || 'Share'}</span>
+                    <span className="text-xs font-medium">{shareStatus || '공유'}</span>
                   </button>
                 </div>
               </div>
@@ -370,34 +364,34 @@ function AmenityBadge({ icon, label }: { icon: string; label: string }) {
 
 function getCategoryLabel(category: string): string {
   const labels: Record<string, string> = {
-    kids_cafe: 'Kids Cafe',
-    amusement_park: 'Amusement Park',
-    zoo_aquarium: 'Zoo & Aquarium',
-    museum: 'Museum',
-    nature_park: 'Nature Park',
-    playground: 'Playground',
-    water_park: 'Water Park',
-    farm_experience: 'Farm Experience',
-    indoor_playground: 'Indoor Playground',
-    library: 'Library',
-    culture_center: 'Culture Center',
-    childcare_center: 'Childcare Center',
-    toy_library: 'Toy Library',
-    public_pool: 'Public Pool',
-    gym: 'Gym',
-    restaurant: 'Restaurant',
-    public_facility: 'Public Facility',
-    other: 'Other',
+    kids_cafe: '키즈카페',
+    amusement_park: '놀이공원',
+    zoo_aquarium: '동물원·수족관',
+    museum: '박물관',
+    nature_park: '자연공원',
+    playground: '놀이터',
+    water_park: '워터파크',
+    farm_experience: '농장체험',
+    indoor_playground: '실내놀이터',
+    library: '도서관',
+    culture_center: '문화센터',
+    childcare_center: '어린이집',
+    toy_library: '장난감 도서관',
+    public_pool: '공공수영장',
+    gym: '체육관',
+    restaurant: '식당',
+    public_facility: '공공시설',
+    other: '기타',
   }
   return labels[category] || category
 }
 
 function getAgeLabel(age: string): string {
   const labels: Record<string, string> = {
-    infant: 'Infant (0-2)',
-    toddler: 'Toddler (3-5)',
-    child: 'Child (6-9)',
-    elementary: 'Elementary (10-12)',
+    infant: '영아 (0~2세)',
+    toddler: '유아 (3~5세)',
+    child: '아동 (6~9세)',
+    elementary: '초등 (10~12세)',
   }
   return labels[age] || age
 }
