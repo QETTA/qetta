@@ -8,6 +8,8 @@ import { FullscreenViewer } from '@/components/kidsmap/feed/fullscreen-viewer'
 import { SearchBar } from '@/components/kidsmap/feed/search-bar'
 import { FeedGridSkeleton, FeedShortsSkeleton } from '@/components/kidsmap/feed/feed-skeleton'
 import { FeedErrorBoundary } from '@/components/kidsmap/feed/feed-error-boundary'
+import { usePullToRefresh } from '@/hooks/kidsmap/use-pull-to-refresh'
+import { PullToRefreshIndicator } from '@/components/kidsmap/pull-to-refresh-indicator'
 import type { ContentSource } from '@/lib/skill-engine/data-sources/kidsmap/types'
 import { clsx } from 'clsx'
 
@@ -44,6 +46,10 @@ export default function FeedPage() {
   const observerRef = useRef<HTMLDivElement>(null)
   const [fullscreenIndex, setFullscreenIndex] = useState<number | null>(null)
 
+  const { isRefreshing, pullDistance, onTouchStart, onTouchMove, onTouchEnd } = usePullToRefresh({
+    onRefresh: () => fetchFeed(true),
+  })
+
   // Initial fetch
   useEffect(() => {
     fetchFeed(true)
@@ -68,7 +74,15 @@ export default function FeedPage() {
   }, [hasMore, isLoading, loadMore])
 
   return (
-    <div className="min-h-screen bg-white pb-16 dark:bg-gray-950">
+    <div
+      className="min-h-screen bg-white pb-16 dark:bg-gray-950"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Pull-to-refresh */}
+      <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
+
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95">
         <div className="mx-auto max-w-2xl px-4">

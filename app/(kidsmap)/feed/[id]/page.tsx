@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ContentPlayer } from '@/components/kidsmap/feed/content-player'
+import { useBookmarkStore } from '@/stores/kidsmap/bookmark-store'
+import { useViewHistoryStore } from '@/stores/kidsmap/view-history-store'
 import type { FeedItem } from '@/stores/kidsmap/feed-store'
 import type { ContentSource } from '@/lib/skill-engine/data-sources/kidsmap/types'
 import Link from 'next/link'
@@ -27,6 +29,9 @@ export default function ContentDetailPage() {
   const [item, setItem] = useState<FeedItem | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const isBookmarked = useBookmarkStore((s) => s.isBookmarked(id))
+  const toggleBookmark = useBookmarkStore((s) => s.toggleBookmark)
+  const addView = useViewHistoryStore((s) => s.addView)
 
   useEffect(() => {
     if (!id) return
@@ -39,6 +44,13 @@ export default function ContentDetailPage() {
         const json = await res.json()
         if (!json.success) throw new Error(json.error)
         setItem(json.data)
+        // Record view history
+        addView({
+          contentId: json.data.id,
+          title: json.data.title,
+          source: json.data.source,
+          thumbnailUrl: json.data.thumbnailUrl,
+        })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load')
       } finally {
@@ -47,7 +59,7 @@ export default function ContentDetailPage() {
     }
 
     fetchContent()
-  }, [id])
+  }, [id, addView])
 
   if (isLoading) {
     return (
@@ -74,13 +86,25 @@ export default function ContentDetailPage() {
   return (
     <div className="min-h-screen bg-white pb-20 dark:bg-gray-950">
       {/* Back button */}
-      <header className="sticky top-0 z-40 flex h-12 items-center gap-3 border-b border-gray-100 bg-white/95 px-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95">
-        <button onClick={() => router.back()} className="text-lg">
-          ←
+      <header className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-gray-100 bg-white/95 px-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="text-lg" aria-label="뒤로 가기">
+            ←
+          </button>
+          <span className="text-sm font-medium text-gray-500">
+            {SOURCE_LABELS[item.source]}
+          </span>
+        </div>
+        <button
+          onClick={() => toggleBookmark(item)}
+          className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
+          aria-label={isBookmarked ? '저장 취소' : '저장'}
+        >
+          <svg className="h-5 w-5" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          <span className={isBookmarked ? 'text-red-500' : 'text-gray-500'}>{isBookmarked ? '저장됨' : '저장'}</span>
         </button>
-        <span className="text-sm font-medium text-gray-500">
-          {SOURCE_LABELS[item.source]}
-        </span>
       </header>
 
       {/* Player */}

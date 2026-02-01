@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRef } from 'react'
+import { useBookmarkStore } from '@/stores/kidsmap/bookmark-store'
 import type { ContentSource, ContentType } from '@/lib/skill-engine/data-sources/kidsmap/types'
 
 function formatDuration(seconds: number): string {
@@ -51,20 +52,23 @@ export interface ContentCardProps {
   tags?: string[]
 }
 
-export function ContentCard({
-  id,
-  source,
-  title,
-  thumbnailUrl,
-  author,
-  authorThumbnail,
-  publishedAt,
-  viewCount,
-  duration,
-  relatedPlaceName,
-}: ContentCardProps) {
+export function ContentCard(props: ContentCardProps) {
+  const {
+    id,
+    source,
+    title,
+    thumbnailUrl,
+    author,
+    authorThumbnail,
+    publishedAt,
+    viewCount,
+    duration,
+    relatedPlaceName,
+  } = props
   const videoRef = useRef<HTMLVideoElement>(null)
   const isVideo = source === 'YOUTUBE' || source === 'NAVER_CLIP'
+  const isBookmarked = useBookmarkStore((s) => s.isBookmarked(id))
+  const toggleBookmark = useBookmarkStore((s) => s.toggleBookmark)
 
   const timeAgo = getTimeAgo(publishedAt)
 
@@ -99,6 +103,21 @@ export function ContentCard({
         >
           {SOURCE_LABELS[source]}
         </div>
+
+        {/* Bookmark button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            toggleBookmark(props as import('@/stores/kidsmap/feed-store').FeedItem)
+          }}
+          className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+          aria-label={isBookmarked ? '저장 취소' : '저장'}
+        >
+          <svg className="h-4 w-4" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
       </div>
 
       {/* Info */}
