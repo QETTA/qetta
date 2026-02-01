@@ -24,6 +24,7 @@
     "db:studio": "prisma studio",
     "db:setup": "npx tsx scripts/db-setup.ts",
     "db:check": "npx tsx scripts/db-setup.ts check",
+    "db:migrate:direct": "npx tsx scripts/db-direct-migrate.ts",
     "prepare": "husky",
     "validate": "npm run typecheck && npm run lint && npm run test"
   },
