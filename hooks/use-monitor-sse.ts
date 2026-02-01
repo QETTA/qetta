@@ -11,6 +11,7 @@ import type {
 const SSE_ENDPOINT = '/api/monitor/stream'
 const MAX_RECONNECT_DELAY = 30000 // 30 seconds
 const BASE_RECONNECT_DELAY = 1000 // 1 second
+const MAX_RECONNECT_ATTEMPTS = 10 // Stop retrying after 10 attempts
 
 interface MonitorEvent {
   type: 'sensor-update' | 'oee-update' | 'alert' | 'full-sync' | 'heartbeat'
@@ -112,6 +113,13 @@ export function useMonitorSSE() {
           setConnectionStatus(false)
           setError('실시간 연결 끊김')
           eventSource.close()
+
+          // Stop retrying after max attempts
+          if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
+            clientLogger.error('[SSE] Max reconnect attempts reached, giving up')
+            setError('연결 재시도 횟수 초과. 페이지를 새로고침해 주세요.')
+            return
+          }
 
           // Exponential backoff reconnection
           const delay = Math.min(
