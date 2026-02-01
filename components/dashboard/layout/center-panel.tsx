@@ -32,9 +32,9 @@ interface QettaCenterPanelProps {
 
 function LoadingState() {
   return (
-    <div className="flex items-center justify-center h-32">
+    <div className="flex h-32 items-center justify-center">
       <div className="flex flex-col items-center gap-2">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-500" />
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-zinc-500" />
         <span className="text-sm text-zinc-500">Loading documents...</span>
       </div>
     </div>
@@ -43,7 +43,7 @@ function LoadingState() {
 
 function EmptyState() {
   return (
-    <div className="flex items-center justify-center h-32">
+    <div className="flex h-32 items-center justify-center">
       <span className="text-sm text-zinc-500">No documents</span>
     </div>
   )
@@ -57,7 +57,7 @@ interface HeaderProps {
 
 function Header({ title, onSortClick, onFilterClick }: HeaderProps) {
   return (
-    <div className="h-14 px-5 flex items-center justify-between border-b border-white/5">
+    <div className="flex h-14 items-center justify-between border-b border-white/5 px-5">
       <h2 id="document-list-title" className="text-base font-semibold text-white">
         {title}
       </h2>
@@ -65,11 +65,11 @@ function Header({ title, onSortClick, onFilterClick }: HeaderProps) {
         <button
           onClick={onSortClick}
           data-testid="document-sort-button"
-          className="p-1.5 text-zinc-500 hover:text-zinc-300 hover:bg-white/5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300 focus:ring-2 focus:ring-white/30 focus:outline-none"
           aria-label="Change sort order"
         >
           <svg
-            className="w-4 h-4"
+            className="h-4 w-4"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -86,11 +86,11 @@ function Header({ title, onSortClick, onFilterClick }: HeaderProps) {
         <button
           onClick={onFilterClick}
           data-testid="document-filter-button"
-          className="p-1.5 text-zinc-500 hover:text-zinc-300 hover:bg-white/5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300 focus:ring-2 focus:ring-white/30 focus:outline-none"
           aria-label="Filter options"
         >
           <svg
-            className="w-4 h-4"
+            className="h-4 w-4"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -116,7 +116,7 @@ interface FooterProps {
 
 function Footer({ totalCount, unreadCount }: FooterProps) {
   return (
-    <div className="px-5 py-3 border-t border-white/5 bg-zinc-900/50">
+    <div className="border-t border-white/5 bg-zinc-900/50 px-5 py-3">
       <div className="flex items-center justify-between text-xs text-zinc-500">
         <span>Total {totalCount}</span>
         <span>{unreadCount} unread</span>
@@ -141,17 +141,17 @@ export const QettaCenterPanel = memo(function QettaCenterPanel({
   })
 
   const handleSortClick = () => {
-    showToast('Sort options coming soon', 'info')
+    showToast('정렬 기능 준비 중입니다', 'info')
   }
 
   const handleFilterClick = () => {
-    showToast('Filter coming soon', 'info')
+    showToast('필터 기능 준비 중입니다', 'info')
   }
 
   const unreadCount = documents.filter((d) => d.unread).length
 
   return (
-    <div className="w-96 flex-shrink-0 bg-zinc-900 border-r border-white/10 flex flex-col">
+    <div className="flex w-96 flex-shrink-0 flex-col border-r border-white/10 bg-zinc-900">
       {/* Header */}
       <Header
         title={TAB_TITLES[activeTab]}

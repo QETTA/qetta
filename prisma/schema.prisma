@@ -718,3 +718,295 @@ enum WidgetEventType {
   DOCUMENT_DOWNLOADED // 문서 다운로드
   TIME_SAVED // 시간 절감 기록
 }
+
+// ============================================
+// KidsMap - AI-powered kids place finder
+// ============================================
+
+enum BlockStatus {
+  draft
+  active
+  archived
+  deleted
+}
+
+enum QualityGrade {
+  A
+  B
+  C
+  D
+  F
+}
+
+enum FreshnessLevel {
+  fresh    // < 7일
+  recent   // < 30일
+  stale    // < 90일
+  outdated // >= 90일
+}
+
+enum PlaceCategory {
+  amusement_park   // 놀이공원 (야외)
+  zoo_aquarium     // 동물원 (야외)
+  nature_park      // 공원 (야외)
+  kids_cafe        // 키즈카페 (실내)
+  museum           // 박물관 (실내)
+  restaurant       // 놀이방 식당 (실내)
+  public_facility  // 공공시설 (공공)
+  other            // 기타
+}
+
+enum PlaceSource {
+  TOUR_API
+  PLAYGROUND_API
+  KAKAO_LOCAL
+  MANUAL
+}
+
+enum ContentSource {
+  YOUTUBE
+  NAVER_BLOG
+  NAVER_CLIP
+}
+
+enum ContentType {
+  video
+  blog_post
+  short_video
+}
+
+enum CrawlJobType {
+  FULL_CRAWL
+  INCREMENTAL
+  REGION_CRAWL
+  CATEGORY_CRAWL
+  CONTENT_REFRESH
+  QUALITY_CHECK
+  DEDUP_SCAN
+}
+
+enum CrawlJobStatus {
+  pending
+  running
+  completed
+  failed
+  cancelled
+  paused
+}
+
+// ============================================
+// KidsMap Place Blocks
+// ============================================
+
+model KidsmapPlaceBlock {
+  id String @id @default(uuid())
+
+  // 정규화된 장소 데이터 (NormalizedPlace JSON)
+  data Json
+
+  // 블록 상태
+  status       BlockStatus    @default(active)
+  qualityGrade QualityGrade   @default(C)
+  freshness    FreshnessLevel @default(fresh)
+  completeness Int            @default(0) // 0-100
+
+  // 중복 체크용 해시 (name + address + lat/lng)
+  dedupeHash String @unique @db.VarChar(64)
+
+  // 관련 콘텐츠 ID 배열
+  relatedContentIds String[] @default([])
+
+  // 검색 최적화
+  searchKeywords String[] @default([])
+  regionCode     String?  @db.VarChar(10)
+
+  // 핵심 필드 추출 (검색/필터용)
+  name      String        @db.VarChar(255)
+  category  PlaceCategory
+  source    PlaceSource
+  sourceId  String        @db.VarChar(100)
+  latitude  Decimal?      @db.Decimal(10, 8)
+  longitude Decimal?      @db.Decimal(11, 8)
+  address   String?       @db.Text
+
+  // 메타데이터 (PlaceBlockMetadata JSON)
+  metadata Json @default("{}")
+
+  // 타임스탬프
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lastCrawledAt  DateTime @default(now())
+  crawlCount     Int      @default(1)
+
+  // Relations
+  relatedContents KidsmapContentBlock[]
+
+  // 인덱스
+  @@index([status])
+  @@index([category])
+  @@index([regionCode])
+  @@index([source, sourceId])
+  @@index([qualityGrade])
+  @@index([freshness])
+  @@index([latitude, longitude])
+  @@index([updatedAt(sort: Desc)])
+  @@map("kidsmap_place_blocks")
+}
+
+// ============================================
+// KidsMap Content Blocks
+// ============================================
+
+model KidsmapContentBlock {
+  id String @id @default(uuid())
+
+  // 정규화된 콘텐츠 데이터 (NormalizedContent JSON)
+  data Json
+
+  // 블록 상태
+  status       BlockStatus    @default(active)
+  qualityGrade QualityGrade   @default(C)
+  freshness    FreshnessLevel @default(fresh)
+
+  // 관련 장소 블록 참조
+  relatedPlaceId String? @db.Uuid
+  relatedPlace   KidsmapPlaceBlock? @relation(fields: [relatedPlaceId], references: [id], onDelete: SetNull)
+
+  // 중복 체크용 해시
+  dedupeHash String @unique @db.VarChar(64)
+
+  // 핵심 필드 추출
+  title        String         @db.VarChar(500)
+  source       ContentSource
+  sourceId     String         @db.VarChar(100)
+  contentType  ContentType
+  author       String?        @db.VarChar(255)
+  publishedAt  DateTime?
+  viewCount    Int            @default(0)
+  likeCount    Int            @default(0)
+
+  // 콘텐츠 분석 결과 (감성분석, 키워드 등)
+  analysis Json @default("{}")
+
+  // 메타데이터
+  metadata Json @default("{}")
+
+  // 타임스탬프
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastCrawledAt DateTime @default(now())
+
+  // 인덱스
+  @@index([status])
+  @@index([source, sourceId])
+  @@index([relatedPlaceId])
+  @@index([qualityGrade])
+  @@index([publishedAt(sort: Desc)])
+  @@index([viewCount(sort: Desc)])
+  @@map("kidsmap_content_blocks")
+}
+
+// ============================================
+// KidsMap Crawl Jobs
+// ============================================
+
+model KidsmapCrawlJob {
+  id String @id @default(uuid())
+
+  // 작업 정보
+  type     CrawlJobType   @map("type")
+  status   CrawlJobStatus @default(pending)
+  priority Int            @default(5) // 1-10
+
+  // 작업 설정 (CrawlJobConfig JSON)
+  config Json
+
+  // 진행 상황 (CrawlProgress JSON)
+  progress Json @default("{\"totalEstimated\":0,\"processed\":0,\"succeeded\":0,\"failed\":0,\"skipped\":0,\"percentage\":0}")
+
+  // 결과 (CrawlResult JSON)
+  result Json?
+
+  // 에러 정보
+  error Json?
+
+  // 타임스탬프
+  createdAt   DateTime  @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+  scheduledAt DateTime?
+
+  // 재시도 정보
+  retryCount Int @default(0)
+  maxRetries Int @default(3)
+
+  // 인덱스
+  @@index([status])
+  @@index([type])
+  @@index([priority(sort: Desc)])
+  @@index([scheduledAt])
+  @@index([createdAt(sort: Desc)])
+  @@map("kidsmap_crawl_jobs")
+}
+
+// ============================================
+// KidsMap Crawl Schedules
+// ============================================
+
+model KidsmapCrawlSchedule {
+  id String @id @default(uuid())
+
+  // 스케줄 정보
+  name    String  @db.VarChar(100)
+  cron    String  @db.VarChar(100)
+  enabled Boolean @default(true)
+
+  // 작업 설정 (CrawlJobConfig JSON)
+  jobConfig Json
+
+  // 실행 이력
+  lastRunAt DateTime?
+  nextRunAt DateTime?
+
+  // 타임스탬프
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 인덱스
+  @@index([enabled])
+  @@index([nextRunAt])
+  @@map("kidsmap_crawl_schedules")
+}
+
+// ============================================
+// KidsMap Block Stats (캐시)
+// ============================================
+
+model KidsmapBlockStats {
+  id String @id @default("global") @db.VarChar(50)
+
+  // 전체 카운트
+  totalPlaces   Int @default(0)
+  totalContents Int @default(0)
+
+  // 상태별 분포 (JSON)
+  placesByStatus   Json @default("{}")
+  contentsByStatus Json @default("{}")
+
+  // 카테고리/소스별 분포 (JSON)
+  placesByCategory Json @default("{}")
+  placesByRegion   Json @default("{}")
+  contentsBySource Json @default("{}")
+
+  // 품질 분포 (JSON)
+  qualityDistribution   Json @default("{}")
+  freshnessDistribution Json @default("{}")
+
+  // 평균값
+  averageCompleteness Decimal @default(0) @db.Decimal(5, 2)
+
+  // 마지막 업데이트
+  lastUpdated DateTime @default(now())
+
+  @@map("kidsmap_block_stats")
+}

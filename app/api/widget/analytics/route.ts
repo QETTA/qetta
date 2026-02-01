@@ -156,7 +156,7 @@ export async function GET(request: Request) {
 
     // Convert event counts to object
     const events = eventCounts.reduce(
-      (acc, { eventType, _count }) => {
+      (acc: Record<string, number>, { eventType, _count }: { eventType: string; _count: number }) => {
         acc[eventType] = _count
         return acc
       },

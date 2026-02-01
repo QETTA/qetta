@@ -26,7 +26,10 @@ export class EmailNotConfiguredError extends Error {
  * Custom error thrown when email sending fails
  */
 export class EmailSendError extends Error {
-  constructor(message: string, public readonly originalError?: unknown) {
+  constructor(
+    message: string,
+    public readonly originalError?: unknown
+  ) {
     super(message)
     this.name = 'EmailSendError'
   }
@@ -52,9 +55,9 @@ function getResendClient(): Resend | null {
 
 /**
  * 발신자 이메일 주소
- * Resend에서 검증된 도메인 사용 (실제 배포 시 변경 필요)
+ * EMAIL_FROM 환경변수로 설정 가능
  */
-const FROM_EMAIL = 'QETTA <onboarding@resend.dev>'
+const FROM_EMAIL = process.env.EMAIL_FROM || 'QETTA <noreply@qetta.io>'
 
 /**
  * 이메일 인증 메일 발송
@@ -80,10 +83,7 @@ const FROM_EMAIL = 'QETTA <onboarding@resend.dev>'
  * }
  * ```
  */
-export async function sendVerificationEmail(
-  to: string,
-  verificationUrl: string
-): Promise<void> {
+export async function sendVerificationEmail(to: string, verificationUrl: string): Promise<void> {
   const client = getResendClient()
 
   // Resend가 설정되지 않은 경우
@@ -157,10 +157,7 @@ export async function sendVerificationEmail(
  * }
  * ```
  */
-export async function sendPasswordResetEmail(
-  to: string,
-  resetUrl: string
-): Promise<void> {
+export async function sendPasswordResetEmail(to: string, resetUrl: string): Promise<void> {
   const client = getResendClient()
 
   // Resend가 설정되지 않은 경우

@@ -16,7 +16,7 @@ import {
   cancelSubscription,
 } from '@/lib/payment/subscription'
 import { getUsageQuota, checkUsageWarning } from '@/lib/payment/usage'
-import { PLAN_CONFIGS, PaymentError, PAYMENT_ERROR_CODES } from '@/lib/payment/types'
+import { PLAN_CONFIGS, type PlanId, PaymentError, PAYMENT_ERROR_CODES } from '@/lib/payment/types'
 
 // ============================================
 // GET /api/payments/subscription
@@ -52,7 +52,7 @@ export const GET = withApiMiddleware(
     ])
 
     // 플랜 설정
-    const planConfig = PLAN_CONFIGS[status.plan]
+    const planConfig = PLAN_CONFIGS[status.plan as PlanId]
 
     return NextResponse.json({
       success: true,
