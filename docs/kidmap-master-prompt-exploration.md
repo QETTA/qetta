@@ -2,8 +2,9 @@
 
 > **목적**: Plan Mode 진입 전, AI가 KidsMap의 현재 코드·아키텍처·갭을 완전히 이해하도록 하는 탐색 프롬프트
 > **작성일**: 2026-02-01
-> **버전**: 3.0
+> **버전**: 3.1
 > **프로젝트**: KidsMap — AI 기반 어린이 놀이 공간 검색 플랫폼 (QETTA 내 독립 모듈)
+> **전문가 분석 보고서**: [`docs/kidmap-expert-analysis-report.md`](./kidmap-expert-analysis-report.md) (P0 버그 3건, 보안 4건, 15개 우선순위 항목)
 
 ---
 
