@@ -18,21 +18,51 @@ export type KidsMapDataSource = 'TOUR_API' | 'PLAYGROUND_API'
 
 /** 장소 카테고리 */
 export const PLACE_CATEGORIES = {
-  /** 놀이공원/테마파크 */
+  /** 놀이공원/테마파크 (야외) */
   AMUSEMENT_PARK: 'amusement_park',
-  /** 동물원/수족관 */
+  /** 동물원/수족관 (야외) */
   ZOO_AQUARIUM: 'zoo_aquarium',
-  /** 키즈카페/실내놀이터 */
+  /** 키즈카페/실내놀이터 (실내) */
   KIDS_CAFE: 'kids_cafe',
-  /** 박물관/체험관 */
+  /** 박물관/체험관 (실내) */
   MUSEUM: 'museum',
-  /** 자연/공원 */
+  /** 자연/공원 (야외) */
   NATURE_PARK: 'nature_park',
+  /** 놀이방 있는 식당 (실내) */
+  RESTAURANT: 'restaurant',
+  /** 공공시설 (육아나눔터, 장난감도서관 등) */
+  PUBLIC_FACILITY: 'public_facility',
   /** 기타 */
   OTHER: 'other',
 } as const
 
 export type PlaceCategory = (typeof PLACE_CATEGORIES)[keyof typeof PLACE_CATEGORIES]
+
+/** Quick Filter 카테고리 (야외/실내/공공/식당) */
+export const FILTER_CATEGORIES = {
+  /** 야외 (공원, 놀이터, 자연체험, 물놀이장, 농장) */
+  OUTDOOR: 'outdoor',
+  /** 실내 (키즈카페, 실내놀이터, 박물관, 도서관) */
+  INDOOR: 'indoor',
+  /** 공공시설 (육아나눔터, 장난감도서관, 공공수영장, 체육관) */
+  PUBLIC: 'public',
+  /** 식당 (놀이방 있는 식당, 키즈카페 식당, 패밀리 레스토랑) */
+  RESTAURANT: 'restaurant',
+} as const
+
+export type FilterCategory = (typeof FILTER_CATEGORIES)[keyof typeof FILTER_CATEGORIES]
+
+/** PlaceCategory → FilterCategory 매핑 */
+export const PLACE_TO_FILTER_CATEGORY: Record<PlaceCategory, FilterCategory> = {
+  amusement_park: 'outdoor',
+  zoo_aquarium: 'outdoor',
+  nature_park: 'outdoor',
+  kids_cafe: 'indoor',
+  museum: 'indoor',
+  restaurant: 'restaurant',
+  public_facility: 'public',
+  other: 'indoor', // 기본값
+}
 
 /** 연령대 적합성 */
 export const AGE_GROUPS = {
@@ -54,14 +84,108 @@ export interface Amenities {
   strollerAccess?: boolean
   /** 수유실 */
   nursingRoom?: boolean
+  /** 기저귀 교환대 */
+  diaperChangingStation?: boolean
   /** 주차장 */
   parking?: boolean
-  /** 식당/카페 */
+  /** 식당/카페 (boolean - 편의시설로서의 식당 유무) */
   restaurant?: boolean
   /** 화장실 */
   restroom?: boolean
   /** 휠체어 접근 가능 */
   wheelchairAccess?: boolean
+  /** 아기 의자 */
+  babyChair?: boolean
+  /** 수유 쿠션 */
+  nursingCushion?: boolean
+}
+
+/** 혼잡도 정보 (실시간 및 예측) */
+export interface CrowdLevel {
+  /** 현재 혼잡도 (1-5) */
+  current?: number
+  /** 시간대별 혼잡도 예측 */
+  hourly?: Array<{
+    hour: number // 0-23
+    level: number // 1-5 (1=한산, 5=매우혼잡)
+  }>
+  /** 주말 혼잡도 */
+  weekend?: number
+  /** 공휴일 혼잡도 */
+  holiday?: number
+  /** 마지막 업데이트 */
+  lastUpdated?: string
+}
+
+/** 예약 정보 */
+export interface ReservationInfo {
+  /** 예약 가능 여부 */
+  available: boolean
+  /** 예약 필수 여부 */
+  required?: boolean
+  /** 예약 URL */
+  url?: string
+  /** 전화 예약 */
+  phoneOnly?: boolean
+  /** 예약 가능 시간대 */
+  availableHours?: string
+  /** 취소 정책 */
+  cancellationPolicy?: string
+}
+
+/** 식당 전용 메타데이터 (놀이방 있는 식당) */
+export interface RestaurantMetadata {
+  /** 놀이방 유무 */
+  hasPlayroom: boolean
+
+  /** 놀이방 크기 (평수) */
+  playroomSize?: number
+
+  /** 놀이방 연령대 */
+  playroomAges?: AgeGroup[]
+
+  /** 보호자 동반 필수 여부 */
+  guardianRequired?: boolean
+
+  /** 식사 중 돌봄 가능 여부 */
+  attendantAvailable?: boolean
+
+  /** 키즈 메뉴 제공 */
+  kidsMenuAvailable?: boolean
+
+  /** 키즈 메뉴 가격대 */
+  kidsMenuPriceRange?: {
+    min: number
+    max: number
+  }
+
+  /** 아기 의자 개수 */
+  babyChairCount?: number
+
+  /** 수유실 유무 */
+  nursingRoomAvailable?: boolean
+
+  /** 기저귀 교환대 유무 */
+  changingStationAvailable?: boolean
+
+  /** 주차 정보 */
+  parkingInfo?: {
+    available: boolean
+    free?: boolean
+    capacity?: number
+  }
+
+  /** 예약 정보 */
+  reservation?: ReservationInfo
+
+  /** 대기 시간 (분, 실시간) */
+  waitingTime?: number
+
+  /** 음식 종류 */
+  cuisineType?: string[]
+
+  /** 가격대 (1-5) */
+  priceLevel?: number
 }
 
 /** 운영 시간 */
@@ -157,6 +281,15 @@ export interface NormalizedPlace {
 
   /** 입장료 */
   admissionFee?: AdmissionFee
+
+  /** 식당 전용 메타데이터 (놀이방 있는 식당인 경우) */
+  restaurantMetadata?: RestaurantMetadata
+
+  /** 혼잡도 정보 */
+  crowdLevel?: CrowdLevel
+
+  /** 예약 정보 */
+  reservationInfo?: ReservationInfo
 
   /** 원본 데이터 */
   rawData: unknown
