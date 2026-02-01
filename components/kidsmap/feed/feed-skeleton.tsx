@@ -1,5 +1,3 @@
-'use client'
-
 export function FeedGridSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

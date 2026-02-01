@@ -1,5 +1,3 @@
-'use client'
-
 import Image from 'next/image'
 import type { ContentSource } from '@/lib/skill-engine/data-sources/kidsmap/types'
 

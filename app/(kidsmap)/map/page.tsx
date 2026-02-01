@@ -19,14 +19,21 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useKakaoMap } from '@/hooks/use-kakao-map'
 import { useMapStore } from '@/stores/kidsmap/map-store'
 import { useFilterStore } from '@/stores/kidsmap/filter-store'
 import { usePlaceStore } from '@/stores/kidsmap/place-store'
 import { useKakaoMapContext } from '@/contexts/kakao-map-context'
-import { PlaceDetailSheet, QuickFilter } from '@/components/kidsmap'
+import { QuickFilter } from '@/components/kidsmap'
 import type { PlaceWithDistance } from '@/stores/kidsmap/place-store'
+
+// Dynamic import for heavy bottom sheet component (loaded on demand)
+const PlaceDetailSheet = dynamic(
+  () => import('@/components/kidsmap/place-detail-sheet').then((mod) => mod.PlaceDetailSheet),
+  { ssr: false }
+)
 
 // ============================================
 // Main Component

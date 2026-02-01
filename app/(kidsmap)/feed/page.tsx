@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useCallback, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { useFeedStore } from '@/stores/kidsmap/feed-store'
 import { ContentCard } from '@/components/kidsmap/feed/content-card'
 import { ShortsCard } from '@/components/kidsmap/feed/shorts-card'
-import { FullscreenViewer } from '@/components/kidsmap/feed/fullscreen-viewer'
 import { SearchBar } from '@/components/kidsmap/feed/search-bar'
 import { FeedGridSkeleton, FeedShortsSkeleton } from '@/components/kidsmap/feed/feed-skeleton'
 import { FeedErrorBoundary } from '@/components/kidsmap/feed/feed-error-boundary'
@@ -12,6 +12,12 @@ import { usePullToRefresh } from '@/hooks/kidsmap/use-pull-to-refresh'
 import { PullToRefreshIndicator } from '@/components/kidsmap/pull-to-refresh-indicator'
 import type { ContentSource } from '@/lib/skill-engine/data-sources/kidsmap/types'
 import { clsx } from 'clsx'
+
+// Dynamic import for heavy fullscreen viewer component
+const FullscreenViewer = dynamic(
+  () => import('@/components/kidsmap/feed/fullscreen-viewer').then((mod) => mod.FullscreenViewer),
+  { ssr: false }
+)
 
 const SOURCE_TABS: { label: string; value: ContentSource | null }[] = [
   { label: '전체', value: null },
