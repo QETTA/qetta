@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
   // 압축 활성화
   compress: true,
 
+  // React Strict Mode
+  reactStrictMode: true,
+
+  // 프로덕션 소스맵 비활성화 (Sentry에서 별도 업로드)
+  productionBrowserSourceMaps: false,
+
   // 실험적 기능
   experimental: {
     // Server Actions 활성화 (이미 기본값이지만 명시적으로)
@@ -22,12 +28,45 @@ const nextConfig: NextConfig = {
 
   // 이미지 최적화 설정
   images: {
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '*.hancom.com',
       },
     ],
+  },
+
+  // 보안 헤더
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=()',
+          },
+        ],
+      },
+      {
+        source: '/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=2592000, must-revalidate' },
+        ],
+      },
+    ]
   },
 }
 

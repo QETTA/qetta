@@ -4,6 +4,11 @@
   "buildCommand": "npx prisma generate && next build",
   "installCommand": "npm install",
   "regions": ["icn1"],
+  "build": {
+    "env": {
+      "SKIP_ENV_VALIDATION": "true"
+    }
+  },
   "headers": [
     {
       "source": "/api/(.*)",
