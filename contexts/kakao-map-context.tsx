@@ -15,7 +15,7 @@
  * </KakaoMapProvider>
  */
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react'
 
 // ============================================
 // Types
@@ -41,20 +41,29 @@ declare global {
     kakao: {
       maps: {
         load: (callback: () => void) => void
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         LatLng: new (lat: number, lng: number) => any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         LatLngBounds: new () => { extend: (latlng: any) => void }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Map: new (container: HTMLElement, options: any) => any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Marker: new (options: any) => any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         InfoWindow: new (options: any) => any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         CustomOverlay: new (options: any) => any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         MarkerClusterer: new (options: any) => any
         services: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Geocoder: new () => any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Places: new () => any
         }
         event: {
-          addListener: (target: any, type: string, handler: (...args: any[]) => void) => void
-          removeListener: (target: any, type: string, handler: (...args: any[]) => void) => void
+          addListener: (target: unknown, type: string, handler: (...args: unknown[]) => void) => void
+          removeListener: (target: unknown, type: string, handler: (...args: unknown[]) => void) => void
         }
         ControlPosition: {
           TOP: number
@@ -107,13 +116,18 @@ export function KakaoMapProvider({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [kakao, setKakao] = useState<typeof window.kakao | null>(null)
+  const initRef = useRef(false)
 
   useEffect(() => {
+    // Prevent re-initialization
+    if (initRef.current) return
+    initRef.current = true
+
     const key = apiKey || process.env.NEXT_PUBLIC_KAKAO_MAP_KEY
 
     // Validate API key
     if (!key) {
-      setError(
+      setError( // eslint-disable-line react-hooks/set-state-in-effect
         new Error(
           'Kakao Map API key is required. Set NEXT_PUBLIC_KAKAO_MAP_KEY environment variable.',
         ),
@@ -167,13 +181,7 @@ export function KakaoMapProvider({
 
     document.head.appendChild(script)
 
-    return () => {
-      // Cleanup: remove script on unmount
-      const scriptToRemove = document.getElementById('kakao-map-sdk')
-      if (scriptToRemove) {
-        scriptToRemove.remove()
-      }
-    }
+    // Do NOT remove script on cleanup - SDK should persist
   }, [apiKey, libraries])
 
   const value: KakaoMapContextValue = {

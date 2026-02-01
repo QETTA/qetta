@@ -47,12 +47,14 @@ export interface UseKakaoMapReturn {
   /** Map container ref - attach to div element */
   mapRef: React.RefObject<HTMLDivElement | null>
   /** Kakao Map instance */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   map: any | null
   /** Map is initialized and ready */
   isReady: boolean
   /** Initialize map with container element */
   initMap: (container: HTMLElement) => void
   /** Add marker to map */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addMarker: (marker: PlaceMarker) => any
   /** Remove marker from map */
   removeMarker: (markerId: string) => void
@@ -75,8 +77,10 @@ export interface UseKakaoMapReturn {
 export function useKakaoMap(options?: UseKakaoMapOptions): UseKakaoMapReturn {
   const { isLoaded, kakao } = useKakaoMapContext()
   const mapRef = useRef<HTMLDivElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [map, setMap] = useState<any | null>(null)
   const [isReady, setIsReady] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markersRef = useRef<Map<string, any>>(new Map())
 
   // Zustand store
@@ -157,6 +161,7 @@ export function useKakaoMap(options?: UseKakaoMapOptions): UseKakaoMapReturn {
   // ============================================
 
   const addMarker = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (markerData: PlaceMarker): any | null => {
       if (!map || !kakao) return null
 
@@ -244,6 +249,7 @@ export function useKakaoMap(options?: UseKakaoMapOptions): UseKakaoMapReturn {
     (handler: (lat: number, lng: number) => void) => {
       if (!map || !kakao) return
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       kakao.maps.event.addListener(map, 'click', (mouseEvent: any) => {
         const latlng = mouseEvent.latLng
         handler(latlng.getLat(), latlng.getLng())

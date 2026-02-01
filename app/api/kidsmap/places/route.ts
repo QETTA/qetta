@@ -18,7 +18,6 @@ import { getSimplePlaceRepository } from '@/lib/skill-engine/data-sources/kidsma
 import { rateLimit, createRateLimitResponse } from '@/lib/api/rate-limiter'
 import type {
   PlaceCategory,
-  FilterCategory,
   AgeGroup,
 } from '@/lib/skill-engine/data-sources/kidsmap/types'
 
@@ -39,12 +38,10 @@ export async function GET(request: NextRequest) {
     const lat = searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : null
     const lng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : null
     const radius = searchParams.get('radius') ? parseInt(searchParams.get('radius')!) : 5000
-    const filterCategory = searchParams.get('category') as FilterCategory | null
     const placeCategoriesParam = searchParams.get('placeCategories')
     const ageGroupsParam = searchParams.get('ageGroups')
     const page = parseInt(searchParams.get('page') || '1')
     const pageSize = parseInt(searchParams.get('pageSize') || '20')
-    const openNow = searchParams.get('openNow') === 'true'
 
     // Parse arrays
     const placeCategories = placeCategoriesParam

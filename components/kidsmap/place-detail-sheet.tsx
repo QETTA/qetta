@@ -20,7 +20,6 @@ import { usePlaceStore } from '@/stores/kidsmap/place-store'
 import { shareContent, getPlaceShareUrl } from '@/lib/kidsmap/share-utils'
 import { cn } from '@/lib/utils'
 import { PlaceContentsTab } from './place-contents-tab'
-import type { PlaceWithDistance } from '@/stores/kidsmap/place-store'
 
 // ============================================
 // Main Component
@@ -37,11 +36,8 @@ export function PlaceDetailSheet() {
   const isFav = selectedPlace ? isFavorite(selectedPlace.id) : false
 
   // Reset drag state when opening
-  useEffect(() => {
-    if (isOpen) {
-      setDragY(0)
-    }
-  }, [isOpen])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { if (isOpen) setDragY(0) }, [isOpen])
 
   // Touch handlers for drag gesture
   const handleTouchStart = useCallback((e: React.TouchEvent) => {

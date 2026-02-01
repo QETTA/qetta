@@ -42,7 +42,6 @@ import type {
 
 import {
   PLACE_CATEGORIES,
-  TOUR_API_CONTENT_TYPE,
   KidsMapApiError,
   KIDSMAP_ERROR_CODES,
 } from './types'
@@ -239,6 +238,26 @@ export class KidsMapClient {
       ...result,
       places: filtered,
     }
+  }
+
+  /**
+   * 어린이/가족 관련 장소 통합 검색 (TourAPI)
+   */
+  async searchKidsPlaces(options?: {
+    areaCode?: TourApiAreaCode
+    category?: PlaceCategory
+    page?: number
+    pageSize?: number
+    numOfRows?: number
+  }): Promise<KidsMapSearchResult> {
+    if (!this.tourClient) {
+      throw new KidsMapApiError(
+        'TourAPI 클라이언트가 초기화되지 않았습니다.',
+        KIDSMAP_ERROR_CODES.INVALID_API_KEY
+      )
+    }
+
+    return this.tourClient.searchKidsPlaces(options)
   }
 
   /**

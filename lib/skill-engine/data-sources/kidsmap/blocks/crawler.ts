@@ -21,9 +21,10 @@ import {
   generateContentDedupeHash,
 } from './repository'
 import { getKidsMapClient } from '../client'
+import { getTourApiClient } from '../tour-api-client'
 import { getContentClient } from '../content-client'
 import { getKakaoLocalClient } from '../kakao-client'
-import type { NormalizedPlace, NormalizedContent, PlaceCategory } from '../types'
+import type { NormalizedPlace, NormalizedContent, TourApiAreaCode } from '../types'
 import { TOUR_API_AREA_CODES } from '../types'
 
 // ============================================
@@ -203,7 +204,7 @@ async function crawlTourApi(
   config: CrawlJobConfig,
   onProgress: (progress: Partial<CrawlProgress>) => void
 ): Promise<NormalizedPlace[]> {
-  const client = getKidsMapClient()
+  const tourClient = getTourApiClient()
   const places: NormalizedPlace[] = []
   const regionCodes = config.regionCodes || Object.values(TOUR_API_AREA_CODES)
 
@@ -215,7 +216,8 @@ async function crawlTourApi(
       onProgress({ currentSource: 'TOUR_API', currentPage: processed + 1 })
 
       // 어린이 관련 장소 검색
-      const result = await client.search({
+      const result = await tourClient.searchKidsPlaces({
+        areaCode: areaCode as TourApiAreaCode,
         page: 1,
         pageSize: config.pageSize,
       })
@@ -376,7 +378,7 @@ async function processCrawlJob(job: Job<CrawlJob>): Promise<CrawlResult> {
   }
 
   try {
-    let places: NormalizedPlace[] = []
+    const places: NormalizedPlace[] = []
     let contents: NormalizedContent[] = []
 
     // 타입별 크롤링 실행
@@ -428,8 +430,8 @@ async function processCrawlJob(job: Job<CrawlJob>): Promise<CrawlResult> {
     // 장소 데이터 저장
     for (const place of places) {
       try {
-        const hash = generatePlaceDedupeHash(place)
-        const existing = await placeRepo.findByDedupeHash(hash)
+        const dedupeHash = generatePlaceDedupeHash(place)
+        const existing = await placeRepo.findByDedupeHash(dedupeHash)
 
         if (existing) {
           if (config.skipDuplicates) {
@@ -452,7 +454,7 @@ async function processCrawlJob(job: Job<CrawlJob>): Promise<CrawlResult> {
     // 콘텐츠 데이터 저장
     for (const content of contents) {
       try {
-        const hash = generateContentDedupeHash(content)
+        generateContentDedupeHash(content)
         // 중복 체크 후 저장
         await contentRepo.create(content)
         result.newBlocks++
@@ -538,18 +540,6 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-function inferCategory(categoryName: string): PlaceCategory {
-  const lower = categoryName.toLowerCase()
-
-  if (lower.includes('카페') || lower.includes('키즈')) return 'kids_cafe'
-  if (lower.includes('놀이공원') || lower.includes('테마파크')) return 'amusement_park'
-  if (lower.includes('동물원') || lower.includes('수족관') || lower.includes('아쿠아'))
-    return 'zoo_aquarium'
-  if (lower.includes('박물관') || lower.includes('체험')) return 'museum'
-  if (lower.includes('공원') || lower.includes('자연')) return 'nature_park'
-
-  return 'other'
-}
 
 // ============================================
 // 작업 상태 조회
