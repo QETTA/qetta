@@ -15,7 +15,11 @@ export function TabBar() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95"
+      aria-label="메인 네비게이션"
+      role="navigation"
+    >
       <div className="mx-auto flex h-14 max-w-lg items-center justify-around">
         {TABS.map((tab) => {
           const isActive = pathname?.startsWith(tab.href)
@@ -23,6 +27,8 @@ export function TabBar() {
             <Link
               key={tab.href}
               href={tab.href}
+              aria-label={tab.label}
+              aria-current={isActive ? 'page' : undefined}
               className={clsx(
                 'flex flex-col items-center gap-0.5 px-4 py-1 text-[10px] font-medium transition-colors',
                 isActive
@@ -30,7 +36,7 @@ export function TabBar() {
                   : 'text-gray-500 dark:text-gray-400',
               )}
             >
-              <span className="text-xl">{tab.icon}</span>
+              <span className="text-xl" aria-hidden="true">{tab.icon}</span>
               <span>{tab.label}</span>
             </Link>
           )

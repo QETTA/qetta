@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     const items = result.data.map((block) => ({
       id: block.id,
       source: block.data.source,
-      type: block.data.contentType || block.data.type,
+      type: block.data.type,
       sourceUrl: block.data.sourceUrl,
       title: block.data.title,
       thumbnailUrl: block.data.thumbnailUrl,

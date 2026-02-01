@@ -15,10 +15,10 @@ export default function MyPage() {
       <header className="border-b border-gray-100 bg-white px-4 pb-6 pt-8 dark:border-gray-800 dark:bg-gray-950">
         {status === 'authenticated' && session?.user ? (
           <div className="flex items-center gap-4">
-            {session.user.image ? (
+            {(session.user as { image?: string }).image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={session.user.image}
+                src={(session.user as { image?: string }).image!}
                 alt=""
                 className="h-16 w-16 rounded-full object-cover"
               />

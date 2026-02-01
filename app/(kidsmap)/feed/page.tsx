@@ -6,6 +6,8 @@ import { ContentCard } from '@/components/kidsmap/feed/content-card'
 import { ShortsCard } from '@/components/kidsmap/feed/shorts-card'
 import { FullscreenViewer } from '@/components/kidsmap/feed/fullscreen-viewer'
 import { SearchBar } from '@/components/kidsmap/feed/search-bar'
+import { FeedGridSkeleton, FeedShortsSkeleton } from '@/components/kidsmap/feed/feed-skeleton'
+import { FeedErrorBoundary } from '@/components/kidsmap/feed/feed-error-boundary'
 import type { ContentSource } from '@/lib/skill-engine/data-sources/kidsmap/types'
 import { clsx } from 'clsx'
 
@@ -152,44 +154,62 @@ export default function FeedPage() {
         </div>
       )}
 
-      {/* Grid mode */}
-      {mode === 'grid' && (
-        <div className="mx-auto max-w-2xl px-4">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {items.map((item) => (
-              <ContentCard key={item.id} {...item} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Shorts mode */}
-      {mode === 'shorts' && (
-        <div className="mx-auto max-w-2xl px-4">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {items.map((item, idx) => (
-              <div key={item.id} onClick={() => setFullscreenIndex(idx)} className="cursor-pointer">
-                <ShortsCard {...item} />
+      <FeedErrorBoundary>
+        {/* Grid mode */}
+        {mode === 'grid' && (
+          <div className="mx-auto max-w-2xl px-4">
+            {isLoading && items.length === 0 ? (
+              <FeedGridSkeleton />
+            ) : (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2" role="feed" aria-label="콘텐츠 피드">
+                {items.map((item) => (
+                  <ContentCard key={item.id} {...item} />
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Empty state */}
-      {!isLoading && items.length === 0 && !error && (
-        <div className="py-20 text-center">
-          <p className="text-4xl">📱</p>
-          <p className="mt-3 text-sm text-gray-500">아직 콘텐츠가 없습니다</p>
-        </div>
-      )}
+        {/* Shorts mode */}
+        {mode === 'shorts' && (
+          <div className="mx-auto max-w-2xl px-4">
+            {isLoading && items.length === 0 ? (
+              <FeedShortsSkeleton />
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" role="feed" aria-label="숏폼 피드">
+                {items.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    onClick={() => setFullscreenIndex(idx)}
+                    onKeyDown={(e) => e.key === 'Enter' && setFullscreenIndex(idx)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${item.title} 풀스크린 보기`}
+                    className="cursor-pointer"
+                  >
+                    <ShortsCard {...item} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-      {/* Loading */}
-      {isLoading && (
-        <div className="flex justify-center py-8">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
-        </div>
-      )}
+        {/* Empty state */}
+        {!isLoading && items.length === 0 && !error && (
+          <div className="py-20 text-center" role="status">
+            <p className="text-4xl">📱</p>
+            <p className="mt-3 text-sm text-gray-500">아직 콘텐츠가 없습니다</p>
+          </div>
+        )}
+
+        {/* Loading more indicator */}
+        {isLoading && items.length > 0 && (
+          <div className="flex justify-center py-8" role="status" aria-label="더 불러오는 중">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
+          </div>
+        )}
+      </FeedErrorBoundary>
 
       {/* Infinite scroll trigger */}
       <div ref={observerRef} className="h-4" />

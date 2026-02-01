@@ -17,7 +17,7 @@ export function SearchBar({
   const [value, setValue] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
