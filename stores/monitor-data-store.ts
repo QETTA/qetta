@@ -95,6 +95,7 @@ interface MonitorDataState {
   setSelectedEquipment: (equipmentId: string | null) => void
   setConnectionStatus: (isConnected: boolean) => void
   setError: (error: string | null) => void
+  reset: () => void
 }
 
 // Create store with subscribeWithSelector middleware
@@ -191,6 +192,16 @@ export const useMonitorDataStore = create<MonitorDataState>()(
     setConnectionStatus: (isConnected) => set({ isConnected }),
 
     setError: (error) => set({ error }),
+
+    reset: () =>
+      set({
+        equipment: [],
+        alerts: [],
+        summary: null,
+        selectedEquipmentId: null,
+        error: null,
+        isConnected: false,
+      }),
   }))
 )
 

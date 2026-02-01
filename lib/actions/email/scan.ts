@@ -14,7 +14,6 @@
  * Note: Gmail/Outlook API 연동 필요
  */
 
-import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/api/logger'
 
 interface ScanEmailParams {
@@ -40,27 +39,15 @@ export async function scanEmail(params: ScanEmailParams) {
       }
     }
 
-    // TODO: Implement email scanning logic
-    // 1. OAuth token validation
-    // 2. Fetch emails from provider API
-    // 3. Filter by keywords and date range
-    // 4. Extract government program announcements
-    // 5. Parse and structure data
-
-    // Placeholder implementation
     logger.debug(`[Email Scan] Provider: ${provider}, Keywords: ${keywords.join(', ')}`)
 
-    // Revalidate apply page (new announcements found)
-    revalidatePath('/apply')
-
+    // OAuth 토큰이 아직 연동되지 않은 상태에서는 명확하게 안내
     return {
-      success: true,
-      data: {
-        scanned: 0,
-        found: 0,
-        announcements: [],
+      success: false,
+      error: {
+        code: 'NOT_IMPLEMENTED',
+        message: `이메일 스캔 기능은 ${provider === 'gmail' ? 'Gmail' : 'Outlook'} OAuth 연동 후 사용 가능합니다. 설정 > 이메일 연동에서 계정을 연결해 주세요.`,
       },
-      message: '이메일 스캔 준비 중 (OAuth 연동 필요)',
     }
   } catch (error) {
     logger.error('[Email Scan Error]', error)

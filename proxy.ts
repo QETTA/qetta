@@ -1,46 +1,43 @@
 /**
- * Next.js Middleware
+ * Next.js 16 Proxy (formerly Middleware)
  *
- * i18n 준비 단계 - locale routing은 아직 비활성화
- * 앱 구조를 [locale] 패턴으로 변환 후 활성화 예정
+ * Auth protection + i18n 준비
+ * Next.js 16에서 middleware.ts → proxy.ts 마이그레이션
  *
- * 현재: 단순 pass-through (모든 요청 허용)
+ * @module proxy
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
+import { NextResponse } from 'next/server'
+import { PROTECTED_ROUTES, AUTH_ROUTES } from '@/constants/routes'
 
 // ============================================
-// i18n Configuration (준비됨, 미활성화)
+// Auth Middleware (via NextAuth)
 // ============================================
 
-// 앱 구조 변환 후 아래 코드 활성화:
-// import createMiddleware from 'next-intl/middleware'
-// import { locales, defaultLocale } from './i18n'
-//
-// const intlMiddleware = createMiddleware({
-//   locales,
-//   defaultLocale,
-//   localePrefix: 'as-needed',
-//   localeDetection: true,
-// })
+export default auth((req) => {
+  const { pathname } = req.nextUrl
+  const isLoggedIn = !!req.auth
 
-// ============================================
-// Main Middleware
-// ============================================
+  // Redirect authenticated users away from auth pages
+  if (AUTH_ROUTES.some((p) => pathname.startsWith(p)) && isLoggedIn) {
+    return NextResponse.redirect(new URL('/monitor', req.url))
+  }
 
-export default function middleware(request: NextRequest) {
-  // i18n 라우팅 준비 완료, 앱 구조 변환 후 활성화
-  // 현재는 모든 요청 통과
+  // Protect dashboard routes
+  if (PROTECTED_ROUTES.some((p) => pathname.startsWith(p)) && !isLoggedIn) {
+    const loginUrl = new URL('/login', req.url)
+    loginUrl.searchParams.set('callbackUrl', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
   return NextResponse.next()
-}
+})
 
 // ============================================
 // Matcher Configuration
 // ============================================
 
 export const config = {
-  // 정적 파일 및 API 제외
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon\\.ico|.*\\..*).*)'],
 }

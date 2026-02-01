@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     )
   }
 
-  // state 파싱
+  // state 파싱 + CSRF 검증
   let parsedState: OAuthState = { returnUrl: '/dashboard', nonce: '', timestamp: 0 }
   if (state) {
     try {
@@ -51,9 +51,31 @@ export async function GET(request: Request) {
           new URL('/auth/error?error=state_expired', request.url)
         )
       }
+
+      // CSRF: nonce 검증 — 쿠키에 저장된 nonce와 비교
+      const cookieStore = await cookies()
+      const storedNonce = cookieStore.get('oauth_nonce')?.value
+      if (!storedNonce || storedNonce !== parsedState.nonce) {
+        logger.warn('[Gmail OAuth] Nonce mismatch — potential CSRF')
+        return NextResponse.redirect(
+          new URL('/auth/error?error=invalid_state', request.url)
+        )
+      }
+      // 사용 후 삭제
+      cookieStore.delete('oauth_nonce')
     } catch {
       logger.warn('[Gmail OAuth] Failed to parse state')
     }
+  }
+
+  // SECURITY: returnUrl 검증 — 상대 경로만 허용 (open redirect 방지)
+  if (parsedState.returnUrl && (
+    !parsedState.returnUrl.startsWith('/') ||
+    parsedState.returnUrl.startsWith('//') ||
+    parsedState.returnUrl.includes('://')
+  )) {
+    logger.warn('[Gmail OAuth] Blocked open redirect attempt:', parsedState.returnUrl)
+    parsedState.returnUrl = '/dashboard'
   }
 
   try {
