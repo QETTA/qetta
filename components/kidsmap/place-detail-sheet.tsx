@@ -243,8 +243,8 @@ export function PlaceDetailSheet() {
                       {selectedPlace.amenities.strollerAccess && (
                         <AmenityBadge icon="🚼" label="Stroller Access" />
                       )}
-                      {selectedPlace.amenities.indoor && <AmenityBadge icon="🏠" label="Indoor" />}
-                      {selectedPlace.amenities.outdoor && <AmenityBadge icon="🌳" label="Outdoor" />}
+                      {(selectedPlace.amenities as any)?.indoor && <AmenityBadge icon="🏠" label="Indoor" />}
+                      {(selectedPlace.amenities as any)?.outdoor && <AmenityBadge icon="🌳" label="Outdoor" />}
                     </div>
                   </div>
                 )}

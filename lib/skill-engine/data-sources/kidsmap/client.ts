@@ -98,18 +98,16 @@ export class KidsMapClient {
     const pageSize = filters?.pageSize || 50
 
     // 카테고리별 소스 결정
-    const needsTourApi = categories.some((c) =>
-      [
-        PLACE_CATEGORIES.AMUSEMENT_PARK,
-        PLACE_CATEGORIES.ZOO_AQUARIUM,
-        PLACE_CATEGORIES.MUSEUM,
-        PLACE_CATEGORIES.NATURE_PARK,
-      ].includes(c)
-    )
+    const tourCategories: PlaceCategory[] = [
+      PLACE_CATEGORIES.AMUSEMENT_PARK,
+      PLACE_CATEGORIES.ZOO_AQUARIUM,
+      PLACE_CATEGORIES.MUSEUM,
+      PLACE_CATEGORIES.NATURE_PARK,
+    ]
+    const needsTourApi = categories.some((c) => (tourCategories as PlaceCategory[]).includes(c))
 
-    const needsPlaygroundApi = categories.some((c) =>
-      [PLACE_CATEGORIES.KIDS_CAFE].includes(c)
-    )
+    const playgroundCategories: PlaceCategory[] = [PLACE_CATEGORIES.KIDS_CAFE]
+    const needsPlaygroundApi = categories.some((c) => (playgroundCategories as PlaceCategory[]).includes(c))
 
     // TourAPI 검색
     if (needsTourApi && this.tourClient) {
@@ -241,6 +239,26 @@ export class KidsMapClient {
       ...result,
       places: filtered,
     }
+  }
+
+  /**
+   * 어린이/가족 관련 장소 통합 검색 (TourAPI)
+   */
+  async searchKidsPlaces(options?: {
+    areaCode?: TourApiAreaCode
+    category?: PlaceCategory
+    page?: number
+    pageSize?: number
+    numOfRows?: number
+  }): Promise<KidsMapSearchResult> {
+    if (!this.tourClient) {
+      throw new KidsMapApiError(
+        'TourAPI 클라이언트가 초기화되지 않았습니다.',
+        KIDSMAP_ERROR_CODES.INVALID_API_KEY
+      )
+    }
+
+    return this.tourClient.searchKidsPlaces(options)
   }
 
   /**

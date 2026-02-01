@@ -66,7 +66,7 @@ const QUICK_FILTERS: Array<{
 // ============================================
 
 export function QuickFilter() {
-  const { filterCategory, setFilterCategory, clearFilters } = useFilterStore()
+  const { filterCategory, setFilterCategory, reset: clearFilters } = useFilterStore()
 
   const handleFilterClick = (category: FilterCategory) => {
     if (filterCategory === category) {

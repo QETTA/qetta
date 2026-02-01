@@ -18,7 +18,7 @@
  * }
  */
 
-import { NextRequest, NextResponse } from 'next'
+import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { getPlaceBlockRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
 import type { AgeGroup, PlaceCategory } from '@/lib/skill-engine/data-sources/kidsmap/types'
@@ -60,17 +60,13 @@ export async function POST(request: NextRequest) {
 
     // Get nearby places
     const repo = getPlaceBlockRepository()
-    const nearbyPlaces = await repo.search(
-      {
-        status: 'active' as const,
-        categories: body.preferences?.categories,
-      },
-      {
-        page: 1,
-        pageSize: 50,
-        sortBy: 'quality',
-      },
-    )
+    const nearbyPlaces = await repo.search({
+      status: ['active'] as const,
+      categories: body.preferences?.categories,
+      page: 1,
+      pageSize: 50,
+      sortBy: 'qualityGrade',
+    })
 
     // Filter by distance (rough filter)
     const maxDistance = body.preferences?.maxDistance || 10000 // 10km default

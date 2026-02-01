@@ -13,7 +13,7 @@
  * - page, pageSize: 페이지네이션
  */
 
-import { NextRequest, NextResponse } from 'next'
+import { NextRequest, NextResponse } from 'next/server'
 import { getPlaceBlockRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
 import type {
   PlaceCategory,
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     // Build filter
     const filter: any = {
-      status: 'active' as const,
+      status: ['active'] as const,
     }
 
     if (placeCategories.length > 0) {
@@ -65,11 +65,10 @@ export async function GET(request: NextRequest) {
     const repo = getPlaceBlockRepository()
 
     // Search places
-    const result = await repo.search(filter, {
-      page,
-      pageSize,
-      sortBy: lat && lng ? 'distance' : 'quality',
-    })
+    filter.page = page
+    filter.pageSize = pageSize
+    filter.sortBy = 'qualityGrade'
+    const result = await repo.search(filter)
 
     // Calculate distance if location provided
     if (lat && lng) {
@@ -88,7 +87,7 @@ export async function GET(request: NextRequest) {
 
       // Filter by radius
       result.data = result.data.filter(
-        (place) => !place.distance || place.distance <= radius,
+        (place) => !(place as any).distance || (place as any).distance <= radius,
       )
     }
 

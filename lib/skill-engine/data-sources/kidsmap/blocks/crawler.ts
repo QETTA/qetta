@@ -21,9 +21,10 @@ import {
   generateContentDedupeHash,
 } from './repository'
 import { getKidsMapClient } from '../client'
+import { getTourApiClient } from '../tour-api-client'
 import { getContentClient } from '../content-client'
 import { getKakaoLocalClient } from '../kakao-client'
-import type { NormalizedPlace, NormalizedContent, PlaceCategory } from '../types'
+import type { NormalizedPlace, NormalizedContent, PlaceCategory, TourApiAreaCode } from '../types'
 import { TOUR_API_AREA_CODES } from '../types'
 
 // ============================================
@@ -203,7 +204,7 @@ async function crawlTourApi(
   config: CrawlJobConfig,
   onProgress: (progress: Partial<CrawlProgress>) => void
 ): Promise<NormalizedPlace[]> {
-  const client = getKidsMapClient()
+  const tourClient = getTourApiClient()
   const places: NormalizedPlace[] = []
   const regionCodes = config.regionCodes || Object.values(TOUR_API_AREA_CODES)
 
@@ -215,9 +216,9 @@ async function crawlTourApi(
       onProgress({ currentSource: 'TOUR_API', currentPage: processed + 1 })
 
       // 어린이 관련 장소 검색
-      const result = await client.searchKidsPlaces({
-        areaCode,
-        numOfRows: config.pageSize,
+      const result = await tourClient.searchKidsPlaces({
+        areaCode: areaCode as TourApiAreaCode,
+        pageSize: config.pageSize,
       })
 
       places.push(...result.places)
@@ -254,7 +255,7 @@ async function crawlPlaygroundApi(
 
     // 키즈카페 검색
     const kidsCafes = await client.searchKidsCafes({
-      numOfRows: config.pageSize * config.maxPages,
+      pageSize: config.pageSize * config.maxPages,
     })
     places.push(...kidsCafes.places)
 
@@ -284,27 +285,12 @@ async function crawlKakaoLocal(
     try {
       onProgress({ currentSource: 'KAKAO_LOCAL', currentPage: processed + 1 })
 
-      const result = await client.searchByKeyword({
-        query: keyword,
+      const result = await client.searchByKeyword(keyword, {
         size: 15,
       })
 
-      // Kakao 결과를 NormalizedPlace로 변환
-      for (const doc of result.documents) {
-        places.push({
-          id: `kakao-${doc.id}`,
-          source: 'PLAYGROUND_API', // Kakao는 별도 소스로 처리
-          sourceUrl: doc.place_url,
-          fetchedAt: new Date().toISOString(),
-          name: doc.place_name,
-          category: inferCategory(doc.category_name),
-          address: doc.road_address_name || doc.address_name,
-          latitude: parseFloat(doc.y),
-          longitude: parseFloat(doc.x),
-          tel: doc.phone,
-          rawData: doc,
-        })
-      }
+      // KakaoLocalClient already returns NormalizedPlace[]
+      places.push(...result.places)
 
       processed++
       await delay(config.requestDelay)

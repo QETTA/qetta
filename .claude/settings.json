@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(git *)",
+      "Bash(node *)",
+      "Bash(vercel *)"
+    ]
+  },
+  "enableAllProjectMcpServers": true
+}

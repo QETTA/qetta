@@ -15,7 +15,7 @@
  * </KakaoMapProvider>
  */
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react'
 
 // ============================================
 // Types
@@ -42,6 +42,7 @@ declare global {
       maps: {
         load: (callback: () => void) => void
         LatLng: new (lat: number, lng: number) => any
+        LatLngBounds: new () => any
         Map: new (container: HTMLElement, options: any) => any
         Marker: new (options: any) => any
         InfoWindow: new (options: any) => any
@@ -106,8 +107,13 @@ export function KakaoMapProvider({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [kakao, setKakao] = useState<typeof window.kakao | null>(null)
+  const initRef = useRef(false)
 
   useEffect(() => {
+    // Prevent re-initialization
+    if (initRef.current) return
+    initRef.current = true
+
     const key = apiKey || process.env.NEXT_PUBLIC_KAKAO_MAP_KEY
 
     // Validate API key
@@ -166,13 +172,7 @@ export function KakaoMapProvider({
 
     document.head.appendChild(script)
 
-    return () => {
-      // Cleanup: remove script on unmount
-      const scriptToRemove = document.getElementById('kakao-map-sdk')
-      if (scriptToRemove) {
-        scriptToRemove.remove()
-      }
-    }
+    // Do NOT remove script on cleanup - SDK should persist
   }, [apiKey, libraries])
 
   const value: KakaoMapContextValue = {

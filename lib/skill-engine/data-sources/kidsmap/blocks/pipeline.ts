@@ -514,7 +514,7 @@ export class BlockMigrator {
    * NCP Object Storage로 마이그레이션
    */
   private async migrateToObjectStorage(
-    data: PlaceBlock[] | ContentBlock[],
+    data: (PlaceBlock | ContentBlock)[],
     type: 'places' | 'contents'
   ): Promise<number> {
     if (this.config.dryRun) {
@@ -755,13 +755,3 @@ ${alerts.length > 0 ? alerts.map((a) => `- [${a.level.toUpperCase()}] ${a.messag
   }
 }
 
-// ============================================
-// Export
-// ============================================
-
-export {
-  DataBlockPipeline,
-  BlockOptimizer,
-  BlockMigrator,
-  BlockMonitor,
-}
