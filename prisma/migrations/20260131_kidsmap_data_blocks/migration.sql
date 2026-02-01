@@ -8,7 +8,7 @@
 CREATE TYPE block_status AS ENUM ('draft', 'active', 'archived', 'deleted');
 CREATE TYPE quality_grade AS ENUM ('A', 'B', 'C', 'D', 'F');
 CREATE TYPE freshness_level AS ENUM ('fresh', 'recent', 'stale', 'outdated');
-CREATE TYPE place_category AS ENUM ('amusement_park', 'zoo_aquarium', 'kids_cafe', 'museum', 'nature_park', 'other');
+CREATE TYPE place_category AS ENUM ('amusement_park', 'zoo_aquarium', 'kids_cafe', 'museum', 'nature_park', 'restaurant', 'public_facility', 'other');
 CREATE TYPE place_source AS ENUM ('TOUR_API', 'PLAYGROUND_API', 'KAKAO_LOCAL', 'MANUAL');
 CREATE TYPE content_source AS ENUM ('YOUTUBE', 'NAVER_BLOG', 'NAVER_CLIP');
 CREATE TYPE content_type AS ENUM ('video', 'blog_post', 'short_video');

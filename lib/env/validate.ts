@@ -15,7 +15,7 @@ export class EnvValidationError extends Error {
     const contextMsg = context ? ` (${context})` : ''
     super(
       `Missing required environment variable: ${variableName}${contextMsg}\n` +
-      `Please set ${variableName} in your .env.local file or environment.`
+        `Please set ${variableName} in your .env.local file or environment.`
     )
     this.name = 'EnvValidationError'
   }
@@ -187,6 +187,80 @@ export const ENV = {
     const value = process.env.RESEND_API_KEY
     return value && value.trim() !== '' ? value : undefined
   },
+
+  /**
+   * Email sender address (e.g., "QETTA <noreply@qetta.io>").
+   */
+  get EMAIL_FROM(): string {
+    return getEnvOrDefault('EMAIL_FROM', 'QETTA <noreply@qetta.io>')
+  },
+
+  // ── Payment (Toss) ──────────────────────────────
+
+  get TOSS_CLIENT_KEY(): string | undefined {
+    const value = process.env.TOSS_CLIENT_KEY || process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  get TOSS_SECRET_KEY(): string | undefined {
+    const value = process.env.TOSS_SECRET_KEY
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  get TOSS_WEBHOOK_SECRET(): string | undefined {
+    const value = process.env.TOSS_WEBHOOK_SECRET
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  get HAS_PAYMENT(): boolean {
+    return !!this.TOSS_CLIENT_KEY && !!this.TOSS_SECRET_KEY
+  },
+
+  // ── Redis ────────────────────────────────────────
+
+  get REDIS_URL(): string | undefined {
+    const value = process.env.REDIS_URL
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  get HAS_REDIS(): boolean {
+    return !!this.REDIS_URL
+  },
+
+  // ── Supabase ─────────────────────────────────────
+
+  get SUPABASE_URL(): string | undefined {
+    const value = process.env.SUPABASE_URL
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  get SUPABASE_SERVICE_ROLE_KEY(): string | undefined {
+    const value = process.env.SUPABASE_SERVICE_ROLE_KEY
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  get HAS_SUPABASE(): boolean {
+    return !!this.SUPABASE_URL && !!this.SUPABASE_SERVICE_ROLE_KEY
+  },
+
+  // ── Sentry ───────────────────────────────────────
+
+  get SENTRY_DSN(): string | undefined {
+    const value = process.env.SENTRY_DSN
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  // ── Kakao Map ────────────────────────────────────
+
+  get KAKAO_REST_API_KEY(): string | undefined {
+    const value = process.env.KAKAO_REST_API_KEY
+    return value && value.trim() !== '' ? value : undefined
+  },
+
+  get NEXT_PUBLIC_KAKAO_MAP_KEY(): string | undefined {
+    const value = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY
+    return value && value.trim() !== '' ? value : undefined
+  },
 } as const
 
 /**
@@ -197,11 +271,34 @@ export const ENV = {
  */
 export function validateRequiredEnv(): void {
   // Accessing these getters will throw if required variables are missing
-  const required = [
-    ENV.ANTHROPIC_API_KEY,
-    ENV.NEXTAUTH_SECRET,
-  ]
+  const required = [ENV.ANTHROPIC_API_KEY, ENV.NEXTAUTH_SECRET]
 
-  // Development-only logging
-  logger.debug(`✅ Environment validation passed (${required.length} required variables checked)`)
+  logger.debug(`[Env] Required: ${required.length} variables OK`)
+
+  // Log optional service availability
+  const services = {
+    Database: ENV.HAS_DATABASE,
+    Payment: ENV.HAS_PAYMENT,
+    Redis: ENV.HAS_REDIS,
+    Supabase: ENV.HAS_SUPABASE,
+    Email: !!ENV.RESEND_API_KEY,
+    Sentry: !!ENV.SENTRY_DSN,
+    KakaoMap: !!ENV.KAKAO_REST_API_KEY,
+    Google: !!ENV.GOOGLE_CLIENT_ID,
+    GitHub: !!ENV.GITHUB_CLIENT_ID,
+  }
+
+  const active = Object.entries(services)
+    .filter(([, v]) => v)
+    .map(([k]) => k)
+  const inactive = Object.entries(services)
+    .filter(([, v]) => !v)
+    .map(([k]) => k)
+
+  if (active.length > 0) {
+    logger.debug(`[Env] Active services: ${active.join(', ')}`)
+  }
+  if (inactive.length > 0) {
+    logger.debug(`[Env] Inactive services: ${inactive.join(', ')}`)
+  }
 }

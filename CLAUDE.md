@@ -17,22 +17,37 @@
 app/                    # Next.js App Router
 ├── (auth)/            # Authentication pages
 ├── (dashboard)/       # Dashboard pages
+├── (kidsmap)/         # KidsMap MAP-FIRST pages
 ├── (marketing)/       # Landing/marketing pages
 └── api/               # API routes
+    ├── kidsmap/       # KidsMap API (places, recommendations)
+    ├── monitor/       # Monitor SSE stream
+    └── proposals/     # Proposal generation stream
 
 components/            # React components
 ├── auth/              # Auth forms
-├── dashboard/         # Dashboard UI
+├── dashboard/         # Dashboard UI (monitor, docs, shimmer)
+├── kidsmap/           # KidsMap (map, filters, bottom sheet)
 ├── landing/           # Marketing components
 └── layout/            # Shared layouts
 
-lib/                   # Core business logic (38 modules)
-├── block-engine/      # 3-Layer Block Engine ⭐
-├── skill-engine/      # Skill-based automation
+contexts/              # React Contexts (KakaoMapProvider)
+hooks/                 # Custom hooks (useKakaoMap, useMonitorSSE, useProposalStream)
+stores/                # Zustand stores
+├── kidsmap/           # map-store, filter-store, place-store
+└── *.ts               # monitor-data-store, ai-panel-store
+
+lib/                   # Core business logic
+├── block-engine/      # 3-Layer Block Engine
+├── skill-engine/      # Skill-based automation + KidsMap data sources
+├── document-generator/ # Doc gen + KidsMap LRU cache
 ├── claude/            # Claude API integration
+├── monitor/           # IoT simulator, sensors, alerts
 ├── auth/              # Authentication logic
 ├── db/                # Database (Prisma)
 └── ...
+
+prisma/                # Schema + migrations (including kidsmap_* tables)
 ```
 
 ## 🚫 Critical Rules

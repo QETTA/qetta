@@ -11,9 +11,7 @@ function CallToAction() {
       aria-labelledby="footer-cta-heading"
       className="relative pt-20 pb-16 text-center sm:py-24"
     >
-      <p className="text-sm font-medium uppercase tracking-wider text-white">
-        Document Automation
-      </p>
+      <p className="text-sm font-medium tracking-wider text-white uppercase">Document Automation</p>
       <h2
         id="footer-cta-heading"
         className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-5xl"
@@ -29,7 +27,7 @@ function CallToAction() {
       </p>
       <div className="mt-6">
         <Button
-          className="w-full bg-white px-8 py-3 text-base font-semibold text-zinc-950 hover:bg-zinc-100 border-white sm:w-auto"
+          className="w-full border-white bg-white px-8 py-3 text-base font-semibold text-zinc-950 hover:bg-zinc-100 sm:w-auto"
           href="/pricing"
         >
           {CTA_LABELS.FREE_TRIAL}
@@ -52,7 +50,7 @@ function SitemapLink(props: React.ComponentPropsWithoutRef<typeof Link>) {
     <li>
       <Link
         {...props}
-        className="font-medium text-white transition-colors hover:text-white/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/50 focus-visible:rounded-sm"
+        className="font-medium text-white transition-colors hover:text-white/70 focus:outline-none focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-zinc-500/50"
       />
     </li>
   )
@@ -73,7 +71,7 @@ function Sitemap() {
         <SitemapHeading>Company</SitemapHeading>
         <SitemapLinks>
           <SitemapLink href="/company">About Us</SitemapLink>
-          <SitemapLink href="/company">Team</SitemapLink>
+          <SitemapLink href="/company#team">Team</SitemapLink>
           <SitemapLink href="mailto:hr@qetta.io">Careers</SitemapLink>
         </SitemapLinks>
       </div>
@@ -87,8 +85,8 @@ function Sitemap() {
       <div>
         <SitemapHeading>Legal</SitemapHeading>
         <SitemapLinks>
-          <SitemapLink href="/company">Terms of Service</SitemapLink>
-          <SitemapLink href="/company">Privacy Policy</SitemapLink>
+          <SitemapLink href="/terms">Terms of Service</SitemapLink>
+          <SitemapLink href="/privacy">Privacy Policy</SitemapLink>
         </SitemapLinks>
       </div>
     </>
@@ -109,7 +107,7 @@ function SocialLinks() {
       <Link
         href="mailto:contact@qetta.io"
         aria-label="Send email to QETTA"
-        className="text-zinc-400 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/50 focus-visible:rounded-sm"
+        className="text-zinc-400 transition-colors hover:text-white focus:outline-none focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-zinc-500/50"
       >
         <SocialIconLinkedIn className="size-4" aria-hidden="true" />
       </Link>
@@ -136,9 +134,9 @@ export function Footer() {
       </div>
 
       {/* Footer - Sitemap, Copyright, Social Links */}
-      <footer className="bg-zinc-950 border-t border-white/5">
+      <footer className="border-t border-white/5 bg-zinc-950">
         <Container>
-          <PlusGrid className="pb-16 pt-8">
+          <PlusGrid className="pt-8 pb-16">
             <PlusGridRow>
               <div className="grid grid-cols-2 gap-y-10 pb-6 lg:grid-cols-6 lg:gap-8">
                 <div className="col-span-2 flex">

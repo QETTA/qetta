@@ -218,6 +218,7 @@ async function crawlTourApi(
       // 어린이 관련 장소 검색
       const result = await tourClient.searchKidsPlaces({
         areaCode: areaCode as TourApiAreaCode,
+        page: 1,
         pageSize: config.pageSize,
       })
 
@@ -289,7 +290,7 @@ async function crawlKakaoLocal(
         size: 15,
       })
 
-      // KakaoLocalClient already returns NormalizedPlace[]
+      // Kakao 결과는 이미 NormalizedPlace로 반환됨
       places.push(...result.places)
 
       processed++

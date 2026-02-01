@@ -215,10 +215,15 @@ export const useFilterStore = create<FilterState>()(
       {
         name: 'kidsmap-filter-storage', // LocalStorage key
         partialize: (state) => ({
-          // Only persist user preferences
+          // Persist all user filter preferences
+          filterCategory: state.filterCategory,
+          placeCategories: state.placeCategories,
           ageGroups: state.ageGroups,
+          maxDistance: state.maxDistance,
           amenities: state.amenities,
+          restaurant: state.restaurant,
           sortBy: state.sortBy,
+          openNow: state.openNow,
         }),
       },
     ),

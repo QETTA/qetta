@@ -3,9 +3,23 @@
  *
  * Centralized schemas for all POST API routes.
  * Each schema validates request body and provides type inference.
+ *
+ * Security: User-provided text fields are sanitized to prevent XSS attacks.
+ * @see lib/security/sanitize.ts
  */
 
 import { z } from 'zod'
+import { stripHtml, sanitizeUrl, normalizeString } from '@/lib/security/sanitize'
+
+// ============================================
+// Sanitized String Transformers
+// ============================================
+
+/** 모든 HTML 태그 제거 + 정규화 */
+const safeString = z.string().transform((val) => normalizeString(stripHtml(val)))
+
+/** URL 살균 (javascript: 등 차단) */
+const safeUrl = z.string().transform(sanitizeUrl)
 
 // ============================================
 // /api/chat
@@ -16,13 +30,14 @@ export const chatRequestSchema = z.object({
     .array(
       z.object({
         role: z.enum(['user', 'assistant']),
-        content: z.string().max(32000, 'Message content exceeds maximum length'),
+        // User messages are sanitized to prevent XSS
+        content: z.string().max(32000, 'Message content exceeds maximum length').transform(stripHtml),
       })
     )
     .min(1, 'Messages array must not be empty')
     .max(100, 'Too many messages'),
-  enginePreset: z.string().max(50, 'Engine preset too long').optional(),
-  inlineCommand: z.string().max(100, 'Inline command too long').optional(),
+  enginePreset: safeString.pipe(z.string().max(50, 'Engine preset too long')).optional(),
+  inlineCommand: safeString.pipe(z.string().max(100, 'Inline command too long')).optional(),
   // Context fields with reasonable length limits (8KB each)
   context: z.string().max(8192, 'Context exceeds maximum length').optional(),
   intelligentContext: z.string().max(8192, 'Intelligent context exceeds maximum length').optional(),
@@ -55,8 +70,9 @@ const companyHistoryEntrySchema = z.object({
 }).passthrough()
 
 export const analyzeRejectionRequestSchema = z.object({
-  rejectionText: z.string().min(1, '탈락 사유 텍스트가 필요합니다.'),
-  domain: z.string().default('general'),
+  // User-provided rejection text is sanitized
+  rejectionText: z.string().min(1, '탈락 사유 텍스트가 필요합니다.').transform(stripHtml),
+  domain: safeString.pipe(z.string()).default('general'),
   companyHistory: z.array(companyHistoryEntrySchema).optional(),
   useExtendedThinking: z.boolean().optional(),
 })
@@ -232,7 +248,8 @@ export const companyProfileHistorySchema = z.object({
 
 export const companyProfileSchema = z.object({
   id: z.string(),
-  name: z.string().min(1, '회사명은 필수입니다'),
+  // Company name is sanitized
+  name: safeString.pipe(z.string().min(1, '회사명은 필수입니다')),
   businessNumber: z.string(),
   basic: companyProfileBasicSchema,
   qualifications: companyProfileQualificationsSchema,
@@ -286,7 +303,8 @@ export const factSourceEnum = z.enum([
 
 export const createCompanyFactRequestSchema = z.object({
   type: companyFactTypeEnum,
-  content: z.string().min(1, '내용은 필수입니다'),
+  // User-provided content is sanitized
+  content: safeString.pipe(z.string().min(1, '내용은 필수입니다')),
   confidence: z.number().min(0).max(1).optional().default(1.0),
   source: factSourceEnum.optional().default('user_input'),
   relatedId: z.string().optional(),

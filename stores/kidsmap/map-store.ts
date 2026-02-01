@@ -23,16 +23,16 @@ export interface MapBounds {
 
 export interface PlaceMarker {
   id: string
+  position: MapCenter
+  placeId: string
+  placeName: string
+  category: string
+  isSelected: boolean
+  // Convenience accessors (used by useKakaoMap and map page)
   lat: number
   lng: number
   title: string
   onClick?: (id: string) => void
-  /** @deprecated Use lat/lng directly */
-  position?: MapCenter
-  placeId?: string
-  placeName?: string
-  category?: string
-  isSelected?: boolean
 }
 
 export interface MapState {

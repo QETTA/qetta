@@ -103,10 +103,10 @@ export class KidsMapClient {
       PLACE_CATEGORIES.MUSEUM,
       PLACE_CATEGORIES.NATURE_PARK,
     ]
-    const needsTourApi = categories.some((c) => (tourCategories as PlaceCategory[]).includes(c))
+    const needsTourApi = categories.some((c) => tourCategories.includes(c))
 
     const playgroundCategories: PlaceCategory[] = [PLACE_CATEGORIES.KIDS_CAFE]
-    const needsPlaygroundApi = categories.some((c) => (playgroundCategories as PlaceCategory[]).includes(c))
+    const needsPlaygroundApi = categories.some((c) => playgroundCategories.includes(c))
 
     // TourAPI 검색
     if (needsTourApi && this.tourClient) {

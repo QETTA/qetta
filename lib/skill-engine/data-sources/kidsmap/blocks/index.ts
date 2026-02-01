@@ -97,6 +97,17 @@ export {
 } from './repository'
 
 // ============================================
+// 간단한 places 테이블 저장소 (기존 DB 호환)
+// ============================================
+
+export {
+  SimplePlaceRepository,
+  getSimplePlaceRepository,
+} from './places-repository'
+
+export type { SimplePlaceBlock, PlaceRecord } from './places-repository'
+
+// ============================================
 // 크롤러 export
 // ============================================
 

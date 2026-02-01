@@ -44,17 +44,17 @@ declare global {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         LatLng: new (lat: number, lng: number) => any
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        LatLngBounds: new () => any
+        LatLngBounds: new () => { extend: (latlng: any) => void }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Map: new (container: HTMLElement, options: Record<string, unknown>) => any
+        Map: new (container: HTMLElement, options: any) => any
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Marker: new (options: Record<string, unknown>) => any
+        Marker: new (options: any) => any
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        InfoWindow: new (options: Record<string, unknown>) => any
+        InfoWindow: new (options: any) => any
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        CustomOverlay: new (options: Record<string, unknown>) => any
+        CustomOverlay: new (options: any) => any
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        MarkerClusterer: new (options: Record<string, unknown>) => any
+        MarkerClusterer: new (options: any) => any
         services: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Geocoder: new () => any

@@ -225,7 +225,8 @@ export async function getUsageHistory(
     },
   })
 
-  return records.map(r => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prisma types unavailable without prisma generate
+  return records.map((r: any) => ({
     date: r.createdAt.toISOString().split('T')[0],
     resourceType: r.resourceType,
     quantity: r.quantity,

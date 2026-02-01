@@ -14,7 +14,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getPlaceBlockRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
+import { getSimplePlaceRepository } from '@/lib/skill-engine/data-sources/kidsmap/blocks'
+import { rateLimit, createRateLimitResponse } from '@/lib/api/rate-limiter'
 import type {
   PlaceCategory,
   AgeGroup,
@@ -25,6 +26,11 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const rateLimitResult = await rateLimit(request, 'kidsmap-places')
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(rateLimitResult)
+    }
     const { searchParams } = request.nextUrl
 
     // Query parameters
@@ -41,41 +47,55 @@ export async function GET(request: NextRequest) {
     const placeCategories = placeCategoriesParam
       ? (placeCategoriesParam.split(',') as PlaceCategory[])
       : []
-    const ageGroups = ageGroupsParam
-      ? (ageGroupsParam.split(',') as AgeGroup[])
-      : []
+    const ageGroups = ageGroupsParam ? (ageGroupsParam.split(',') as AgeGroup[]) : []
 
-    // Build filter
-    const filter: Record<string, unknown> = {
-      status: ['active'] as const,
-    }
+    // Build filter for SimplePlaceRepository
+    const filter: {
+      categories?: PlaceCategory[]
+      keyword?: string
+      location?: { latitude: number; longitude: number; radiusKm: number }
+      page?: number
+      pageSize?: number
+    } = {}
 
     if (placeCategories.length > 0) {
       filter.categories = placeCategories
     }
 
     if (query) {
-      filter.searchKeyword = query
+      filter.keyword = query
     }
 
-    // Get repository
-    const repo = getPlaceBlockRepository()
+    // Get repository — uses existing `places` table
+    const repo = getSimplePlaceRepository()
 
-    // Search places
-    filter.page = page
-    filter.pageSize = pageSize
-    filter.sortBy = 'qualityGrade'
+    const needsClientFilter = (lat && lng) || ageGroups.length > 0
+    filter.page = needsClientFilter ? 1 : page
+    filter.pageSize = needsClientFilter ? 500 : pageSize
+
+    // Add location filter if provided (for DB-side filtering)
+    if (lat && lng) {
+      filter.location = {
+        latitude: lat,
+        longitude: lng,
+        radiusKm: radius / 1000, // Convert meters to km
+      }
+    }
+
     const result = await repo.search(filter)
 
     // Calculate distance if location provided
+    type PlaceWithDistance = (typeof result.data)[number] & { distance?: number }
+    let places: PlaceWithDistance[] = result.data
+
     if (lat && lng) {
-      result.data = result.data.map((place) => {
+      places = places.map((place) => {
         if (place.data.latitude && place.data.longitude) {
           const distance = calculateDistance(
             lat,
             lng,
             place.data.latitude as number,
-            place.data.longitude as number,
+            place.data.longitude as number
           )
           return { ...place, distance }
         }
@@ -83,36 +103,40 @@ export async function GET(request: NextRequest) {
       })
 
       // Filter by radius
-      result.data = result.data.filter(
-        (place) => {
-          const p = place as unknown as Record<string, unknown>
-          return !p.distance || (p.distance as number) <= radius
-        },
-      )
+      places = places.filter((place) => !place.distance || place.distance <= radius)
     }
 
-    // Filter by age groups (client-side for now)
+    // Filter by age groups
     if (ageGroups.length > 0) {
-      result.data = result.data.filter((place) => {
+      places = places.filter((place) => {
         const recommended = place.data.recommendedAges || []
         return ageGroups.some((age) => recommended.includes(age))
       })
     }
 
+    // Client-side pagination after filtering
+    const totalFiltered = places.length
+    if (needsClientFilter) {
+      const start = (page - 1) * pageSize
+      places = places.slice(start, start + pageSize)
+    }
+
     return NextResponse.json({
       success: true,
       data: {
-        places: result.data.map((block) => ({
+        places: places.map((block) => ({
           ...block.data,
           blockId: block.id,
           qualityGrade: block.qualityGrade,
           completeness: block.completeness,
-          distance: (block as unknown as Record<string, unknown>).distance,
+          distance: block.distance,
         })),
-        total: result.total,
+        total: needsClientFilter ? totalFiltered : result.total,
         page,
         pageSize,
-        hasMore: result.data.length === pageSize,
+        hasMore: needsClientFilter
+          ? page * pageSize < totalFiltered
+          : page * pageSize < result.total,
       },
     })
   } catch (error) {
@@ -122,7 +146,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: 'Failed to search places',
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
@@ -134,21 +158,13 @@ export async function GET(request: NextRequest) {
 /**
  * Haversine distance calculation (km)
  */
-function calculateDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number {
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371 // Earth radius in km
   const dLat = toRad(lat2 - lat1)
   const dLon = toRad(lon2 - lon1)
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2)
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c * 1000 // Convert to meters
 }

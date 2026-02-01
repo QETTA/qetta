@@ -44,3 +44,25 @@ export { createTemplate } from './templates/create'
 
 // Auth Actions
 export { registerUser } from './auth/register'
+
+// ============================================
+// KidsMap Actions
+// ============================================
+
+// Places
+export { searchPlaces, getPlaceDetail } from './kidsmap/places'
+export type {
+  SearchPlacesParams,
+  SearchPlacesResult,
+  GetPlaceDetailResult,
+  PlaceWithDistance,
+} from './kidsmap/places'
+
+// Feed
+export { fetchFeed, getContentDetail, fetchTrending } from './kidsmap/feed'
+export type {
+  FetchFeedParams,
+  FetchFeedResult,
+  GetContentDetailResult as GetContentResult,
+  FeedItem,
+} from './kidsmap/feed'

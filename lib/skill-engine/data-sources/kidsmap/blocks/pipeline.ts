@@ -547,7 +547,7 @@ export class BlockMigrator {
    * NCP PostgreSQL로 마이그레이션
    */
   private async migrateToNcpPostgres(
-    data: PlaceBlock[] | ContentBlock[],
+    data: (PlaceBlock | ContentBlock)[],
     type: 'places' | 'contents'
   ): Promise<number> {
     if (this.config.dryRun) {

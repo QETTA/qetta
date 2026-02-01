@@ -12,7 +12,6 @@
  * - 재사용 가능한 템플릿 관리
  */
 
-import { revalidatePath } from 'next/cache'
 import { logger } from '@/lib/api/logger'
 import type { EnginePresetType } from '@/types/inbox'
 
@@ -41,30 +40,16 @@ export async function createTemplate(params: CreateTemplateParams) {
       }
     }
 
-    // TODO: Implement template creation logic
-    // 1. Validate template structure
-    // 2. Store in database or file system
-    // 3. Associate with domain engine
-    // 4. Generate template ID
-
-    // Placeholder implementation
-    const templateId = `template-${Date.now()}`
-
     logger.debug(`[Template Create] ${name} for ${enginePreset}/${documentType}`)
 
-    // Revalidate docs page (new template available)
-    revalidatePath('/docs')
-
+    // DB 연동 전까지는 명확한 에러 반환
     return {
-      success: true,
-      data: {
-        id: templateId,
-        name,
-        enginePreset,
-        documentType,
-        createdAt: new Date().toISOString(),
+      success: false,
+      error: {
+        code: 'NOT_IMPLEMENTED',
+        message:
+          '템플릿 저장 기능은 데이터베이스 연동 후 사용 가능합니다. 현재는 기본 제공 템플릿만 사용할 수 있습니다.',
       },
-      message: `템플릿 "${name}" 생성 완료`,
     }
   } catch (error) {
     logger.error('[Template Creation Error]', error)
