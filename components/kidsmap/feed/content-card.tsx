@@ -104,17 +104,22 @@ export function ContentCard(props: ContentCardProps) {
           {SOURCE_LABELS[source]}
         </div>
 
-        {/* Bookmark button */}
+        {/* Bookmark button - 44px 터치 타겟 + Haptic */}
         <button
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
+            // Haptic feedback
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+              navigator.vibrate(isBookmarked ? [10, 30, 10] : 15)
+            }
             toggleBookmark(props as import('@/stores/kidsmap/feed-store').FeedItem)
           }}
-          className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+          className="absolute top-1 right-1 flex h-11 w-11 items-center justify-center rounded-full bg-black/40 text-white transition-all hover:bg-black/60 active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           aria-label={isBookmarked ? '저장 취소' : '저장'}
+          aria-pressed={isBookmarked}
         >
-          <svg className="h-4 w-4" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-5 w-5" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
         </button>
