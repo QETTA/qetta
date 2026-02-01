@@ -46,11 +46,15 @@ export async function GET(request: NextRequest) {
 
     const keyword = searchParams.get('keyword')?.slice(0, 100)
 
+    const placeId = searchParams.get('placeId')
+
     // Query content blocks
     const repo = getContentBlockRepository()
     const result = await repo.search({
       status: ['active'] as const,
       sources,
+      keyword: keyword || undefined,
+      relatedPlaceId: placeId || undefined,
       page,
       pageSize,
       sortBy: sortBy === 'popular' ? 'viewCount' : sortBy === 'trending' ? 'viewCount' : 'publishedAt',

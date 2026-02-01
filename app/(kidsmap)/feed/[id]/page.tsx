@@ -102,14 +102,26 @@ export default function ContentDetailPage() {
           <span>· {new Date(item.publishedAt).toLocaleDateString('ko-KR')}</span>
         </div>
 
-        {/* Place link */}
+        {/* Place CTA — Content-to-Visit conversion */}
         {item.relatedPlaceName && item.relatedPlaceId && (
           <Link
             href={`/map?placeId=${item.relatedPlaceId}`}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+            className="mt-4 flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3 transition-colors hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
           >
-            📍 {item.relatedPlaceName}
-            <span className="text-xs">→ 지도에서 보기</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-lg dark:bg-blue-800">
+              📍
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                {item.relatedPlaceName}
+              </p>
+              <p className="text-xs text-blue-500 dark:text-blue-400">
+                지도에서 위치 확인 · 길찾기
+              </p>
+            </div>
+            <svg className="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </Link>
         )}
 

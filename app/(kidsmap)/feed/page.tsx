@@ -5,6 +5,7 @@ import { useFeedStore } from '@/stores/kidsmap/feed-store'
 import { ContentCard } from '@/components/kidsmap/feed/content-card'
 import { ShortsCard } from '@/components/kidsmap/feed/shorts-card'
 import { FullscreenViewer } from '@/components/kidsmap/feed/fullscreen-viewer'
+import { SearchBar } from '@/components/kidsmap/feed/search-bar'
 import type { ContentSource } from '@/lib/skill-engine/data-sources/kidsmap/types'
 import { clsx } from 'clsx'
 
@@ -33,6 +34,7 @@ export default function FeedPage() {
     setMode,
     setSort,
     setSourceFilter,
+    setKeyword,
     fetchFeed,
     loadMore,
   } = useFeedStore()
@@ -68,9 +70,14 @@ export default function FeedPage() {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95">
         <div className="mx-auto max-w-2xl px-4">
+          {/* Search */}
+          <div className="pt-3 pb-2">
+            <SearchBar onSearch={setKeyword} placeholder="장소, 콘텐츠 검색..." />
+          </div>
+
           {/* Title + mode toggle */}
-          <div className="flex h-12 items-center justify-between">
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white">피드</h1>
+          <div className="flex h-10 items-center justify-between">
+            <h1 className="text-base font-bold text-gray-900 dark:text-white">피드</h1>
             <div className="flex gap-1 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800">
               <button
                 onClick={() => setMode('grid')}

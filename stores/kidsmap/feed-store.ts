@@ -45,6 +45,7 @@ interface FeedState {
   mode: FeedMode
   sort: FeedSort
   sourceFilter: ContentSource | null
+  keyword: string
   isLoading: boolean
   error: string | null
 
@@ -52,6 +53,7 @@ interface FeedState {
   setMode: (mode: FeedMode) => void
   setSort: (sort: FeedSort) => void
   setSourceFilter: (source: ContentSource | null) => void
+  setKeyword: (keyword: string) => void
   fetchFeed: (reset?: boolean) => Promise<void>
   loadMore: () => Promise<void>
   reset: () => void
@@ -65,6 +67,7 @@ const INITIAL_STATE = {
   mode: 'grid' as FeedMode,
   sort: 'recent' as FeedSort,
   sourceFilter: null as ContentSource | null,
+  keyword: '',
   isLoading: false,
   error: null as string | null,
 }
@@ -84,6 +87,11 @@ export const useFeedStore = create<FeedState>((set, get) => ({
     get().fetchFeed(true)
   },
 
+  setKeyword: (keyword) => {
+    set({ keyword })
+    get().fetchFeed(true)
+  },
+
   fetchFeed: async (reset = false) => {
     const state = get()
     if (state.isLoading) return
@@ -99,6 +107,9 @@ export const useFeedStore = create<FeedState>((set, get) => ({
       })
       if (state.sourceFilter) {
         params.set('source', state.sourceFilter)
+      }
+      if (state.keyword) {
+        params.set('keyword', state.keyword)
       }
 
       const res = await fetch(`/api/kidsmap/feed?${params}`)
