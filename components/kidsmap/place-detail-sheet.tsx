@@ -18,6 +18,7 @@ import { Fragment, useCallback, useState, useEffect, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { usePlaceStore } from '@/stores/kidsmap/place-store'
 import { cn } from '@/lib/utils'
+import { PlaceContentsTab } from './place-contents-tab'
 import type { PlaceWithDistance } from '@/stores/kidsmap/place-store'
 
 // ============================================
@@ -278,6 +279,14 @@ export function PlaceDetailSheet() {
                     </div>
                   </div>
                 )}
+
+                {/* Related Contents */}
+                <div className="mb-4">
+                  <PlaceContentsTab
+                    placeId={selectedPlace.id}
+                    placeName={selectedPlace.name}
+                  />
+                </div>
 
                 {/* Contact Info */}
                 {selectedPlace.tel && (

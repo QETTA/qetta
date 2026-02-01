@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { useFeedStore } from '@/stores/kidsmap/feed-store'
 import { ContentCard } from '@/components/kidsmap/feed/content-card'
 import { ShortsCard } from '@/components/kidsmap/feed/shorts-card'
+import { FullscreenViewer } from '@/components/kidsmap/feed/fullscreen-viewer'
 import type { ContentSource } from '@/lib/skill-engine/data-sources/kidsmap/types'
 import { clsx } from 'clsx'
 
@@ -37,6 +38,7 @@ export default function FeedPage() {
   } = useFeedStore()
 
   const observerRef = useRef<HTMLDivElement>(null)
+  const [fullscreenIndex, setFullscreenIndex] = useState<number | null>(null)
 
   // Initial fetch
   useEffect(() => {
@@ -158,8 +160,10 @@ export default function FeedPage() {
       {mode === 'shorts' && (
         <div className="mx-auto max-w-2xl px-4">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {items.map((item) => (
-              <ShortsCard key={item.id} {...item} />
+            {items.map((item, idx) => (
+              <div key={item.id} onClick={() => setFullscreenIndex(idx)} className="cursor-pointer">
+                <ShortsCard {...item} />
+              </div>
             ))}
           </div>
         </div>
@@ -182,6 +186,16 @@ export default function FeedPage() {
 
       {/* Infinite scroll trigger */}
       <div ref={observerRef} className="h-4" />
+
+      {/* Fullscreen viewer */}
+      {fullscreenIndex !== null && (
+        <FullscreenViewer
+          items={items}
+          initialIndex={fullscreenIndex}
+          onClose={() => setFullscreenIndex(null)}
+          onLoadMore={loadMore}
+        />
+      )}
     </div>
   )
 }
