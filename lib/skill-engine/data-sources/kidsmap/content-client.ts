@@ -370,8 +370,7 @@ export class ContentClient {
     switch (sortBy) {
       case 'date':
         return [...contents].sort(
-          (a, b) =>
-            new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+          (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
         )
       case 'viewCount':
         return [...contents].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
@@ -393,7 +392,7 @@ export class ContentClient {
     })
 
     const result: NormalizedContent[] = []
-    let maxLength = Math.max(
+    const maxLength = Math.max(
       bySource.YOUTUBE.length,
       bySource.NAVER_BLOG.length,
       bySource.NAVER_CLIP.length

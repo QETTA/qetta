@@ -62,8 +62,16 @@ declare global {
           Places: new () => any
         }
         event: {
-          addListener: (target: unknown, type: string, handler: (...args: unknown[]) => void) => void
-          removeListener: (target: unknown, type: string, handler: (...args: unknown[]) => void) => void
+          addListener: (
+            target: unknown,
+            type: string,
+            handler: (...args: unknown[]) => void
+          ) => void
+          removeListener: (
+            target: unknown,
+            type: string,
+            handler: (...args: unknown[]) => void
+          ) => void
         }
         ControlPosition: {
           TOP: number
@@ -125,12 +133,20 @@ export function KakaoMapProvider({
 
     const key = apiKey || process.env.NEXT_PUBLIC_KAKAO_MAP_KEY
 
+    // Debug logging
+    console.log('[KakaoMapProvider] API Key check:', {
+      hasApiKeyProp: !!apiKey,
+      hasEnvVar: !!process.env.NEXT_PUBLIC_KAKAO_MAP_KEY,
+      keyLength: key?.length || 0,
+    })
+
     // Validate API key
     if (!key) {
-      setError( // eslint-disable-line react-hooks/set-state-in-effect
+      console.error('[KakaoMapProvider] No API key found!')
+      setError(
         new Error(
-          'Kakao Map API key is required. Set NEXT_PUBLIC_KAKAO_MAP_KEY environment variable.',
-        ),
+          'Kakao Map API key is required. Set NEXT_PUBLIC_KAKAO_MAP_KEY environment variable.'
+        )
       )
       return
     }

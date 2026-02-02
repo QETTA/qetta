@@ -42,6 +42,7 @@ export function OfflineIndicator({
 }: OfflineIndicatorProps) {
   const [showReconnected, setShowReconnected] = useState(false)
   const [wasOffline, setWasOffline] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   const { isOnline, isOffline } = useOnlineStatus({
     onReconnect: () => {
@@ -55,6 +56,11 @@ export function OfflineIndicator({
     },
   })
 
+  // Hydration 불일치 방지: 클라이언트에서만 렌더링
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // 재연결 메시지 자동 숨김
   useEffect(() => {
     if (showReconnected) {
@@ -65,6 +71,11 @@ export function OfflineIndicator({
     }
   }, [showReconnected, autoHideDelay])
 
+  // 서버 사이드에서는 렌더링하지 않음
+  if (!mounted) {
+    return null
+  }
+
   // 아무것도 표시하지 않을 때
   if (isOnline && !showReconnected) {
     return null
@@ -72,7 +83,7 @@ export function OfflineIndicator({
 
   return (
     <div
-      className={`fixed top-0 inset-x-0 z-[100] transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-[100] transition-all duration-300 ${
         isOffline ? 'translate-y-0' : showReconnected ? 'translate-y-0' : '-translate-y-full'
       }`}
       role="alert"
@@ -81,15 +92,18 @@ export function OfflineIndicator({
       {/* Safe Area 고려 */}
       <div
         className={`pt-[env(safe-area-inset-top)] ${
-          isOffline
-            ? 'bg-red-500 dark:bg-red-600'
-            : 'bg-green-500 dark:bg-green-600'
+          isOffline ? 'bg-red-500 dark:bg-red-600' : 'bg-green-500 dark:bg-green-600'
         }`}
       >
         <div className="flex items-center justify-center gap-3 px-4 py-2.5">
           {/* 아이콘 */}
           {isOffline ? (
-            <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-4 w-4 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -98,7 +112,12 @@ export function OfflineIndicator({
               />
             </svg>
           ) : (
-            <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-4 w-4 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -117,7 +136,7 @@ export function OfflineIndicator({
           {isOffline && showRetry && onRetry && (
             <button
               onClick={onRetry}
-              className="ml-2 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white hover:bg-white/30 transition-colors min-h-[32px]"
+              className="ml-2 min-h-[32px] rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-white/30"
             >
               재시도
             </button>

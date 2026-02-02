@@ -141,7 +141,6 @@ export default function KidsMapPage() {
     }, 300)
 
     return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, center, filterCategory, ageGroups, maxDistance, openNow, searchPlaces])
 
   // ============================================
@@ -168,7 +167,9 @@ export default function KidsMapPage() {
           lng: place.longitude,
           title: place.name,
           onClick: (placeId: string) => {
-            const selectedPlace = searchResult.places.find((p: PlaceWithDistance) => p.id === placeId)
+            const selectedPlace = searchResult.places.find(
+              (p: PlaceWithDistance) => p.id === placeId
+            )
             if (selectedPlace) {
               selectPlace(selectedPlace)
             }
@@ -189,7 +190,7 @@ export default function KidsMapPage() {
           lat: selectedPlace.latitude,
           lng: selectedPlace.longitude,
         },
-        3, // Zoom in when selecting
+        3 // Zoom in when selecting
       )
     }
   }, [selectedPlace, panTo])
@@ -202,7 +203,7 @@ export default function KidsMapPage() {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-zinc-950">
         <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-zinc-700 border-t-white mx-auto" />
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-zinc-700 border-t-white" />
           <p className="text-zinc-400">Loading Kakao Maps SDK...</p>
         </div>
       </div>
@@ -244,10 +245,15 @@ export default function KidsMapPage() {
       {/* Back Navigation */}
       <Link
         href="/"
-        className="absolute top-4 left-4 z-10 flex items-center justify-center w-10 h-10 bg-white dark:bg-zinc-900 rounded-full shadow-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+        className="absolute top-4 left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white shadow-lg transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
         aria-label="Go back to home"
       >
-        <svg className="h-5 w-5 text-zinc-700 dark:text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="h-5 w-5 text-zinc-700 dark:text-zinc-300"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </Link>
@@ -261,7 +267,7 @@ export default function KidsMapPage() {
 
       {/* Search Status Overlay */}
       {isSearching && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-zinc-900/90 backdrop-blur-sm px-4 py-2 rounded-full border border-zinc-800 shadow-lg">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full border border-zinc-800 bg-zinc-900/90 px-4 py-2 shadow-lg backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-600 border-t-white" />
             <span className="text-sm text-zinc-300">Searching places...</span>
@@ -271,32 +277,31 @@ export default function KidsMapPage() {
 
       {/* Error Message */}
       {searchError && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-red-900/90 backdrop-blur-sm px-4 py-2 rounded-lg border border-red-800 shadow-lg">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-lg border border-red-800 bg-red-900/90 px-4 py-2 shadow-lg backdrop-blur-sm">
           <p className="text-sm text-white">{searchError}</p>
         </div>
       )}
 
       {/* Results Count */}
       {searchResult && !isSearching && (
-        <div className="absolute top-4 right-4 bg-zinc-900/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-zinc-800 shadow-lg">
+        <div className="absolute top-4 right-4 rounded-lg border border-zinc-800 bg-zinc-900/90 px-3 py-2 shadow-lg backdrop-blur-sm">
           <p className="text-sm text-zinc-300">
-            <span className="font-semibold text-white">{searchResult.totalCount}</span> places
-            found
+            <span className="font-semibold text-white">{searchResult.totalCount}</span> places found
           </p>
         </div>
       )}
 
       {/* Toast Notification */}
       {toast && (
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 bg-zinc-900/95 backdrop-blur-sm px-4 py-2.5 rounded-lg border border-zinc-700 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <p className="text-sm text-white whitespace-nowrap">{toast}</p>
+        <div className="animate-in fade-in slide-in-from-bottom-2 absolute bottom-32 left-1/2 -translate-x-1/2 rounded-lg border border-zinc-700 bg-zinc-900/95 px-4 py-2.5 shadow-lg backdrop-blur-sm duration-200">
+          <p className="text-sm whitespace-nowrap text-white">{toast}</p>
         </div>
       )}
 
       {/* User Location Button */}
       <button
         onClick={requestUserLocation}
-        className="absolute bottom-24 right-4 bg-white hover:bg-zinc-100 p-3 rounded-full shadow-lg border border-zinc-200 transition-colors"
+        className="absolute right-4 bottom-24 rounded-full border border-zinc-200 bg-white p-3 shadow-lg transition-colors hover:bg-zinc-100"
         aria-label="Show my location"
       >
         <svg
@@ -321,8 +326,8 @@ export default function KidsMapPage() {
       </button>
 
       {/* Quick Filters */}
-      <div className="absolute top-16 left-4 right-4 max-w-2xl">
-        <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm px-4 py-3 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-lg">
+      <div className="absolute top-16 right-4 left-4 max-w-2xl">
+        <div className="rounded-lg border border-zinc-200 bg-white/95 px-4 py-3 shadow-lg backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/95">
           <QuickFilter />
         </div>
       </div>
