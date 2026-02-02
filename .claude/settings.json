@@ -5,7 +5,33 @@
       "Bash(npx *)",
       "Bash(git *)",
       "Bash(node *)",
-      "Bash(vercel *)"
+      "Bash(vercel *)",
+      "Bash(prisma *)",
+      "Bash(playwright *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "trigger": "PostToolUse",
+        "commandMatch": "Edit|Write|MultiEdit",
+        "filePatternMatch": "\\.(ts|tsx|js|jsx|mjs)$",
+        "command": "cd C:/Users/sihu2/qetta && npx prettier --write {{file_path}} --config .prettierrc || true",
+        "statusMessage": "🎨 Formatting..."
+      },
+      {
+        "trigger": "PostToolUse",
+        "commandMatch": "Edit|Write|MultiEdit",
+        "filePatternMatch": "\\.css$",
+        "command": "cd C:/Users/sihu2/qetta && npx prettier --write {{file_path}} --config .prettierrc || true",
+        "statusMessage": "🎨 Formatting CSS..."
+      },
+      {
+        "trigger": "PostToolUse",
+        "commandMatch": "Edit.*prisma/schema.prisma|Write.*prisma/schema.prisma",
+        "command": "cd C:/Users/sihu2/qetta && npm run db:generate",
+        "statusMessage": "⚡ Regenerating Prisma Client..."
+      }
     ]
   },
   "enableAllProjectMcpServers": true
