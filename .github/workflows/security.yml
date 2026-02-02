@@ -7,7 +7,7 @@ name: Security
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   schedule:
     # 매주 월요일 09:00 KST (00:00 UTC)
     - cron: '0 0 * * 1'

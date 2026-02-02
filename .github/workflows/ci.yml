@@ -1,15 +1,16 @@
 # QETTA CI Pipeline
 #
-# 트리거: Push, Pull Request (main, develop 브랜치)
-# 작업: Lint → Test → Build
+# 트리거: Push, Pull Request (main, master, develop 브랜치)
+# 작업: Lint → TypeCheck → Test → Build
 
 name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [main, master, develop]
+  workflow_dispatch: # 수동 실행 지원
 
 env:
   NODE_VERSION: '20'

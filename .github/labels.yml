@@ -1,0 +1,140 @@
+# QETTA Labels 자동 설정
+#
+# 사용법: GitHub CLI로 실행
+# gh label create "label-name" --color "hexcode" --description "설명"
+#
+# 또는 이 파일을 참조하여 GitHub 웹에서 수동 생성
+
+# ============================================
+# 타입 라벨 (Type)
+# ============================================
+- name: "bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: "feature"
+  color: "a2eeef"
+  description: "New feature or request"
+
+- name: "enhancement"
+  color: "84b6eb"
+  description: "Improvement to existing feature"
+
+- name: "docs"
+  color: "0075ca"
+  description: "Documentation only changes"
+
+- name: "refactor"
+  color: "fbca04"
+  description: "Code refactoring (no functional changes)"
+
+- name: "test"
+  color: "bfe5bf"
+  description: "Adding or updating tests"
+
+- name: "chore"
+  color: "fef2c0"
+  description: "Maintenance tasks"
+
+# ============================================
+# 우선순위 라벨 (Priority)
+# ============================================
+- name: "priority: critical"
+  color: "b60205"
+  description: "Must be fixed ASAP"
+
+- name: "priority: high"
+  color: "d93f0b"
+  description: "High priority issue"
+
+- name: "priority: medium"
+  color: "fbca04"
+  description: "Medium priority issue"
+
+- name: "priority: low"
+  color: "0e8a16"
+  description: "Low priority issue"
+
+# ============================================
+# 상태 라벨 (Status)
+# ============================================
+- name: "status: in progress"
+  color: "fbca04"
+  description: "Currently being worked on"
+
+- name: "status: blocked"
+  color: "d73a4a"
+  description: "Blocked by another issue"
+
+- name: "status: needs review"
+  color: "0e8a16"
+  description: "Ready for code review"
+
+- name: "status: needs info"
+  color: "d876e3"
+  description: "Needs more information"
+
+# ============================================
+# 영역 라벨 (Area)
+# ============================================
+- name: "area: frontend"
+  color: "1d76db"
+  description: "Frontend related"
+
+- name: "area: backend"
+  color: "5319e7"
+  description: "Backend/API related"
+
+- name: "area: database"
+  color: "006b75"
+  description: "Database related"
+
+- name: "area: devops"
+  color: "ededed"
+  description: "DevOps/Infrastructure"
+
+- name: "area: kidsmap"
+  color: "ff6b6b"
+  description: "KidsMap feature"
+
+# ============================================
+# 자동화 라벨 (Automation)
+# ============================================
+- name: "dependencies"
+  color: "0366d6"
+  description: "Pull requests that update a dependency"
+
+- name: "npm"
+  color: "cb3837"
+  description: "npm package updates"
+
+- name: "github-actions"
+  color: "2088ff"
+  description: "GitHub Actions updates"
+
+- name: "automerge"
+  color: "0e8a16"
+  description: "Auto-merge when checks pass"
+
+# ============================================
+# 크기 라벨 (Size)
+# ============================================
+- name: "size: XS"
+  color: "3cbf00"
+  description: "< 10 lines changed"
+
+- name: "size: S"
+  color: "5d9801"
+  description: "10-50 lines changed"
+
+- name: "size: M"
+  color: "7f7203"
+  description: "50-200 lines changed"
+
+- name: "size: L"
+  color: "a14c05"
+  description: "200-500 lines changed"
+
+- name: "size: XL"
+  color: "c42607"
+  description: "> 500 lines changed"

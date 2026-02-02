@@ -11,6 +11,7 @@ updates:
   # ============================================
   - package-ecosystem: 'npm'
     directory: '/'
+    target-branch: 'master'
     schedule:
       interval: 'weekly'
       day: 'monday'
@@ -57,6 +58,7 @@ updates:
   # ============================================
   - package-ecosystem: 'github-actions'
     directory: '/'
+    target-branch: 'master'
     schedule:
       interval: 'weekly'
       day: 'monday'
@@ -66,5 +68,11 @@ updates:
     labels:
       - 'dependencies'
       - 'github-actions'
+      - 'automerge'
     commit-message:
       prefix: 'chore(actions)'
+    # GitHub Actions는 보통 안전하므로 자동 병합 가능
+    groups:
+      actions:
+        patterns:
+          - '*'
