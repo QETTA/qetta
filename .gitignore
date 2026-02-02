@@ -81,7 +81,23 @@ screenshots/
 .claude/settings.local.json
 .claude/memory/
 .claude/tasks/
+.claude/plan.md
+.claude/skills/
+CLAUDE.local.md
 # Keep these tracked
 !.claude/patterns/
+
+# Serena (AI tool)
+.serena/
+
+# Temporary screenshots
+*.png
+!public/**/*.png
+
+# Quick start scripts (local dev only)
+scripts/quick-start.*
+scripts/auto-*.ps1
+scripts/setup-*.sh
+
 .vercel
 .env*.local

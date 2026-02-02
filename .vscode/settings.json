@@ -14,6 +14,42 @@
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.suggest.autoImports": true,
 
+  // GitHub Copilot Pro (Student Pack - All Premium Models)
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true,
+    "typescript": true,
+    "typescriptreact": true,
+    "javascript": true,
+    "javascriptreact": true,
+    "json": true,
+    "jsonc": true,
+    "prisma": true
+  },
+
+  // Copilot Chat - Claude Sonnet 4 (2026-02 현재 최고 품질)
+  "github.copilot.chat.model": "claude-sonnet-4",
+
+  // Inline Suggestions - GPT-4o (빠르고 정확)
+  "github.copilot.inlineChat.model": "gpt-4o",
+
+  // Code Completions - GPT-4o (코딩 최적화, 안정적)
+  "github.copilot.editor.model": "gpt-4o",
+
+  // Advanced Settings
+  "github.copilot.editor.enableAutoCompletions": true,
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.codeContext.includeWorkspaceSymbols": true,
+  "github.copilot.chat.localeOverride": "en",
+  "github.copilot.advanced": {
+    "inlineSuggestCount": 5, // 5개 제안 (Pro 기능)
+    "multiModelEnabled": true, // 멀티모델 활성화
+    "experimentalFeatures": true, // 실험 기능 활성화
+    "length": "medium",
+    "temperature": 0.7
+  },
+
   // Files
   "files.eol": "\n",
   "files.insertFinalNewline": true,
