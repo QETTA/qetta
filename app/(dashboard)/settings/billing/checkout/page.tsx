@@ -15,9 +15,13 @@ import { Loader2, CreditCard, AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 // Toss SDK is loaded dynamically on the client
+interface TossPaymentsInstance {
+  requestPayment: (method: string, options: Record<string, unknown>) => Promise<void>
+}
+
 declare global {
   interface Window {
-    TossPayments?: any
+    TossPayments?: (clientKey: string) => TossPaymentsInstance
   }
 }
 
@@ -96,13 +100,11 @@ function CheckoutContent() {
 
   if (!orderId || !amount) {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-lg">
+      <div className="container mx-auto max-w-lg px-4 py-8">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Invalid payment information. Please try again.
-          </AlertDescription>
+          <AlertDescription>Invalid payment information. Please try again.</AlertDescription>
         </Alert>
         <Button className="mt-4" onClick={() => router.push('/settings/billing')}>
           Back to Billing
@@ -112,7 +114,7 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-lg">
+    <div className="container mx-auto max-w-lg px-4 py-8">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -123,7 +125,7 @@ function CheckoutContent() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Order info */}
-          <div className="space-y-3 p-4 bg-muted rounded-lg">
+          <div className="bg-muted space-y-3 rounded-lg p-4">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Product</span>
               <span className="font-medium">{orderName}</span>
@@ -132,7 +134,7 @@ function CheckoutContent() {
               <span className="text-muted-foreground">Order ID</span>
               <span className="font-mono text-sm">{orderId}</span>
             </div>
-            <div className="flex justify-between text-lg font-bold pt-2 border-t">
+            <div className="flex justify-between border-t pt-2 text-lg font-bold">
               <span>Amount</span>
               <span>
                 {new Intl.NumberFormat('ko-KR', {
@@ -175,7 +177,7 @@ function CheckoutContent() {
           </div>
 
           {/* Help text */}
-          <p className="text-xs text-center text-muted-foreground">
+          <p className="text-muted-foreground text-center text-xs">
             Payment is securely processed by Toss Payments.
             <br />
             Service is activated immediately after payment.
@@ -190,7 +192,7 @@ export default function CheckoutPage() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto py-8 px-4 max-w-lg">
+        <div className="container mx-auto max-w-lg px-4 py-8">
           <Card>
             <CardContent className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin" />

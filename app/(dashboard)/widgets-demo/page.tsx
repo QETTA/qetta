@@ -17,15 +17,25 @@ import { DISPLAY_METRICS } from '@/constants/metrics'
 
 // Dynamic imports for heavy widget components (react-grid-layout is ~50KB)
 const QettaWidgetSystem = dynamic(
-  () => import('@/components/dashboard/widgets/widget-system').then(mod => ({ default: mod.QettaWidgetSystem })),
+  () =>
+    import('@/components/dashboard/widgets/widget-system').then((mod) => ({
+      default: mod.QettaWidgetSystem,
+    })),
   {
-    loading: () => <div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-500" /></div>,
+    loading: () => (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-zinc-500" />
+      </div>
+    ),
     ssr: false,
   }
 )
 
 const QettaLayoutEditor = dynamic(
-  () => import('@/components/dashboard/widgets/layout-editor').then(mod => ({ default: mod.QettaLayoutEditor })),
+  () =>
+    import('@/components/dashboard/widgets/layout-editor').then((mod) => ({
+      default: mod.QettaLayoutEditor,
+    })),
   {
     ssr: false,
   }
@@ -165,24 +175,21 @@ const INITIAL_WIDGETS: DashboardWidget[] = [
 ]
 
 export default function WidgetsDemoPage() {
-  const [widgets, setWidgets] = useState<DashboardWidget[]>([])
-  const [editMode, setEditMode] = useState(false)
+  const [widgets, setWidgets] = useState<DashboardWidget[]>(() => {
+    // Lazy initializer - runs only once on mount
+    if (typeof window === 'undefined') return INITIAL_WIDGETS
 
-  // Load initial widgets on mount
-  useEffect(() => {
-    // Try to load from localStorage first
     const saved = localStorage.getItem('dashboard-layout')
     if (saved) {
       try {
-        setWidgets(JSON.parse(saved))
+        return JSON.parse(saved) as DashboardWidget[]
       } catch {
-        // If parsing fails, use initial widgets
-        setWidgets(INITIAL_WIDGETS)
+        return INITIAL_WIDGETS
       }
-    } else {
-      setWidgets(INITIAL_WIDGETS)
     }
-  }, [])
+    return INITIAL_WIDGETS
+  })
+  const [editMode, setEditMode] = useState(false)
 
   // Handle widget updates
   const handleWidgetUpdate = (updatedWidgets: DashboardWidget[]) => {
@@ -204,10 +211,10 @@ export default function WidgetsDemoPage() {
   return (
     <div className="min-h-screen bg-zinc-950 p-8">
       {/* Page Header */}
-      <div className="max-w-7xl mx-auto mb-8">
+      <div className="mx-auto mb-8 max-w-7xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Customizable Dashboard</h1>
+            <h1 className="mb-2 text-3xl font-bold text-white">Customizable Dashboard</h1>
             <p className="text-zinc-400">
               Phase 1 Demo: Drag-and-drop widgets, resize, and save your layout
             </p>
@@ -226,7 +233,7 @@ export default function WidgetsDemoPage() {
       </div>
 
       {/* Widget System */}
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         <QettaWidgetSystem
           activeTab="DOCS"
           widgets={widgets}
@@ -236,8 +243,8 @@ export default function WidgetsDemoPage() {
       </div>
 
       {/* Instructions */}
-      <div className="max-w-7xl mx-auto mt-8 p-6 bg-zinc-900 rounded-xl ring-1 ring-white/10">
-        <h2 className="text-sm font-medium text-white mb-3">How to use:</h2>
+      <div className="mx-auto mt-8 max-w-7xl rounded-xl bg-zinc-900 p-6 ring-1 ring-white/10">
+        <h2 className="mb-3 text-sm font-medium text-white">How to use:</h2>
         <ul className="space-y-2 text-sm text-zinc-400">
           <li className="flex items-start gap-2">
             <span className="text-white">1.</span>
@@ -249,7 +256,8 @@ export default function WidgetsDemoPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-white">3.</span>
-            <strong className="text-white">Resize</strong> widgets by dragging the bottom-right corner
+            <strong className="text-white">Resize</strong> widgets by dragging the bottom-right
+            corner
           </li>
           <li className="flex items-start gap-2">
             <span className="text-white">4.</span>
@@ -261,7 +269,8 @@ export default function WidgetsDemoPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-white">6.</span>
-            Click <strong className="text-white">X</strong> on a widget to remove it (edit mode only)
+            Click <strong className="text-white">X</strong> on a widget to remove it (edit mode
+            only)
           </li>
         </ul>
       </div>

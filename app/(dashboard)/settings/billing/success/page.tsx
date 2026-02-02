@@ -25,10 +25,11 @@ function SuccessContent() {
   const orderId = searchParams.get('orderId')
   const amount = searchParams.get('amount')
 
+  // Validate params early (derived state)
+  const hasValidParams = !!(paymentKey && orderId && amount)
+
   useEffect(() => {
-    if (!paymentKey || !orderId || !amount) {
-      setStatus('error')
-      setError('Invalid payment information')
+    if (!hasValidParams) {
       return
     }
 
@@ -69,22 +70,49 @@ function SuccessContent() {
       } catch (error) {
         console.error('Confirm error:', error)
         setStatus('error')
-        const message = error instanceof Error ? error.message : 'An error occurred during payment confirmation'
+        const message =
+          error instanceof Error ? error.message : 'An error occurred during payment confirmation'
         setError(message)
       }
     }
 
     confirmPayment()
-  }, [paymentKey, orderId, amount])
+  }, [paymentKey, orderId, amount, hasValidParams])
+
+  // Handle invalid params (early return)
+  if (!hasValidParams) {
+    return (
+      <div className="container mx-auto max-w-lg px-4 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <AlertCircle className="h-6 w-6" />
+              Invalid Payment Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>Missing required payment parameters</AlertDescription>
+            </Alert>
+            <Button variant="outline" onClick={() => router.push('/settings/billing')}>
+              Back to Billing
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (status === 'loading') {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-lg">
+      <div className="container mx-auto max-w-lg px-4 py-8">
         <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <CardContent className="flex flex-col items-center justify-center space-y-4 py-12">
+            <Loader2 className="text-primary h-12 w-12 animate-spin" />
             <p className="text-lg font-medium">Confirming payment...</p>
-            <p className="text-sm text-muted-foreground">Please wait</p>
+            <p className="text-muted-foreground text-sm">Please wait</p>
           </CardContent>
         </Card>
       </div>
@@ -93,10 +121,10 @@ function SuccessContent() {
 
   if (status === 'error') {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-lg">
+      <div className="container mx-auto max-w-lg px-4 py-8">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
+            <CardTitle className="text-destructive flex items-center gap-2">
               <AlertCircle className="h-6 w-6" />
               Payment Failed
             </CardTitle>
@@ -120,17 +148,17 @@ function SuccessContent() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-lg">
+    <div className="container mx-auto max-w-lg px-4 py-8">
       <Card>
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
             <CheckCircle2 className="h-10 w-10 text-green-600" />
           </div>
           <CardTitle className="text-2xl">Payment Complete!</CardTitle>
           <CardDescription>Thank you for using QETTA Premium services</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="p-4 bg-muted rounded-lg space-y-2">
+          <div className="bg-muted space-y-2 rounded-lg p-4">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Order ID</span>
               <span className="font-mono text-sm">{orderId}</span>
@@ -166,7 +194,7 @@ export default function SuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto py-8 px-4 max-w-lg">
+        <div className="container mx-auto max-w-lg px-4 py-8">
           <Card>
             <CardContent className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin" />

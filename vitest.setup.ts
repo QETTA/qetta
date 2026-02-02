@@ -80,7 +80,6 @@ afterAll(() => {
 
 // Vitest globals에 유틸리티 추가 (선택적)
 declare global {
-  // eslint-disable-next-line no-var
   var testUtils: {
     createMockSession: (userId?: string) => {
       user: { id: string; email: string; name: string }

@@ -27,7 +27,16 @@
     "db:migrate:direct": "npx tsx scripts/db-direct-migrate.ts",
     "db:migrate:api": "npx tsx scripts/db-migrate-api.ts",
     "prepare": "husky",
-    "validate": "npm run typecheck && npm run lint && npm run test"
+    "validate": "npm run typecheck && npm run lint && npm run test",
+    "validate:97": "npx tsx scripts/validate-97-points.ts",
+    "env:check": "node check-env.js && node check-kidsmap.js",
+    "vscode:setup": "bash scripts/setup-vscode.sh",
+    "tokens:log": "npx tsx scripts/monitor-tokens.ts log",
+    "tokens:report": "npx tsx scripts/monitor-tokens.ts report",
+    "security:check": "npm audit && npm run lint",
+    "pack:verify": "npx tsx scripts/verify-student-pack.ts",
+    "pack:signup": "npx tsx scripts/auto-signup-student-pack.ts",
+    "pack:status": "npx tsx scripts/verify-student-pack.ts && echo '\nRun: npm run pack:signup to start signup process'"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.1",
@@ -107,6 +116,7 @@
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5",
     "vitest": "^4.0.18"
   }
