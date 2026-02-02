@@ -57,13 +57,9 @@ export function LoginForm() {
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-semibold text-white">
-          Sign in
-        </h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Sign in to your account
-        </p>
+      <div className="mb-8 text-center">
+        <h1 className="text-2xl font-semibold text-white">Sign in</h1>
+        <p className="mt-2 text-sm text-zinc-400">Sign in to your account</p>
       </div>
 
       {/* Registration success message */}
@@ -106,15 +102,17 @@ export function LoginForm() {
             aria-describedby="email-hint"
             aria-invalid={errorMessage ? 'true' : undefined}
             className={clsx(
-              'block w-full h-11 rounded-lg bg-zinc-900/50 text-white',
+              'block h-11 w-full rounded-lg bg-zinc-900/50 text-white',
               'ring-1 ring-white/10 placeholder:text-zinc-500',
               'px-4 text-sm',
-              'focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-zinc-900/70',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'focus:bg-zinc-900/70 focus:ring-2 focus:ring-white/30 focus:outline-none',
+              'disabled:cursor-not-allowed disabled:opacity-50',
               'transition-all duration-200'
             )}
           />
-          <span id="email-hint" className="sr-only">Enter your email</span>
+          <span id="email-hint" className="sr-only">
+            Enter your email
+          </span>
         </Field>
 
         {/* Password field */}
@@ -133,15 +131,17 @@ export function LoginForm() {
             aria-describedby="password-hint"
             aria-invalid={errorMessage ? 'true' : undefined}
             className={clsx(
-              'block w-full h-11 rounded-lg bg-zinc-900/50 text-white',
+              'block h-11 w-full rounded-lg bg-zinc-900/50 text-white',
               'ring-1 ring-white/10 placeholder:text-zinc-500',
               'px-4 text-sm',
-              'focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-zinc-900/70',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'focus:bg-zinc-900/70 focus:ring-2 focus:ring-white/30 focus:outline-none',
+              'disabled:cursor-not-allowed disabled:opacity-50',
               'transition-all duration-200'
             )}
           />
-          <span id="password-hint" className="sr-only">Enter your password</span>
+          <span id="password-hint" className="sr-only">
+            Enter your password
+          </span>
         </Field>
 
         {/* Remember me & Forgot password */}
@@ -152,21 +152,19 @@ export function LoginForm() {
               disabled={isPending}
               className={clsx(
                 'group block size-4 rounded border border-white/20 bg-zinc-900/50',
-                'data-checked:bg-zinc-500 data-checked:border-zinc-500',
-                'focus:outline-none focus:ring-2 focus:ring-white/30',
+                'data-checked:border-zinc-500 data-checked:bg-zinc-500',
+                'focus:ring-2 focus:ring-white/30 focus:outline-none',
                 'disabled:opacity-50',
                 'transition-colors duration-150'
               )}
             >
-              <CheckIcon className="fill-white opacity-0 group-data-checked:opacity-100 size-3" />
+              <CheckIcon className="size-3 fill-white opacity-0 group-data-checked:opacity-100" />
             </Checkbox>
-            <Label className="text-zinc-400 cursor-pointer select-none">
-              Remember me
-            </Label>
+            <Label className="cursor-pointer text-zinc-400 select-none">Remember me</Label>
           </Field>
           <Link
             href="/forgot-password"
-            className="text-zinc-400 hover:text-white transition-colors"
+            className="text-zinc-400 transition-colors hover:text-white"
           >
             Forgot password?
           </Link>
@@ -177,17 +175,17 @@ export function LoginForm() {
           type="submit"
           disabled={isPending}
           className={clsx(
-            'w-full h-11 rounded-lg text-sm font-semibold',
+            'h-11 w-full rounded-lg text-sm font-semibold',
             'bg-zinc-600 text-white',
             'hover:bg-zinc-500',
-            'focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-zinc-950',
-            'disabled:opacity-50 disabled:cursor-not-allowed',
+            'focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-zinc-950 focus:outline-none',
+            'disabled:cursor-not-allowed disabled:opacity-50',
             'transition-all duration-200'
           )}
         >
           {isPending ? (
             <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
                 <circle
                   className="opacity-25"
                   cx="12"
@@ -217,9 +215,7 @@ export function LoginForm() {
           <div className="w-full border-t border-white/10" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-zinc-900/80 text-zinc-500">
-            or
-          </span>
+          <span className="bg-zinc-900/80 px-4 text-zinc-500">or</span>
         </div>
       </div>
 
@@ -232,10 +228,10 @@ export function LoginForm() {
             window.location.href = '/api/auth/signin/google'
           }}
           className={clsx(
-            'w-full h-11 rounded-lg text-sm font-medium',
+            'h-11 w-full rounded-lg text-sm font-medium',
             'bg-white text-zinc-900',
             'hover:bg-zinc-100',
-            'focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950',
+            'focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-zinc-950 focus:outline-none',
             'transition-all duration-200',
             'flex items-center justify-center gap-3'
           )}
@@ -268,10 +264,10 @@ export function LoginForm() {
             window.location.href = '/api/auth/signin/github'
           }}
           className={clsx(
-            'w-full h-11 rounded-lg text-sm font-medium',
+            'h-11 w-full rounded-lg text-sm font-medium',
             'bg-zinc-800 text-white ring-1 ring-white/10',
             'hover:bg-zinc-700',
-            'focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-zinc-950',
+            'focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-zinc-950 focus:outline-none',
             'transition-all duration-200',
             'flex items-center justify-center gap-3'
           )}
@@ -289,10 +285,10 @@ export function LoginForm() {
 
       {/* Sign up link */}
       <div className="mt-8 text-center text-sm">
-        <span className="text-zinc-500">Don't have an account?</span>{' '}
+        <span className="text-zinc-500">Don&apos;t have an account?</span>{' '}
         <Link
           href="/signup"
-          className="text-white hover:text-zinc-300 font-medium transition-colors"
+          className="font-medium text-white transition-colors hover:text-zinc-300"
         >
           Sign up
         </Link>

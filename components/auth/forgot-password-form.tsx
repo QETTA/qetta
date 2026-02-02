@@ -79,21 +79,21 @@ export function ForgotPasswordForm() {
       <div className="mb-8">
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-6 transition-colors"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-zinc-400 transition-colors hover:text-white"
         >
           <ArrowLeftIcon className="h-4 w-4" />
           Back to sign in
         </Link>
 
-        <h1 className="text-2xl font-semibold text-white mb-2">Forgot password</h1>
+        <h1 className="mb-2 text-2xl font-semibold text-white">Forgot password</h1>
         <p className="text-sm text-zinc-400">
-          Enter your email and we'll send you a reset link.
+          Enter your email and we&apos;ll send you a reset link.
         </p>
       </div>
 
       {/* Success message */}
       {successMessage && (
-        <div className="rounded-lg bg-emerald-500/10 p-6 ring-1 ring-emerald-500/20 mb-6">
+        <div className="mb-6 rounded-lg bg-emerald-500/10 p-6 ring-1 ring-emerald-500/20">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
               <svg
@@ -111,18 +111,16 @@ export function ForgotPasswordForm() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-white mb-1">
-                Check your email
-              </h3>
-              <p className="text-sm text-zinc-400 mb-3">
-                We've sent a password reset link to your email.
+              <h3 className="mb-1 text-sm font-semibold text-white">Check your email</h3>
+              <p className="mb-3 text-sm text-zinc-400">
+                We&apos;ve sent a password reset link to your email.
               </p>
               {state.resetUrl && (
-                <div className="mt-4 p-3 bg-zinc-900/50 rounded-lg ring-1 ring-white/10">
-                  <p className="text-xs text-zinc-500 mb-2">Development mode - Test link:</p>
+                <div className="mt-4 rounded-lg bg-zinc-900/50 p-3 ring-1 ring-white/10">
+                  <p className="mb-2 text-xs text-zinc-500">Development mode - Test link:</p>
                   <a
                     href={state.resetUrl}
-                    className="text-xs text-white hover:text-zinc-300 break-all"
+                    className="text-xs break-all text-white hover:text-zinc-300"
                   >
                     {state.resetUrl}
                   </a>
@@ -137,9 +135,7 @@ export function ForgotPasswordForm() {
       {!successMessage && (
         <form action={formAction} className="space-y-6">
           <Field className="space-y-2">
-            <Label className="text-sm font-medium text-zinc-300">
-              Email address
-            </Label>
+            <Label className="text-sm font-medium text-zinc-300">Email address</Label>
             <Input
               type="email"
               name="email"
@@ -149,11 +145,11 @@ export function ForgotPasswordForm() {
               disabled={isPending}
               placeholder="your@email.com"
               className={clsx(
-                'block w-full h-11 rounded-lg bg-zinc-900/50 text-white',
+                'block h-11 w-full rounded-lg bg-zinc-900/50 text-white',
                 'ring-1 ring-white/10 placeholder:text-zinc-500',
                 'px-4 text-sm',
-                'focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-zinc-900/70',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'focus:bg-zinc-900/70 focus:ring-2 focus:ring-white/30 focus:outline-none',
+                'disabled:cursor-not-allowed disabled:opacity-50',
                 'transition-all duration-200'
               )}
             />
@@ -175,17 +171,17 @@ export function ForgotPasswordForm() {
             type="submit"
             disabled={isPending}
             className={clsx(
-              'w-full h-11 rounded-lg text-sm font-semibold',
+              'h-11 w-full rounded-lg text-sm font-semibold',
               'bg-zinc-600 text-white',
               'hover:bg-zinc-500',
-              'focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-zinc-950',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-zinc-950 focus:outline-none',
+              'disabled:cursor-not-allowed disabled:opacity-50',
               'transition-all duration-200'
             )}
           >
             {isPending ? (
               <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
                   <circle
                     className="opacity-25"
                     cx="12"
@@ -212,10 +208,10 @@ export function ForgotPasswordForm() {
 
       {/* Additional options */}
       <div className="mt-8 text-center text-sm">
-        <span className="text-zinc-500">Don't have an account?</span>{' '}
+        <span className="text-zinc-500">Don&apos;t have an account?</span>{' '}
         <Link
           href="/signup"
-          className="text-white hover:text-zinc-300 font-medium transition-colors"
+          className="font-medium text-white transition-colors hover:text-zinc-300"
         >
           Sign up
         </Link>

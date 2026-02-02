@@ -5,11 +5,7 @@ import { CTA_LABELS } from '@/constants/messages'
 import { AnimatedSection } from './shared/AnimatedSection'
 import { StatsGrid, ChecklistItem } from './shared'
 
-const TRUST_INDICATORS = [
-  '30-day free trial',
-  'No credit card required',
-  'Cancel anytime',
-] as const
+const TRUST_INDICATORS = ['30-day free trial', 'No credit card required', 'Cancel anytime'] as const
 
 /**
  * CTASection - 서버 컴포넌트로 정적 콘텐츠 렌더링
@@ -29,27 +25,35 @@ export const CTASection = memo(function CTASection() {
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 px-8 py-16 ring-1 ring-white/10 sm:px-16 lg:px-24 lg:py-24">
             {/* Background Pattern */}
             <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute -left-16 -top-16 h-32 w-32 sm:h-64 sm:w-64 rounded-full bg-zinc-500/10 blur-3xl" />
-              <div className="absolute -right-16 -bottom-16 h-32 w-32 sm:h-64 sm:w-64 rounded-full bg-blue-500/10 blur-3xl" />
+              <div className="absolute -top-16 -left-16 h-32 w-32 rounded-full bg-zinc-500/10 blur-3xl sm:h-64 sm:w-64" />
+              <div className="absolute -right-16 -bottom-16 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl sm:h-64 sm:w-64" />
             </div>
 
             {/* Content */}
             <div className="relative mx-auto max-w-3xl text-center">
-              <h2 id="cta-heading" className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              <h2
+                id="cta-heading"
+                className="text-4xl font-semibold tracking-tight text-white sm:text-5xl"
+              >
                 QETTA hides.
                 <br />
                 Your brand shines.
               </h2>
 
               <p id="cta-description" className="mt-6 text-lg text-zinc-400">
-                Leverage QETTA's B2B2B whitelabel platform to power your business.
+                Leverage QETTA&apos;s B2B2B whitelabel platform to power your business.
                 <br />
-                {DISPLAY_METRICS.timeSaved.value} time saved. {DISPLAY_METRICS.rejectionReduction.value} error reduction. Your brand, your clients, our engine.
+                {DISPLAY_METRICS.timeSaved.value} time saved.{' '}
+                {DISPLAY_METRICS.rejectionReduction.value} error reduction. Your brand, your
+                clients, our engine.
               </p>
 
               {/* CTA Buttons */}
               <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Button href="/partners/consultants" className="w-full sm:w-auto bg-white text-zinc-950 hover:bg-zinc-100 border-white">
+                <Button
+                  href="/partners/consultants"
+                  className="w-full border-white bg-white text-zinc-950 hover:bg-zinc-100 sm:w-auto"
+                >
                   {CTA_LABELS.PARTNER}
                 </Button>
                 <Button href="/login" outline className="w-full sm:w-auto">
@@ -74,10 +78,16 @@ export const CTASection = memo(function CTASection() {
             <StatsGrid
               className="relative mt-16 border-t border-white/5 pt-8"
               stats={[
-                { value: DISPLAY_METRICS.timeSaved.value, label: DISPLAY_METRICS.timeSaved.labelEn },
+                {
+                  value: DISPLAY_METRICS.timeSaved.value,
+                  label: DISPLAY_METRICS.timeSaved.labelEn,
+                },
                 { value: DISPLAY_METRICS.rejectionReduction.value, label: 'Error reduction' },
                 { value: DISPLAY_METRICS.docSpeed.valueEn ?? '45s', label: 'Per document' },
-                { value: DISPLAY_METRICS.apiUptime.value, label: DISPLAY_METRICS.apiUptime.labelEn },
+                {
+                  value: DISPLAY_METRICS.apiUptime.value,
+                  label: DISPLAY_METRICS.apiUptime.labelEn,
+                },
               ]}
               columns={4}
               variant="centered"

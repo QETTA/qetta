@@ -24,7 +24,12 @@ export const ApplySection = memo(function ApplySection() {
             <AnimatedSection direction="left">
               <Badge color="zinc" className="mb-6">
                 <span className="flex items-center gap-1.5">
-                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <svg
+                    className="h-3 w-3"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16zm0 2c-.076 0-.232.032-.465.262-.238.234-.497.623-.737 1.182-.389.907-.673 2.142-.766 3.556h3.936c-.093-1.414-.377-2.649-.766-3.556-.24-.56-.5-.948-.737-1.182C10.232 4.032 10.076 4 10 4zm3.971 5c-.089-1.546-.383-2.97-.837-4.118A6.004 6.004 0 0115.917 9h-1.946zm-2.003 2H8.032c.093 1.414.377 2.649.766 3.556.24.56.5.948.737 1.182.233.23.389.262.465.262.076 0 .232-.032.465-.262.238-.234.498-.623.737-1.182.389-.907.673-2.142.766-3.556zm1.166 4.118c.454-1.147.748-2.572.837-4.118h1.946a6.004 6.004 0 01-2.783 4.118zm-6.268 0C6.412 13.97 6.118 12.546 6.03 11H4.083a6.004 6.004 0 002.783 4.118z"
@@ -35,15 +40,18 @@ export const ApplySection = memo(function ApplySection() {
                 </span>
               </Badge>
 
-              <h2 id="apply-heading" className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              <h2
+                id="apply-heading"
+                className="text-4xl font-semibold tracking-tight text-white sm:text-5xl"
+              >
                 Access {DISPLAY_METRICS.globalTenders.value}
                 <br />
                 global opportunities
               </h2>
 
               <p id="apply-description" className="mt-6 text-lg text-zinc-400">
-                Search and match against international tenders from SAM.gov (US),
-                UNGM (UN), Goszakup (Kazakhstan), and 50+ procurement platforms worldwide.
+                Search and match against international tenders from SAM.gov (US), UNGM (UN),
+                Goszakup (Kazakhstan), and 50+ procurement platforms worldwide.
               </p>
 
               <div className="mt-8 space-y-4">
@@ -75,15 +83,26 @@ export const ApplySection = memo(function ApplySection() {
           <div className="lg:col-span-7">
             <AnimatedSection direction="right" delay={0.2}>
               {/* Search Interface Mockup */}
-              <div className="overflow-hidden rounded-lg bg-zinc-900/50 ring-1 ring-white/15 shadow-2xl shadow-black/20">
+              <div className="overflow-hidden rounded-lg bg-zinc-900/50 shadow-2xl ring-1 shadow-black/20 ring-white/15">
                 {/* Search Bar */}
-                <div className="border-b border-white/5 bg-zinc-900/50 px-4 sm:px-6 py-4">
+                <div className="border-b border-white/5 bg-zinc-900/50 px-4 py-4 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <svg className="h-5 w-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <svg
+                      className="h-5 w-5 text-zinc-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
                     </svg>
                     <div className="flex-1 text-sm text-zinc-400">
-                      Search for "environmental monitoring equipment"
+                      Search for &quot;environmental monitoring equipment&quot;
                     </div>
                     <div className="flex gap-2">
                       <Badge color="zinc">AI Match</Badge>
@@ -93,7 +112,7 @@ export const ApplySection = memo(function ApplySection() {
                 </div>
 
                 {/* Results List */}
-                <div className="p-6 space-y-3">
+                <div className="space-y-3 p-6">
                   {[
                     {
                       title: 'Air Quality Monitoring System - EPA',
@@ -155,14 +174,16 @@ export const ApplySection = memo(function ApplySection() {
 
               {/* Region Pills */}
               <div className="mt-6 flex flex-wrap gap-2">
-                {['🇺🇸 Americas', '🇪🇺 Europe', '🌏 Asia', '🌍 Africa', '🇦🇺 Oceania'].map((region) => (
-                  <button
-                    key={region}
-                    className="rounded-full bg-zinc-900/50 px-4 py-2 text-sm text-zinc-400 ring-1 ring-white/15 transition-colors hover:bg-zinc-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-                  >
-                    {region}
-                  </button>
-                ))}
+                {['🇺🇸 Americas', '🇪🇺 Europe', '🌏 Asia', '🌍 Africa', '🇦🇺 Oceania'].map(
+                  (region) => (
+                    <button
+                      key={region}
+                      className="rounded-full bg-zinc-900/50 px-4 py-2 text-sm text-zinc-400 ring-1 ring-white/15 transition-colors hover:bg-zinc-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                    >
+                      {region}
+                    </button>
+                  )
+                )}
               </div>
             </AnimatedSection>
           </div>
