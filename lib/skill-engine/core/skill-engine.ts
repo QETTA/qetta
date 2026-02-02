@@ -230,7 +230,8 @@ export class SkillEngine {
       const inputTokens = response.usage.input_tokens
       const outputTokens = response.usage.output_tokens
       // cache_read_input_tokens는 Anthropic 응답에서 제공될 때 사용
-      const cachedTokens = (response.usage as { cache_read_input_tokens?: number }).cache_read_input_tokens || 0
+      const cachedTokens =
+        (response.usage as { cache_read_input_tokens?: number }).cache_read_input_tokens || 0
 
       // 사용량 통계 업데이트
       this.updateUsageStats({
@@ -406,8 +407,8 @@ ${JSON.stringify(additionalData, null, 2)}
   }> {
     let eligibilityScore = 100
     let experienceScore = 50
-    let technicalScore = 50
-    let financialScore = 50
+    const technicalScore = 50
+    const financialScore = 50
     const risks: string[] = []
     const recommendations: string[] = []
 
@@ -442,7 +443,9 @@ ${JSON.stringify(additionalData, null, 2)}
         company.basic.employeeCount > eligibility.employeeCount.max
       ) {
         eligibilityScore -= 50
-        risks.push(`종업원 초과: ${company.basic.employeeCount}명 > ${eligibility.employeeCount.max}명`)
+        risks.push(
+          `종업원 초과: ${company.basic.employeeCount}명 > ${eligibility.employeeCount.max}명`
+        )
       }
     }
 
@@ -472,10 +475,7 @@ ${JSON.stringify(additionalData, null, 2)}
 
     // 최종 점수 계산
     const score = Math.round(
-      eligibilityScore * 0.4 +
-        experienceScore * 0.25 +
-        technicalScore * 0.2 +
-        financialScore * 0.15
+      eligibilityScore * 0.4 + experienceScore * 0.25 + technicalScore * 0.2 + financialScore * 0.15
     )
 
     return {
@@ -559,7 +559,12 @@ ${JSON.stringify(additionalData, null, 2)}
                 confidence: (existing.confidence + confidence) / 2, // 평균 신뢰도
               })
             } else {
-              this.runtimePatternUpdates.set(key, { patternId, deltaFrequency, newSamples, confidence })
+              this.runtimePatternUpdates.set(key, {
+                patternId,
+                deltaFrequency,
+                newSamples,
+                confidence,
+              })
             }
 
             results.details.patternUpdates++
@@ -790,11 +795,7 @@ ${JSON.stringify(additionalData, null, 2)}
   /**
    * 사용량 통계 업데이트
    */
-  updateUsageStats(tokens: {
-    input: number
-    output: number
-    cached?: number
-  }): void {
+  updateUsageStats(tokens: { input: number; output: number; cached?: number }): void {
     this.usageStats.inputTokens += tokens.input
     this.usageStats.outputTokens += tokens.output
     this.usageStats.cachedTokens += tokens.cached || 0

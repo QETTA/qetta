@@ -23,20 +23,20 @@ import { DISPLAY_METRICS } from '@/constants/metrics'
 // ============================================
 
 export type StartupStage =
-  | 'pre_startup'      // 예비창업 (사업자등록 전)
-  | 'early_startup'    // 초기창업 (3년 이내)
-  | 'growth_startup'   // 창업도약 (3~7년)
-  | 'scale_up'         // 스케일업 (7년+)
+  | 'pre_startup' // 예비창업 (사업자등록 전)
+  | 'early_startup' // 초기창업 (3년 이내)
+  | 'growth_startup' // 창업도약 (3~7년)
+  | 'scale_up' // 스케일업 (7년+)
 
 export type ProgramCategory =
-  | 'startup_package'  // 창업 패키지
-  | 'tips'             // TIPS
-  | 'rnd'              // R&D 지원
-  | 'voucher'          // 바우처
-  | 'smart_factory'    // 스마트공장
-  | 'export'           // 수출 지원
-  | 'loan'             // 정책 융자
-  | 'guarantee'        // 보증 지원
+  | 'startup_package' // 창업 패키지
+  | 'tips' // TIPS
+  | 'rnd' // R&D 지원
+  | 'voucher' // 바우처
+  | 'smart_factory' // 스마트공장
+  | 'export' // 수출 지원
+  | 'loan' // 정책 융자
+  | 'guarantee' // 보증 지원
 
 export interface GovSupportProgram extends GovernmentProgram {
   stage: StartupStage[]
@@ -426,15 +426,8 @@ export const EARLY_STARTUP_PACKAGE: GovSupportProgram = {
         title: '1. 사업 요약',
         required: true,
         weight: 0,
-        tips: [
-          '현재까지의 성과 강조',
-          '지원금 활용 후 목표 명시',
-          '스케일업 가능성 어필',
-        ],
-        checklist: [
-          '창업 이후 성과가 요약되었는가?',
-          '이번 지원의 목적이 명확한가?',
-        ],
+        tips: ['현재까지의 성과 강조', '지원금 활용 후 목표 명시', '스케일업 가능성 어필'],
+        checklist: ['창업 이후 성과가 요약되었는가?', '이번 지원의 목적이 명확한가?'],
       },
       {
         id: 'current-status',
@@ -457,16 +450,8 @@ export const EARLY_STARTUP_PACKAGE: GovSupportProgram = {
         title: '3. 성장 전략',
         required: true,
         weight: 25,
-        tips: [
-          '현재 → 목표까지 구체적 경로',
-          '고객 확대 채널 전략',
-          '예상 매출 성장 곡선',
-        ],
-        checklist: [
-          '성장 목표가 수치화되었는가?',
-          '전략이 구체적인가?',
-          '실현 가능성이 있는가?',
-        ],
+        tips: ['현재 → 목표까지 구체적 경로', '고객 확대 채널 전략', '예상 매출 성장 곡선'],
+        checklist: ['성장 목표가 수치화되었는가?', '전략이 구체적인가?', '실현 가능성이 있는가?'],
       },
       // ... 예비창업과 유사한 섹션 + 트랙션 강조
     ],
@@ -553,11 +538,7 @@ export const TIPS_PROGRAM: GovSupportProgram = {
         title: '2. 글로벌 시장성',
         required: true,
         weight: 30,
-        tips: [
-          '글로벌 진출 전략 구체화',
-          '해외 경쟁사 대비 포지셔닝',
-          '해외 PoC/파일럿 계획',
-        ],
+        tips: ['글로벌 진출 전략 구체화', '해외 경쟁사 대비 포지셔닝', '해외 PoC/파일럿 계획'],
         checklist: [
           '글로벌 시장 규모가 산정되었는가?',
           '해외 진출 전략이 있는가?',
@@ -597,9 +578,7 @@ export const TIPS_PROGRAM: GovSupportProgram = {
     {
       category: '사업화 전략',
       weight: 10,
-      subCriteria: [
-        { name: '사업화 계획', points: 10, description: '매출 계획, 마일스톤' },
-      ],
+      subCriteria: [{ name: '사업화 계획', points: 10, description: '매출 계획, 마일스톤' }],
     },
   ],
 
@@ -697,7 +676,7 @@ export const GOV_SUPPORT_SKILL_PACKAGE: SkillPackage = {
   domain: 'general',
   tier: 'composite',
   estimatedCost: {
-    perDocument: 0.50, // 복잡한 문서
+    perDocument: 0.5, // 복잡한 문서
     perMonth: 150,
     cacheEfficiency: 85,
   },
@@ -755,7 +734,7 @@ export function generatePreStartupPlan(
   context: BusinessPlanContext,
   program: GovSupportProgram = PRE_STARTUP_PACKAGE
 ): string {
-  let content = `
+  const content = `
 # ${program.name} 사업계획서
 
 **아이템명**: ${context.itemName}
@@ -825,12 +804,16 @@ ${context.differentiation.map((d) => `| ${d.split(':')[0] || d} | - | ✅ |`).jo
 
 **가격 정책**: ${context.businessModel.pricing}
 
-${context.businessModel.cac && context.businessModel.ltv ? `
+${
+  context.businessModel.cac && context.businessModel.ltv
+    ? `
 **Unit Economics**:
 - 고객 획득 비용 (CAC): ${context.businessModel.cac.toLocaleString()}원
 - 고객 생애 가치 (LTV): ${context.businessModel.ltv.toLocaleString()}원
 - LTV/CAC: ${(context.businessModel.ltv / context.businessModel.cac).toFixed(1)}x
-` : ''}
+`
+    : ''
+}
 
 ---
 
@@ -922,7 +905,7 @@ export function preValidateApplication(
   } else {
     breakdown['differentiation'] = 85
   }
-  totalScore += breakdown['differentiation'] * 0.20
+  totalScore += breakdown['differentiation'] * 0.2
 
   // 시장 규모 검증
   if (!context.marketSize.tam.source) {
@@ -950,7 +933,7 @@ export function preValidateApplication(
       breakdown['team'] = 90
     }
   }
-  totalScore += breakdown['team'] * 0.20
+  totalScore += breakdown['team'] * 0.2
 
   // 비즈니스 모델 검증
   if (!context.businessModel.pricing) {

@@ -14,7 +14,12 @@
  * @see generators/gov-support/data/qetta-super-model.json
  */
 
-import type { DocumentSkill, DocumentTemplate, SkillPackage, EnginePresetFeedback } from '../../types'
+import type {
+  DocumentSkill,
+  DocumentTemplate,
+  SkillPackage,
+  EnginePresetFeedback,
+} from '../../types'
 
 // ============================================
 // TMS Terminology (핵심 용어집)
@@ -195,12 +200,7 @@ export const TMS_TEMPLATES: DocumentTemplate[] = [
     id: 'tms-cleansys-sync',
     name: 'CleanSYS 연동 보고서',
     domain: 'ENVIRONMENT',
-    sections: [
-      '1. 연동 현황',
-      '2. 전송 데이터 요약',
-      '3. 오류 발생 이력',
-      '4. 데이터 정합성 검증',
-    ],
+    sections: ['1. 연동 현황', '2. 전송 데이터 요약', '3. 오류 발생 이력', '4. 데이터 정합성 검증'],
     estimatedGenerationTime: 20,
   },
 ]
@@ -299,7 +299,7 @@ export function generateDailyReportContent(data: TMSEmissionData): string {
   const exceededItems = measurements.filter((m) => m.status === 'exceeded')
   const warningItems = measurements.filter((m) => m.status === 'warning')
 
-  let content = `
+  const content = `
 # 일일 배출량 보고서
 
 ## 1. 측정 개요
@@ -419,9 +419,7 @@ export function validateTMSData(data: TMSEmissionData): {
     // 경고 임계값 체크
     const ratio = measurement.value / measurement.legalLimit
     if (ratio >= TMS_VALIDATION_RULES.warningThreshold && ratio < 1) {
-      warnings.push(
-        `${measurement.pollutant} 법적 기준 ${Math.round(ratio * 100)}% 도달`
-      )
+      warnings.push(`${measurement.pollutant} 법적 기준 ${Math.round(ratio * 100)}% 도달`)
     }
   }
 

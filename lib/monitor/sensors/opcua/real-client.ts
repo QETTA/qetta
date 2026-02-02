@@ -79,7 +79,7 @@ export function createRealOPCUAClient(
   nodeIds: string[] = []
 ): OPCUAClient {
   // Dynamic imports to avoid loading node-opcua in test/dev
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+
   const {
     OPCUAClient: OPCUAClientClass,
     ClientSubscription,
@@ -189,21 +189,32 @@ export function createRealOPCUAClient(
     )
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(monitoredItem as any).on('changed', (dataValue: { value?: { value: unknown }; statusCode?: { name: string }; sourceTimestamp?: Date }) => {
-      const value = dataValue.value?.value
-      const statusCode = dataValue.statusCode?.name || 'Good'
-      const timestamp = dataValue.sourceTimestamp || new Date()
+    ;(monitoredItem as any).on(
+      'changed',
+      (dataValue: {
+        value?: { value: unknown }
+        statusCode?: { name: string }
+        sourceTimestamp?: Date
+      }) => {
+        const value = dataValue.value?.value
+        const statusCode = dataValue.statusCode?.name || 'Good'
+        const timestamp = dataValue.sourceTimestamp || new Date()
 
-      // Build DataValue for handlers
-      const dv: DataValue = {
-        value,
-        statusCode: statusCode.includes('Good') ? 'Good' : statusCode.includes('Uncertain') ? 'Uncertain' : 'Bad',
-        sourceTimestamp: timestamp,
-        serverTimestamp: new Date(),
+        // Build DataValue for handlers
+        const dv: DataValue = {
+          value,
+          statusCode: statusCode.includes('Good')
+            ? 'Good'
+            : statusCode.includes('Uncertain')
+              ? 'Uncertain'
+              : 'Bad',
+          sourceTimestamp: timestamp,
+          serverTimestamp: new Date(),
+        }
+
+        dataChangeHandlers.getAll().forEach((handler) => handler(nodeId, dv))
       }
-
-      dataChangeHandlers.getAll().forEach((handler) => handler(nodeId, dv))
-    })
+    )
 
     monitoredItems.set(nodeId, monitoredItem)
   }
@@ -315,8 +326,11 @@ export function createRealOPCUAClient(
 
       return {
         value: dataValue.value?.value,
-        statusCode: dataValue.statusCode?.name?.includes('Good') ? 'Good' :
-          dataValue.statusCode?.name?.includes('Uncertain') ? 'Uncertain' : 'Bad',
+        statusCode: dataValue.statusCode?.name?.includes('Good')
+          ? 'Good'
+          : dataValue.statusCode?.name?.includes('Uncertain')
+            ? 'Uncertain'
+            : 'Bad',
         sourceTimestamp: dataValue.sourceTimestamp || undefined,
         serverTimestamp: dataValue.serverTimestamp || undefined,
       }

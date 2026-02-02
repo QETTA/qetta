@@ -205,7 +205,7 @@ export const POST = withApiMiddleware(
     }
 
     // Parse options with safe JSON parsing
-    let options: Partial<ExportOptions> = {}
+    const options: Partial<ExportOptions> = {}
     try {
       const body = await request.json()
       // Validate expected fields to avoid type pollution
@@ -213,7 +213,11 @@ export const POST = withApiMiddleware(
         if (body.format === 'docx' || body.format === 'hwpx') {
           options.format = body.format
         }
-        if (body.viewerMode === 'view' || body.viewerMode === 'edit' || body.viewerMode === 'comment') {
+        if (
+          body.viewerMode === 'view' ||
+          body.viewerMode === 'edit' ||
+          body.viewerMode === 'comment'
+        ) {
           options.viewerMode = body.viewerMode
         }
         if (typeof body.allowDownload === 'boolean') {

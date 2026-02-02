@@ -26,11 +26,7 @@
 
 import type { SensorReading } from '@/types/monitor'
 import { mqttLogger as logger } from '@/lib/monitor/observability/logger'
-import {
-  getSensorStatus,
-  SENSOR_NORMAL_RANGES,
-  SENSOR_LABELS,
-} from '@/lib/monitor/sensor-utils'
+import { getSensorStatus, SENSOR_NORMAL_RANGES, SENSOR_LABELS } from '@/lib/monitor/sensor-utils'
 
 // =============================================================================
 // Types
@@ -87,22 +83,13 @@ export type MQTTConnectionState =
   | 'error'
 
 /** Message handler callback */
-export type MessageHandler = (
-  topic: string,
-  payload: MQTTSensorPayload
-) => void
+export type MessageHandler = (topic: string, payload: MQTTSensorPayload) => void
 
 /** Connection state change handler */
-export type StateChangeHandler = (
-  state: MQTTConnectionState,
-  error?: Error
-) => void
+export type StateChangeHandler = (state: MQTTConnectionState, error?: Error) => void
 
 /** Sensor reading handler (higher-level abstraction) */
-export type SensorReadingHandler = (
-  equipmentId: string,
-  readings: SensorReading[]
-) => void
+export type SensorReadingHandler = (equipmentId: string, readings: SensorReading[]) => void
 
 // =============================================================================
 // MQTT Client Interface
@@ -140,13 +127,11 @@ export interface MQTTClient {
  *
  * In production, replace with actual MQTT library implementation.
  */
-export function createSimulatedMQTTClient(
-  options: MQTTClientOptions
-): MQTTClient {
+export function createSimulatedMQTTClient(options: MQTTClientOptions): MQTTClient {
   let state: MQTTConnectionState = 'disconnected'
   let topics: string[] = [...options.topics]
-  let messageHandlers: MessageHandler[] = []
-  let stateHandlers: StateChangeHandler[] = []
+  const messageHandlers: MessageHandler[] = []
+  const stateHandlers: StateChangeHandler[] = []
   let simulationInterval: ReturnType<typeof setInterval> | null = null
   let reconnectAttempts = 0
 
@@ -175,27 +160,28 @@ export function createSimulatedMQTTClient(
     const sensorTypes = ['temperature', 'vibration', 'current', 'noise']
 
     // Simulate one message per equipment per interval
-    const equipmentId =
-      equipmentIds[Math.floor(Math.random() * equipmentIds.length)]
-    const sensorType =
-      sensorTypes[Math.floor(Math.random() * sensorTypes.length)]
+    const equipmentId = equipmentIds[Math.floor(Math.random() * equipmentIds.length)]
+    const sensorType = sensorTypes[Math.floor(Math.random() * sensorTypes.length)]
 
     const topic = `sensors/${equipmentId}/${sensorType}`
     const payload: MQTTSensorPayload = {
       equipmentId,
       sensorType,
       value: Math.round(generateSensorValue(sensorType) * 10) / 10,
-      unit: sensorType === 'temperature' ? '°C' : sensorType === 'vibration' ? 'mm/s' : sensorType === 'current' ? 'A' : 'dB',
+      unit:
+        sensorType === 'temperature'
+          ? '°C'
+          : sensorType === 'vibration'
+            ? 'mm/s'
+            : sensorType === 'current'
+              ? 'A'
+              : 'dB',
       timestamp: new Date().toISOString(),
     }
 
     // Check if topic matches any subscribed pattern
     const matchesTopic = topics.some((pattern) => {
-      const regex = new RegExp(
-        '^' +
-          pattern.replace(/\+/g, '[^/]+').replace(/#/g, '.*') +
-          '$'
-      )
+      const regex = new RegExp('^' + pattern.replace(/\+/g, '[^/]+').replace(/#/g, '.*') + '$')
       return regex.test(topic)
     })
 
@@ -221,9 +207,7 @@ export function createSimulatedMQTTClient(
 
         if (options.reconnect !== false) {
           updateState('reconnecting')
-          await new Promise((resolve) =>
-            setTimeout(resolve, options.reconnectInterval || 5000)
-          )
+          await new Promise((resolve) => setTimeout(resolve, options.reconnectInterval || 5000))
           return this.connect()
         }
         throw new Error('Failed to connect to MQTT broker')
@@ -321,8 +305,7 @@ function shouldUseRealClient(options: MQTTClientOptions): boolean {
   // In production, use real client if broker is not localhost
   if (process.env.NODE_ENV === 'production') {
     const isLocalhost =
-      options.brokerUrl.includes('localhost') ||
-      options.brokerUrl.includes('127.0.0.1')
+      options.brokerUrl.includes('localhost') || options.brokerUrl.includes('127.0.0.1')
     return !isLocalhost
   }
 
@@ -380,9 +363,7 @@ export function createMQTTClient(options: MQTTClientOptions): MQTTClient {
 /**
  * Convert MQTT payload to SensorReading format
  */
-export function mqttPayloadToSensorReading(
-  payload: MQTTSensorPayload
-): SensorReading {
+export function mqttPayloadToSensorReading(payload: MQTTSensorPayload): SensorReading {
   const normalRange = SENSOR_NORMAL_RANGES[payload.sensorType] || [0, 100]
 
   return {
@@ -418,13 +399,11 @@ export interface MQTTSensorService {
 /**
  * Create a higher-level sensor service that aggregates MQTT messages
  */
-export function createMQTTSensorService(
-  options: MQTTSensorServiceOptions
-): MQTTSensorService {
+export function createMQTTSensorService(options: MQTTSensorServiceOptions): MQTTSensorService {
   const client = createMQTTClient(options)
   const aggregationInterval = options.aggregationInterval || 1000
-  let handlers: SensorReadingHandler[] = []
-  let pendingReadings: Map<string, SensorReading[]> = new Map()
+  const handlers: SensorReadingHandler[] = []
+  const pendingReadings: Map<string, SensorReading[]> = new Map()
   let aggregationTimer: ReturnType<typeof setInterval> | null = null
 
   // Process MQTT messages and aggregate by equipment
@@ -491,10 +470,7 @@ export const DEFAULT_SENSOR_TOPICS = [
 ]
 
 /** Create a pre-configured client for smart factory monitoring */
-export function createSmartFactoryMQTTClient(
-  brokerUrl: string,
-  clientId?: string
-): MQTTClient {
+export function createSmartFactoryMQTTClient(brokerUrl: string, clientId?: string): MQTTClient {
   return createMQTTClient({
     brokerUrl,
     clientId: clientId || `qetta-smartfactory-${Date.now()}`,

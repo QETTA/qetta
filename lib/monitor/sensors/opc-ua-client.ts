@@ -123,10 +123,7 @@ export type OPCUAConnectionState =
 export type DataChangeHandler = (nodeId: string, dataValue: DataValue) => void
 
 /** State change handler callback */
-export type OPCUAStateChangeHandler = (
-  state: OPCUAConnectionState,
-  error?: Error
-) => void
+export type OPCUAStateChangeHandler = (state: OPCUAConnectionState, error?: Error) => void
 
 // =============================================================================
 // OPC-UA Client Interface
@@ -178,8 +175,8 @@ export interface BrowseResult {
  */
 function createSimulatedOPCUAClient(options: OPCUAClientOptions): OPCUAClient {
   let state: OPCUAConnectionState = 'disconnected'
-  let dataChangeHandlers: DataChangeHandler[] = []
-  let stateHandlers: OPCUAStateChangeHandler[] = []
+  const dataChangeHandlers: DataChangeHandler[] = []
+  const stateHandlers: OPCUAStateChangeHandler[] = []
   let subscriptionInterval: ReturnType<typeof setInterval> | null = null
 
   // Simulated node values (realistic smart factory data)
@@ -200,10 +197,7 @@ function createSimulatedOPCUAClient(options: OPCUAClientOptions): OPCUAClient {
   // Initialize node values
   options.nodeIds.forEach((nodeId) => {
     const config = nodeBaseValues[nodeId] || { base: 50, variance: 25 }
-    nodeValues.set(
-      nodeId,
-      config.base + (Math.random() - 0.5) * config.variance
-    )
+    nodeValues.set(nodeId, config.base + (Math.random() - 0.5) * config.variance)
   })
 
   const updateState = (newState: OPCUAConnectionState, error?: Error) => {
@@ -248,9 +242,7 @@ function createSimulatedOPCUAClient(options: OPCUAClientOptions): OPCUAClient {
       logger.info(`[OPC-UA] Connecting to ${options.endpointUrl}...`)
 
       // Simulate connection delay
-      await new Promise((resolve) =>
-        setTimeout(resolve, options.connectionTimeout || 1000)
-      )
+      await new Promise((resolve) => setTimeout(resolve, options.connectionTimeout || 1000))
 
       updateState('connected')
       logger.info(`[OPC-UA] Connected to ${options.endpointUrl}`)
@@ -273,15 +265,10 @@ function createSimulatedOPCUAClient(options: OPCUAClientOptions): OPCUAClient {
         throw new Error('Not connected to OPC-UA server')
       }
 
-      logger.info(
-        `[OPC-UA] Created subscription for ${options.nodeIds.length} nodes`
-      )
+      logger.info(`[OPC-UA] Created subscription for ${options.nodeIds.length} nodes`)
 
       // Start simulation
-      subscriptionInterval = setInterval(
-        simulateDataChanges,
-        options.publishingInterval || 1000
-      )
+      subscriptionInterval = setInterval(simulateDataChanges, options.publishingInterval || 1000)
     },
 
     async read(nodeId) {
@@ -411,8 +398,7 @@ function shouldUseRealClient(options: OPCUAClientOptions): boolean {
   // In production, use real client if endpoint is not localhost
   if (process.env.NODE_ENV === 'production') {
     const isLocalhost =
-      options.endpointUrl.includes('localhost') ||
-      options.endpointUrl.includes('127.0.0.1')
+      options.endpointUrl.includes('localhost') || options.endpointUrl.includes('127.0.0.1')
     return !isLocalhost
   }
 
@@ -433,8 +419,7 @@ function shouldUseRealClient(options: OPCUAClientOptions): boolean {
 function enforceProductionSecurity(options: OPCUAClientOptions): OPCUAClientOptions {
   const isProduction = process.env.NODE_ENV === 'production'
   const isLocalhost =
-    options.endpointUrl.includes('localhost') ||
-    options.endpointUrl.includes('127.0.0.1')
+    options.endpointUrl.includes('localhost') || options.endpointUrl.includes('127.0.0.1')
 
   // Skip enforcement for localhost or non-production
   if (!isProduction || isLocalhost) {
@@ -498,21 +483,29 @@ export function createOPCUAClient(options: OPCUAClientOptions): OPCUAClient {
     // Dynamic import to avoid loading node-opcua in test/dev environments
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createRealOPCUAClient } = require('./opcua/real-client')
-    return createRealOPCUAClient({
-      endpointUrl: secureOptions.endpointUrl,
-      applicationName: secureOptions.applicationName,
-      security: secureOptions.securityMode !== 'None' ? {
-        securityMode: secureOptions.securityMode,
-        securityPolicy: secureOptions.securityPolicy === 'Basic128Rsa15' || secureOptions.securityPolicy === 'Basic256'
-          ? 'Basic256Sha256' // Upgrade deprecated policies
-          : secureOptions.securityPolicy,
-      } : undefined,
-      username: secureOptions.username,
-      password: secureOptions.password,
-      sessionTimeout: secureOptions.sessionTimeout,
-      connectionTimeout: secureOptions.connectionTimeout,
-      autoReconnect: secureOptions.autoReconnect,
-    }, secureOptions.nodeIds)
+    return createRealOPCUAClient(
+      {
+        endpointUrl: secureOptions.endpointUrl,
+        applicationName: secureOptions.applicationName,
+        security:
+          secureOptions.securityMode !== 'None'
+            ? {
+                securityMode: secureOptions.securityMode,
+                securityPolicy:
+                  secureOptions.securityPolicy === 'Basic128Rsa15' ||
+                  secureOptions.securityPolicy === 'Basic256'
+                    ? 'Basic256Sha256' // Upgrade deprecated policies
+                    : secureOptions.securityPolicy,
+              }
+            : undefined,
+        username: secureOptions.username,
+        password: secureOptions.password,
+        sessionTimeout: secureOptions.sessionTimeout,
+        connectionTimeout: secureOptions.connectionTimeout,
+        autoReconnect: secureOptions.autoReconnect,
+      },
+      secureOptions.nodeIds
+    )
   }
 
   return createSimulatedOPCUAClient(secureOptions)
@@ -588,9 +581,7 @@ export interface OPCUASensorService {
   /** Stop the service */
   stop: () => Promise<void>
   /** Register handler for sensor readings */
-  onSensorData: (
-    handler: (equipmentId: string, readings: SensorReading[]) => void
-  ) => void
+  onSensorData: (handler: (equipmentId: string, readings: SensorReading[]) => void) => void
   /** Get underlying OPC-UA client */
   getClient: () => OPCUAClient
 }
@@ -598,12 +589,9 @@ export interface OPCUASensorService {
 /**
  * Create a higher-level sensor service that abstracts OPC-UA complexity
  */
-export function createOPCUASensorService(
-  options: OPCUASensorServiceOptions
-): OPCUASensorService {
+export function createOPCUASensorService(options: OPCUASensorServiceOptions): OPCUASensorService {
   const client = createOPCUAClient(options)
-  let handlers: ((equipmentId: string, readings: SensorReading[]) => void)[] =
-    []
+  const handlers: ((equipmentId: string, readings: SensorReading[]) => void)[] = []
 
   // Aggregate readings by equipment
   const pendingReadings: Map<string, SensorReading[]> = new Map()
@@ -639,9 +627,7 @@ export function createOPCUASensorService(
     pendingReadings.set(equipmentId, existing)
 
     // Dispatch immediately for real-time updates
-    handlers.forEach((handler) =>
-      handler(equipmentId, pendingReadings.get(equipmentId) || [])
-    )
+    handlers.forEach((handler) => handler(equipmentId, pendingReadings.get(equipmentId) || []))
   })
 
   return {
@@ -692,11 +678,13 @@ export function createSmartFactoryOPCUAClient(
   securityOverride?: { mode?: SecurityMode; policy?: SecurityPolicy }
 ): OPCUAClient {
   // Default to 'None' in dev, but enforceProductionSecurity will upgrade in prod
-  const securityMode = securityOverride?.mode ??
+  const securityMode =
+    securityOverride?.mode ??
     (process.env.OPCUA_SECURITY_MODE as SecurityMode | undefined) ??
     'None'
 
-  const securityPolicy = securityOverride?.policy ??
+  const securityPolicy =
+    securityOverride?.policy ??
     (process.env.OPCUA_SECURITY_POLICY as SecurityPolicy | undefined) ??
     'Basic256Sha256'
 
