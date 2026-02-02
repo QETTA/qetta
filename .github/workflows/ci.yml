@@ -1,7 +1,7 @@
 # QETTA CI Pipeline
 #
 # 트리거: Push, Pull Request (main, master, develop 브랜치)
-# 작업: Lint → TypeCheck → Test → Build
+# 작업: Lint + TypeCheck (병렬) → Test → Build
 
 name: CI
 
@@ -17,7 +17,7 @@ env:
 
 jobs:
   # ============================================
-  # Lint Job
+  # Lint Job (병렬 실행)
   # ============================================
   lint:
     name: Lint
@@ -49,12 +49,11 @@ jobs:
         run: npm run lint
 
   # ============================================
-  # Test Job
+  # TypeCheck Job (병렬 실행)
   # ============================================
-  test:
-    name: Test
+  typecheck:
+    name: TypeCheck
     runs-on: ubuntu-latest
-    needs: lint
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -64,6 +63,49 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript check
+        run: npm run typecheck
+
+  # ============================================
+  # Test Job (lint + typecheck 후)
+  # ============================================
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install dependencies
         run: npm ci
@@ -100,6 +142,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
 
       - name: Install dependencies
         run: npm ci
