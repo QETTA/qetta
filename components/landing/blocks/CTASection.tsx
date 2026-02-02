@@ -22,7 +22,7 @@ export const CTASection = memo(function CTASection() {
     >
       <div className="mx-auto max-w-7xl">
         <AnimatedSection>
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 px-8 py-16 ring-1 ring-white/10 sm:px-16 lg:px-24 lg:py-24">
+          <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-zinc-900 to-zinc-950 px-8 py-16 ring-1 ring-white/10 sm:px-16 lg:px-24 lg:py-24">
             {/* Background Pattern */}
             <div className="absolute inset-0 overflow-hidden">
               <div className="absolute -top-16 -left-16 h-32 w-32 rounded-full bg-zinc-500/10 blur-3xl sm:h-64 sm:w-64" />

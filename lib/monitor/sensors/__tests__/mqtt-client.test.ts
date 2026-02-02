@@ -137,16 +137,12 @@ describe('createMQTTClient', () => {
 
   describe('publish', () => {
     it('throws when not connected', async () => {
-      await expect(
-        client.publish('test/topic', { value: 1 })
-      ).rejects.toThrow('Not connected')
+      await expect(client.publish('test/topic', { value: 1 })).rejects.toThrow('Not connected')
     })
 
     it('publishes when connected', async () => {
       await client.connect()
-      await expect(
-        client.publish('test/topic', { value: 1 })
-      ).resolves.not.toThrow()
+      await expect(client.publish('test/topic', { value: 1 })).resolves.not.toThrow()
     }, 15000)
   })
 })
@@ -264,7 +260,7 @@ describe('createMQTTSensorService', () => {
 
     await service.stop()
     expect(service.getClient().isConnected()).toBe(false)
-  }, 15000) // Extended timeout for potential reconnect retries
+  }, 30000) // Extended timeout for MQTT connection handling
 
   it('returns underlying client', () => {
     const service = createMQTTSensorService({
@@ -291,10 +287,7 @@ describe('createSmartFactoryMQTTClient', () => {
   })
 
   it('uses custom client ID when provided', () => {
-    const client = createSmartFactoryMQTTClient(
-      'mqtt://localhost:1883',
-      'custom-id-123'
-    )
+    const client = createSmartFactoryMQTTClient('mqtt://localhost:1883', 'custom-id-123')
 
     // Client should be created successfully
     expect(client).toBeDefined()

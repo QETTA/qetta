@@ -95,7 +95,7 @@ export function ForgotPasswordForm() {
       {successMessage && (
         <div className="mb-6 rounded-lg bg-emerald-500/10 p-6 ring-1 ring-emerald-500/20">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <svg
                 className="h-6 w-6 text-emerald-400"
                 fill="none"
