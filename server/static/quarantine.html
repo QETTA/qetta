@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quarantine Operator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #f4f4f4; }
+    .muted { color: #666; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>Quarantine Operator</h1>
+  <p class="muted">This is a minimal operator UI to review quarantined files.</p>
+
+  <div id="content">Loading...</div>
+
+  <script>
+    async function load() {
+      const res = await fetch('/api/qetta/v1/quarantine/evidence');
+      if (!res.ok) {
+        document.getElementById('content').innerText = 'Failed to load quarantine items';
+        return;
+      }
+      const items = await res.json();
+      if (!items || !items.length) {
+        document.getElementById('content').innerHTML = '<p>No quarantined items.</p>';
+        return;
+      }
+      const rows = items.map(i => {
+        const id = i.id || '';
+        const name = i.filename || 'unknown';
+        const reason = i.quarantine_reason || '';
+        const created = i.created_at ? new Date(i.created_at).toLocaleString() : '';
+        const download = `<a href="/api/qetta/v1/quarantine/evidence/${id}/download">download</a>`;
+        return `<tr><td>${name}</td><td>${reason}</td><td>${created}</td><td>${download}</td></tr>`;
+      }).join('');
+
+      document.getElementById('content').innerHTML = `<table><thead><tr><th>File</th><th>Reason</th><th>Created</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+    load();
+  </script>
+</body>
+</html>

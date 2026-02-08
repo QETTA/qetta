@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QETTA | 보조금 정산 자동 검수</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #0f172a;
+  background: #ffffff;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
+
+/* ===== CSS VARIABLES ===== */
+:root {
+  --primary: #4f46e5;
+  --primary-dark: #3730a3;
+  --primary-light: #818cf8;
+  --accent: #7c3aed;
+  --gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+  --gradient-subtle: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #faf5ff 100%);
+  --dark: #0f172a;
+  --dark-soft: #1e293b;
+  --text: #334155;
+  --text-light: #64748b;
+  --text-muted: #94a3b8;
+  --surface: #ffffff;
+  --surface-alt: #f8fafc;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --danger: #ef4444;
+  --danger-bg: #fef2f2;
+  --success: #10b981;
+  --success-bg: #ecfdf5;
+  --warning: #f59e0b;
+  --warning-bg: #fffbeb;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 24px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 20px 40px -12px rgba(0,0,0,0.08);
+  --shadow-xl: 0 25px 50px -12px rgba(0,0,0,0.12);
+  --max-w: 1200px;
+}
+
+/* ===== UTILITY ===== */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+.section { padding: 100px 0; }
+.section-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  color: var(--primary); text-transform: uppercase;
+  background: var(--gradient-subtle);
+  padding: 6px 16px; border-radius: 100px;
+  margin-bottom: 16px;
+}
+.section-label::before {
+  content: ''; width: 6px; height: 6px;
+  background: var(--primary); border-radius: 50%;
+}
+.section-title {
+  font-size: clamp(28px, 4vw, 42px); font-weight: 800;
+  line-height: 1.3; color: var(--dark);
+  margin-bottom: 16px; letter-spacing: -0.02em;
+}
+.section-desc {
+  font-size: 17px; color: var(--text-light);
+  max-width: 640px; line-height: 1.8;
+}
+.text-gradient {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 14px 32px;
+  font-size: 15px; font-weight: 600;
+  border-radius: 12px; border: none;
+  cursor: pointer; transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--gradient); color: #fff;
+  box-shadow: 0 4px 14px rgba(79,70,229,0.35);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79,70,229,0.4);
+}
+.btn-outline {
+  background: transparent; color: var(--primary);
+  border: 1.5px solid var(--primary);
+}
+.btn-outline:hover {
+  background: var(--gradient-subtle);
+}
+.btn-dark {
+  background: var(--dark); color: #fff;
+}
+.btn-dark:hover {
+  background: var(--dark-soft);
+  transform: translateY(-2px);
+}
+.btn-lg { padding: 18px 40px; font-size: 16px; border-radius: 14px; }
+.btn-icon { font-size: 18px; }
+
+/* ===== NAV ===== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+.nav-inner {
+  max-width: var(--max-w); margin: 0 auto;
+  padding: 0 24px; height: 72px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-size: 22px; font-weight: 900;
+  letter-spacing: -0.03em;
+}
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--text-light);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--dark); }
+.nav-cta .btn { padding: 10px 24px; font-size: 14px; }
+
+/* ===== HERO ===== */
+.hero {
+  padding: 160px 0 100px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute;
+  top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(79,70,229,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero::after {
+  content: ''; position: absolute;
+  bottom: -100px; left: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(124,58,237,0.04) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero .container { position: relative; z-index: 1; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--danger-bg); color: var(--danger);
+  padding: 8px 16px; border-radius: 100px;
+  font-size: 13px; font-weight: 600;
+  margin-bottom: 28px;
+  border: 1px solid rgba(239,68,68,0.15);
+}
+.hero-badge::before {
+  content: ''; width: 8px; height: 8px;
+  background: var(--danger); border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.hero-title {
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 900; line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--dark);
+  margin-bottom: 24px;
+  max-width: 780px;
+}
+.hero-desc {
+  font-size: 19px; color: var(--text-light);
+  max-width: 560px; line-height: 1.8;
+  margin-bottom: 40px;
+}
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+.hero-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  max-width: 640px;
+  box-shadow: var(--shadow);
+}
+.hero-stat {
+  background: var(--surface); padding: 28px 32px;
+  text-align: center;
+}
+.hero-stat-value {
+  font-size: 32px; font-weight: 900;
+  color: var(--dark); letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.hero-stat-value.danger { color: var(--danger); }
+.hero-stat-value.primary { color: var(--primary); }
+.hero-stat-label {
+  font-size: 13px; color: var(--text-muted);
+  margin-top: 4px; font-weight: 500;
+}
+
+/* ===== PAIN ===== */
+.pain { background: var(--dark); color: #fff; }
+.pain .section-label { background: rgba(255,255,255,0.08); color: var(--primary-light); }
+.pain .section-label::before { background: var(--primary-light); }
+.pain .section-title { color: #fff; }
+.pain .section-desc { color: rgba(255,255,255,0.6); }
+.pain-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 20px; margin-top: 48px;
+}
+.pain-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+.pain-card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+  transform: translateY(-2px);
+}
+.pain-icon {
+  width: 48px; height: 48px;
+  background: rgba(239,68,68,0.15);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; margin-bottom: 20px;
+}
+.pain-card-title {
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 10px; color: #fff;
+}
+.pain-card-desc {
+  font-size: 14px; color: rgba(255,255,255,0.55);
+  line-height: 1.7;
+}
+.pain-stat {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 14px; padding: 6px 12px;
+  background: rgba(239,68,68,0.12);
+  border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  color: #fca5a5;
+}
+
+/* ===== SOLUTION ===== */
+.solution-flow {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 24px; margin-top: 56px; position: relative;
+}
+.solution-flow::before {
+  content: '';
+  position: absolute; top: 50px; left: 15%; right: 15%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  opacity: 0.2;
+}
+.solution-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.solution-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+.solution-step {
+  width: 56px; height: 56px;
+  background: var(--gradient);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800; color: #fff;
+  margin: 0 auto 24px;
+  box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+}
+.solution-card-title {
+  font-size: 20px; font-weight: 700;
+  margin-bottom: 12px;
+}
+.solution-card-desc {
+  font-size: 14px; color: var(--text-light);
+  line-height: 1.7;
+}
+.solution-tag {
+  display: inline-flex; margin-top: 16px;
+  padding: 6px 14px; border-radius: 100px;
+  font-size: 12px; font-weight: 600;
+  background: var(--gradient-subtle);
+  color: var(--primary);
+}
+
+/* ===== FEATURES ===== */
+.features { background: var(--surface-alt); }
+.features-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 20px; margin-top: 48px;
+}
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px;
+  transition: all 0.3s ease;
+}
+.feature-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: transparent;
+}
+.feature-card.highlight {
+  border: 2px solid var(--primary);
+  background: linear-gradient(135deg, rgba(79,70,229,0.02), rgba(124,58,237,0.03));
+}
+.feature-card.highlight .feature-badge {
+  background: var(--gradient); color: #fff;
+}
+.feature-badge {
+  display: inline-flex; padding: 4px 12px;
+  border-radius: 6px; font-size: 11px; font-weight: 700;
+  background: var(--gradient-subtle); color: var(--primary);
+  margin-bottom: 16px; letter-spacing: 0.05em;
+}
+.feature-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 16px;
+}
+.feature-title {
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 8px;
+}
+.feature-desc {
+  font-size: 14px; color: var(--text-light);
+  line-height: 1.7;
+}
+.feature-list {
+  margin-top: 14px; list-style: none;
+}
+.feature-list li {
+  font-size: 13px; color: var(--text);
+  padding: 4px 0; display: flex; align-items: center; gap: 8px;
+}
+.feature-list li::before {
+  content: ''; width: 5px; height: 5px;
+  background: var(--success); border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ===== PRICING ===== */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-top: 48px;
+}
+.price-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 28px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.price-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+.price-card.popular {
+  border: 2px solid var(--primary);
+  box-shadow: var(--shadow-lg);
+}
+.price-card.popular::before {
+  content: 'RECOMMENDED';
+  position: absolute; top: -12px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--gradient); color: #fff;
+  padding: 4px 16px; border-radius: 100px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.price-name {
+  font-size: 14px; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.price-value {
+  font-size: 28px; font-weight: 900;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+.price-unit {
+  font-size: 13px; color: var(--text-muted);
+  margin-bottom: 24px;
+}
+.price-features { list-style: none; margin-bottom: 28px; }
+.price-features li {
+  font-size: 14px; color: var(--text);
+  padding: 8px 0;
+  display: flex; align-items: flex-start; gap: 10px;
+  border-bottom: 1px solid var(--border-light);
+}
+.price-features li:last-child { border-bottom: none; }
+.price-check {
+  color: var(--success); font-size: 16px;
+  flex-shrink: 0; margin-top: 2px;
+}
+.price-card .btn { width: 100%; }
+
+/* ===== TRUST ===== */
+.trust { background: var(--gradient-subtle); }
+.trust-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 20px; margin-top: 48px;
+}
+.trust-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
+}
+.trust-icon { font-size: 28px; margin-bottom: 12px; }
+.trust-title {
+  font-size: 15px; font-weight: 700;
+  margin-bottom: 6px;
+}
+.trust-desc {
+  font-size: 13px; color: var(--text-light);
+  line-height: 1.6;
+}
+
+/* ===== CTA ===== */
+.cta-section {
+  background: var(--dark); color: #fff;
+  padding: 80px 0;
+  position: relative; overflow: hidden;
+}
+.cta-section::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(79,70,229,0.15), rgba(124,58,237,0.1));
+}
+.cta-inner {
+  position: relative; z-index: 1;
+  text-align: center; max-width: 640px; margin: 0 auto;
+}
+.cta-title {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800; line-height: 1.3;
+  margin-bottom: 16px; letter-spacing: -0.02em;
+}
+.cta-desc {
+  font-size: 17px; color: rgba(255,255,255,0.6);
+  margin-bottom: 36px; line-height: 1.7;
+}
+.cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.cta-note {
+  margin-top: 20px; font-size: 13px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ===== LOGO BAR ===== */
+.logo-bar {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--surface-alt);
+}
+.logo-bar-inner {
+  display: flex; align-items: center; justify-content: center;
+  gap: 40px; flex-wrap: wrap;
+}
+.logo-bar-label {
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  letter-spacing: 0.05em; white-space: nowrap;
+}
+.logo-bar-items {
+  display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
+}
+.logo-bar-item {
+  font-size: 14px; font-weight: 700; color: var(--text-muted);
+  letter-spacing: -0.01em; opacity: 0.55;
+  transition: opacity 0.2s;
+}
+.logo-bar-item:hover { opacity: 0.8; }
+
+/* ===== CTA AUX ===== */
+.cta-aux {
+  display: flex; align-items: center; justify-content: center;
+  gap: 24px; margin-top: 16px; flex-wrap: wrap;
+}
+.cta-aux-item {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--text-muted); font-weight: 500;
+}
+.cta-aux-item::before {
+  content: ''; width: 5px; height: 5px;
+  background: var(--success); border-radius: 50%;
+}
+.cta-aux-dark .cta-aux-item {
+  color: rgba(255,255,255,0.45);
+}
+.cta-aux-dark .cta-aux-item::before {
+  background: var(--primary-light);
+}
+
+/* ===== FAQ ===== */
+.faq-list {
+  max-width: 760px; margin: 48px auto 0;
+}
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+.faq-question {
+  width: 100%; background: none; border: none;
+  padding: 24px 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 16px; font-weight: 600; color: var(--dark);
+  font-family: inherit; text-align: left; line-height: 1.5;
+}
+.faq-question:hover { color: var(--primary); }
+.faq-toggle {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 50%; background: var(--surface-alt);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--text-muted);
+  transition: transform 0.3s, background 0.3s;
+  margin-left: 16px;
+}
+.faq-item.open .faq-toggle {
+  transform: rotate(45deg);
+  background: var(--gradient-subtle); color: var(--primary);
+}
+.faq-answer {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+.faq-item.open .faq-answer {
+  max-height: 300px;
+}
+.faq-answer-inner {
+  padding: 0 0 24px;
+  font-size: 15px; color: var(--text-light); line-height: 1.8;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  background: var(--dark-soft);
+  padding: 48px 0 32px;
+  color: rgba(255,255,255,0.4);
+  font-size: 13px;
+}
+.footer-inner {
+  display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 16px;
+}
+.footer-logo {
+  font-size: 18px; font-weight: 800;
+  color: rgba(255,255,255,0.6);
+}
+.footer-links { display: flex; gap: 24px; }
+.footer-links a:hover { color: rgba(255,255,255,0.7); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 968px) {
+  .nav-links { display: none; }
+  .hero-stats { grid-template-columns: repeat(3, 1fr); }
+  .pain-grid { grid-template-columns: 1fr; }
+  .solution-flow {
+    grid-template-columns: 1fr;
+    max-width: 420px; margin-left: auto; margin-right: auto;
+  }
+  .solution-flow::before { display: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+  .trust-grid { grid-template-columns: repeat(2, 1fr); }
+  .logo-bar-inner { gap: 20px; }
+  .logo-bar-items { gap: 20px; }
+}
+@media (max-width: 640px) {
+  .section { padding: 72px 0; }
+  .hero { padding: 120px 0 72px; }
+  .hero-stats { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .trust-grid { grid-template-columns: 1fr; }
+  .hero-actions { flex-direction: column; }
+  .hero-actions .btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo"><span class="text-gradient">QETTA</span></a>
+    <div class="nav-links">
+      <a href="#problem">문제</a>
+      <a href="#solution">솔루션</a>
+      <a href="#features">기능</a>
+      <a href="#pricing">가격</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#pilot" class="btn btn-primary">파일럿 신청</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== LOGO BAR ===== -->
+<div class="logo-bar" style="margin-top:72px;">
+  <div class="container">
+    <div class="logo-bar-inner">
+      <span class="logo-bar-label">호환 시스템</span>
+      <div class="logo-bar-items">
+        <span class="logo-bar-item">e나라도움</span>
+        <span class="logo-bar-item">국가보조금시스템</span>
+        <span class="logo-bar-item">KISA PII 가이드</span>
+        <span class="logo-bar-item">공공재정환수법</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero" style="padding-top:100px;">
+  <div class="container">
+    <div class="hero-badge">
+      <span>2024년 부정수급 적발 역대 최대 &mdash; 630건 / 493억원</span>
+    </div>
+    <h1 class="hero-title">
+      보조금 정산,<br>
+      <span class="text-gradient">반려 전에 잡습니다</span>
+    </h1>
+    <p class="hero-desc">
+      e나라도움 제출 직전, 증빙 누락&middot;부적격&middot;비목 불일치를
+      자동으로 검수합니다. 반려 루프를 끊고, 감사 대비까지 한 번에.
+    </p>
+    <div class="hero-actions">
+      <a href="#pilot" class="btn btn-primary btn-lg">
+        무료 체험 3건 시작 <span class="btn-icon">&rarr;</span>
+      </a>
+      <a href="#solution" class="btn btn-outline btn-lg">작동 방식 보기</a>
+    </div>
+    <div class="cta-aux" style="justify-content:flex-start; margin-bottom:60px;">
+      <span class="cta-aux-item">카드 등록 불필요</span>
+      <span class="cta-aux-item">계약 의무 없음</span>
+      <span class="cta-aux-item">15분이면 첫 검수 완료</span>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value">225,710</div>
+        <div class="hero-stat-label">e나라도움 등록 보조사업</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value danger">0개</div>
+        <div class="hero-stat-label">정산 특화 SaaS (국내)</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value primary">5배</div>
+        <div class="hero-stat-label">허위청구 최대 제재부가금</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PAIN ===== -->
+<section class="pain section" id="problem">
+  <div class="container">
+    <span class="section-label">Problem</span>
+    <h2 class="section-title">'신청'은 도구가 있지만,<br>'정산~감사'는 아직 수작업입니다</h2>
+    <p class="section-desc">
+      감사보수는 3년 연속 하락하고, 인력은 구하기 어렵고,<br>
+      환수 제재는 매년 강화되고 있습니다.
+    </p>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">&#9888;</div>
+        <div class="pain-card-title">반려 반복 &rarr; 건당 적자</div>
+        <div class="pain-card-desc">
+          부처별 서식과 기준이 다르고 매년 바뀝니다.
+          반려 2~3회면 건당 수수료로는 남지 않습니다.
+        </div>
+        <div class="pain-stat">감사보수 건당 1,520만원 (소형 평균)</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">&#128101;</div>
+        <div class="pain-card-title">정산 담당자 의존 &rarr; 퇴사 시 붕괴</div>
+        <div class="pain-card-desc">
+          노하우가 담당자 머릿속에만 존재합니다.
+          CPA 합격자의 26%만 수습기관 등록 &mdash; 채용도 어렵습니다.
+        </div>
+        <div class="pain-stat">수습등록률 26% (2025 합격자 기준)</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">&#128269;</div>
+        <div class="pain-card-title">감사/점검 &rarr; 본업 올스톱</div>
+        <div class="pain-card-desc">
+          소급 점검이 확대되고 있어 3~5년 전 건도 대응해야 합니다.
+          자료 정리하느라 감사·세무 업무가 밀립니다.
+        </div>
+        <div class="pain-stat">환수 집행 3년 새 3배 증가</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">&#128680;</div>
+        <div class="pain-card-title">환수 1건 = 평판 파괴</div>
+        <div class="pain-card-desc">
+          공공재정환수법 기준 3,000만원 이상 환수 시 명단이 공표됩니다.
+          해당 매출 라인이 소멸합니다.
+        </div>
+        <div class="pain-stat">허위청구 최대 5배 제재부가금</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SOLUTION ===== -->
+<section class="section" id="solution">
+  <div class="container">
+    <div style="text-align:center;">
+      <span class="section-label">Solution</span>
+      <h2 class="section-title">e나라도움 제출 직전,<br><span class="text-gradient">3단계 자동 검수</span></h2>
+      <p class="section-desc" style="margin:0 auto 0;">
+        e나라도움을 대체하지 않습니다. 제출 직전에 품질을 잡아주는 검수 레이어입니다.
+      </p>
+    </div>
+    <div class="solution-flow">
+      <div class="solution-card">
+        <div class="solution-step">A</div>
+        <div class="solution-card-title">품질검수</div>
+        <div class="solution-card-desc">
+          증빙 누락&middot;부적격&middot;비목 불일치를 자동 감지합니다.
+          부처별 서식 적합성까지 검증합니다.
+        </div>
+        <div class="solution-tag">반려 루프 차단</div>
+      </div>
+      <div class="solution-card">
+        <div class="solution-step">B</div>
+        <div class="solution-card-title">노하우 구조화</div>
+        <div class="solution-card-desc">
+          부처별 정산 룰과 법인 자체 체크리스트를 시스템에 내장합니다.
+          담당자가 바뀌어도 품질이 유지됩니다.
+        </div>
+        <div class="solution-tag">속인화 해소</div>
+      </div>
+      <div class="solution-card">
+        <div class="solution-step">C</div>
+        <div class="solution-card-title">감사 대비 패키징</div>
+        <div class="solution-card-desc">
+          정산서&middot;증빙목록&middot;성과보고 초안&middot;감사 체크리스트를
+          하나의 패키지로 생성합니다.
+        </div>
+        <div class="solution-tag">점검 당일 대응</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="features section" id="features">
+  <div class="container">
+    <span class="section-label">Features</span>
+    <h2 class="section-title">정산 완료 패키지,<br>한 번에 생성합니다</h2>
+    <p class="section-desc">
+      1건 = 정산서 + 증빙목록 + 성과보고 초안 + 감사 체크리스트.
+      담당 전문가 승인 시 완료 처리. e나라도움 제출 직전 상태의 완성 패키지.
+    </p>
+    <div class="features-grid">
+      <div class="feature-card highlight">
+        <div class="feature-badge">CORE</div>
+        <div class="feature-title">&#128737; 개인정보 자동 보호</div>
+        <div class="feature-desc">
+          증빙 내 주민번호&middot;계좌&middot;연락처를 자동 탐지하고 마스킹합니다.
+          원본은 국내 저장, 처리 로그를 제공합니다.
+        </div>
+        <ul class="feature-list">
+          <li>주민번호/계좌/연락처 패턴 자동 인식</li>
+          <li>마스킹 후 처리, 원본 분리 저장</li>
+          <li>개인정보 처리 로그 실시간 제공</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-badge">검수</div>
+        <div class="feature-title">&#128203; 증빙 완결성 검증</div>
+        <div class="feature-desc">
+          비목별 증빙 매칭, 누락 항목 감지, 부적격 증빙 경고.
+          반려 사유를 제출 전에 차단합니다.
+        </div>
+        <ul class="feature-list">
+          <li>부처별 정산 서식 자동 매칭</li>
+          <li>누락/불일치 실시간 경고</li>
+          <li>보완 가이드 자동 생성</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-badge">생성</div>
+        <div class="feature-title">&#128196; 정산서 자동 구성</div>
+        <div class="feature-desc">
+          집행내역을 기반으로 정산서와 증빙목록을 자동 구성합니다.
+          성과보고서 초안까지 한 번에 생성합니다.
+        </div>
+        <ul class="feature-list">
+          <li>집행내역 &rarr; 정산서 자동 변환</li>
+          <li>증빙목록 자동 매핑</li>
+          <li>성과보고서 KPI 초안 생성</li>
+        </ul>
+      </div>
+      <div class="feature-card highlight">
+        <div class="feature-badge">KILLER</div>
+        <div class="feature-title">&#9989; 감사 대비 체크리스트</div>
+        <div class="feature-desc">
+          자주 지적되는 항목을 사전 점검합니다.
+          근거 규정 링크와 검토 로그가 함께 생성됩니다.
+        </div>
+        <ul class="feature-list">
+          <li>주요 지적사항 사전 경고</li>
+          <li>근거 규정 자동 링크</li>
+          <li>검토/승인 로그 + 타임스탬프</li>
+          <li>변경 이력 추적</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div style="text-align:center;">
+      <span class="section-label">Pricing</span>
+      <h2 class="section-title">시작은 무료 3건,<br>효과를 보고 결정하세요</h2>
+      <p class="section-desc" style="margin:0 auto 0;">
+        연 선불 + 건당 과금. 파일럿 참여 법인은 12개월 가격 고정.
+      </p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Trial</div>
+        <div class="price-value">0원</div>
+        <div class="price-unit">3건 무료 / 1~2주</div>
+        <ul class="price-features">
+          <li><span class="price-check">&#10003;</span> 정산 패키지 3건 생성</li>
+          <li><span class="price-check">&#10003;</span> 증빙 검수 + 경고</li>
+          <li><span class="price-check">&#10003;</span> PII 마스킹 포함</li>
+          <li><span class="price-check">&#10003;</span> 도입 전 효과 확인</li>
+        </ul>
+        <a href="#pilot" class="btn btn-outline" style="width:100%">무료 시작</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Starter</div>
+        <div class="price-value">연 선불</div>
+        <div class="price-unit">연 10건 포함 + 추가 건당</div>
+        <ul class="price-features">
+          <li><span class="price-check">&#10003;</span> Trial 전 기능 포함</li>
+          <li><span class="price-check">&#10003;</span> 감사 체크리스트</li>
+          <li><span class="price-check">&#10003;</span> 부처별 룰 기본 세트</li>
+          <li><span class="price-check">&#10003;</span> 이메일 지원</li>
+        </ul>
+        <a href="#pilot" class="btn btn-dark" style="width:100%">파일럿 문의</a>
+      </div>
+      <div class="price-card popular">
+        <div class="price-name">Pro</div>
+        <div class="price-value">연 선불</div>
+        <div class="price-unit">연 80건 포함 + 추가 건당(단가&darr;)</div>
+        <ul class="price-features">
+          <li><span class="price-check">&#10003;</span> Starter 전 기능 포함</li>
+          <li><span class="price-check">&#10003;</span> 법인 커스텀 체크리스트</li>
+          <li><span class="price-check">&#10003;</span> 우선 지원</li>
+          <li><span class="price-check">&#10003;</span> 리퍼럴 파트너 가능</li>
+        </ul>
+        <a href="#pilot" class="btn btn-primary" style="width:100%">파일럿 신청</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Firm</div>
+        <div class="price-value">별도 협의</div>
+        <div class="price-unit">무제한 / 전사 도입</div>
+        <ul class="price-features">
+          <li><span class="price-check">&#10003;</span> Pro 전 기능 포함</li>
+          <li><span class="price-check">&#10003;</span> 전담 매니저</li>
+          <li><span class="price-check">&#10003;</span> 커스텀 연동</li>
+          <li><span class="price-check">&#10003;</span> SLA 99.5%</li>
+        </ul>
+        <a href="#pilot" class="btn btn-outline" style="width:100%">상담 요청</a>
+      </div>
+    </div>
+    <p style="text-align:center; margin-top:24px; font-size:13px; color:var(--text-muted);">
+      * 금액은 파일럿 실측 후 확정. 파일럿 참여 법인은 확정 가격 12개월 고정 혜택 제공.<br>
+      * 모든 유료 플랜은 연 선불 구조입니다. 월 단위 계약 대비 약 15~20% 절감 효과.
+    </p>
+  </div>
+</section>
+
+<!-- ===== TRUST ===== -->
+<section class="trust section">
+  <div class="container">
+    <div style="text-align:center;">
+      <span class="section-label">Trust</span>
+      <h2 class="section-title">신뢰할 수 있는 이유</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="trust-icon">&#128274;</div>
+        <div class="trust-title">개인정보 보호</div>
+        <div class="trust-desc">PII 자동 마스킹, 국내 저장, 명시적 동의 기반 처리. PIPA 준수.</div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">&#128100;</div>
+        <div class="trust-title">전문가 최종 판단</div>
+        <div class="trust-desc">자동 제출 없음. 모든 산출물은 담당 전문가의 검토 후 제출.</div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">&#128209;</div>
+        <div class="trust-title">근거 기반 검수</div>
+        <div class="trust-desc">모든 경고와 체크 항목에 관련 규정 링크와 사유를 명시합니다.</div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">&#128736;</div>
+        <div class="trust-title">독립성 침해 없음</div>
+        <div class="trust-desc">리퍼럴 모델. 감사/세무 독립성에 영향 없는 보조 도구입니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SOCIAL PROOF ===== -->
+<section class="section" style="padding:60px 0;">
+  <div class="container">
+    <div style="text-align:center;">
+      <span class="section-label">Pilot</span>
+      <h2 class="section-title">파일럿 참여 법인</h2>
+      <p class="section-desc" style="margin:0 auto 40px;">현재 파일럿 법인을 모집하고 있습니다. 실제 정산 데이터로 효과를 검증합니다.</p>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:720px; margin:0 auto;">
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; text-align:center;">
+        <div style="font-size:32px; margin-bottom:8px;">&#127970;</div>
+        <div style="font-size:14px; font-weight:700; margin-bottom:4px;">소형 회계법인</div>
+        <div style="font-size:13px; color:var(--text-muted);">CPA 5~10명 규모</div>
+        <div style="margin-top:12px; display:inline-flex; padding:4px 12px; border-radius:100px; font-size:12px; font-weight:600; background:var(--success-bg); color:var(--success);">모집 중</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; text-align:center;">
+        <div style="font-size:32px; margin-bottom:8px;">&#127971;</div>
+        <div style="font-size:14px; font-weight:700; margin-bottom:4px;">중견 회계법인</div>
+        <div style="font-size:13px; color:var(--text-muted);">CPA 20~50명 규모</div>
+        <div style="margin-top:12px; display:inline-flex; padding:4px 12px; border-radius:100px; font-size:12px; font-weight:600; background:var(--success-bg); color:var(--success);">모집 중</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; text-align:center;">
+        <div style="font-size:32px; margin-bottom:8px;">&#128202;</div>
+        <div style="font-size:14px; font-weight:700; margin-bottom:4px;">파일럿 결과</div>
+        <div style="font-size:13px; color:var(--text-muted);">효과 검증 후 공개</div>
+        <div style="margin-top:12px; display:inline-flex; padding:4px 12px; border-radius:100px; font-size:12px; font-weight:600; background:var(--warning-bg); color:var(--warning);">준비 중</div>
+      </div>
+    </div>
+    <p style="text-align:center; margin-top:24px; font-size:13px; color:var(--text-muted);">
+      * 파일럿 완료 후 참여 법인 동의 하에 결과 사례를 공개할 예정입니다.
+    </p>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="section" id="faq">
+  <div class="container">
+    <div style="text-align:center;">
+      <span class="section-label">FAQ</span>
+      <h2 class="section-title">자주 묻는 질문</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          e나라도움을 대체하는 건가요?
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            아닙니다. QETTA는 e나라도움에 <strong>제출하기 직전</strong> 증빙과 정산서의 품질을 검수하는 레이어입니다.
+            기존 시스템을 그대로 쓰면서, 반려 가능성을 사전에 차단합니다.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          개인정보(주민번호 등)는 어떻게 처리되나요?
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            증빙 내 PII(주민번호, 계좌번호, 연락처)는 업로드 즉시 자동 탐지 후 마스킹 처리됩니다.
+            원본은 국내 서버에 암호화 분리 저장하며, 처리 로그를 실시간 제공합니다.
+            개인정보보호법(PIPA) 기준을 준수합니다.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          파일럿은 정말 무료인가요? 나중에 자동 결제되나요?
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            파일럿 3건은 완전 무료이며, 카드 등록도 필요 없습니다.
+            파일럿 종료 후 별도 계약 없이는 과금이 발생하지 않습니다.
+            효과를 확인한 뒤 유료 전환 여부를 결정하시면 됩니다.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          감사 독립성에 영향이 없나요?
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            QETTA는 자문이 아닌 <strong>검수 보조 도구</strong>입니다. 자동 제출 기능이 없으며,
+            모든 산출물은 담당 전문가가 직접 검토&middot;승인 후 제출합니다.
+            리퍼럴 모델 또한 감사/세무 독립성에 영향을 주지 않는 구조입니다.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          어떤 부처의 보조금을 지원하나요?
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            파일럿 단계에서는 주요 부처(중기부, 복지부, 과기부)의 정산 서식을 우선 지원합니다.
+            법인 커스텀 룰(Pro 이상)을 통해 특정 부처 서식을 추가할 수 있으며,
+            정식 출시 시 대부분의 e나라도움 등록 부처를 커버할 예정입니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-section" id="pilot">
+  <div class="container">
+    <div class="cta-inner">
+      <h2 class="cta-title">정산 3건,<br>무료로 검수해 보세요</h2>
+      <p class="cta-desc">
+        실제 정산 데이터로 증빙 누락/부적격이 잡히는지 확인하세요.<br>
+        1~2주면 효과를 알 수 있습니다.
+      </p>
+      <div class="cta-actions">
+        <a href="mailto:partner@qetta.kr" class="btn btn-primary btn-lg">
+          파일럿 신청하기 <span class="btn-icon">&rarr;</span>
+        </a>
+        <a href="#solution" class="btn btn-outline btn-lg" style="color:#fff; border-color:rgba(255,255,255,0.3);">
+          작동 방식 다시 보기
+        </a>
+      </div>
+      <div class="cta-aux cta-aux-dark">
+        <span class="cta-aux-item">카드 등록 불필요</span>
+        <span class="cta-aux-item">15분 내 첫 결과</span>
+        <span class="cta-aux-item">계약 의무 없음</span>
+      </div>
+      <p class="cta-note">파일럿 참여 법인: 확정 가격 12개월 고정</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">QETTA</div>
+        <p style="margin-top:4px;">보조금 정산 자동 검수 솔루션</p>
+      </div>
+      <div class="footer-links">
+        <a href="#">이용약관</a>
+        <a href="#">개인정보처리방침</a>
+        <a href="mailto:partner@qetta.kr">partner@qetta.kr</a>
+      </div>
+    </div>
+    <p style="margin-top:24px; text-align:center; font-size:12px; color:rgba(255,255,255,0.25);">
+      &copy; 2026 QETTA. 본 솔루션은 규정 기반 자동 검수 보조 도구이며, 최종 검토 및 제출 책임은 이용자에게 있습니다.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
