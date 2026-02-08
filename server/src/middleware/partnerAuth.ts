@@ -4,13 +4,12 @@ import { getDb } from '../config/mongodb.js';
 import { logger } from '../config/logger.js';
 import type { FirmAccount } from '../types/settlement.js';
 
-declare global {
-  namespace Express {
-    interface Request {
-      firmAccount?: FirmAccount;
-    }
+declare module 'express-serve-static-core' {
+  // Augment Express Request type with firm account (preferred over namespace)
+  interface Request {
+    firmAccount?: FirmAccount;
   }
-}
+} 
 
 /**
  * API key 인증 미들웨어 (SHA-256)

@@ -64,7 +64,7 @@ templatesRouter.get('/:id/download', async (req: Request, res: Response) => {
   const id = String(req.params.id);
   const tpl = await templateService.getTemplate(firmId, id);
   if (!tpl) return res.status(404).json({ error: 'Template not found' });
-  const version = tpl.versions.find((v: any) => v.version === tpl.current_version);
+  const version = tpl.versions.find((v: { version: number; file_path: string }) => v.version === tpl.current_version);
   if (!version) return res.status(404).json({ error: 'Template version not found' });
   res.download(version.file_path, `${tpl.name}.docx`);
 });

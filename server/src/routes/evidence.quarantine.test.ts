@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import fs from 'fs/promises';
 import path from 'path';
+import type { Request, Response } from 'express';
 
 import { handleEvidenceUpload } from './evidence.js';
-import * as virus from '../services/virusScanService.js';
 
 
 function makeReq(fileBuffer: Buffer, filename = 'bad.docx') {
@@ -11,21 +11,23 @@ function makeReq(fileBuffer: Buffer, filename = 'bad.docx') {
     file: { buffer: fileBuffer, originalname: filename, mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size: fileBuffer.length },
     body: { project_id: 'projectX' },
     firmAccount: { firm_id: 'firm123' },
-  } as any;
+  } as unknown as Request;
 }
 
+type MockRes = {
+  _status?: number;
+  _json?: unknown;
+  status: (code: number) => MockRes;
+  json: (obj: unknown) => MockRes;
+};
+
 function makeRes() {
-  const res: any = {};
-  res.status = (code: number) => {
-    res._status = code;
-    return res;
+  const res: MockRes = {
+    status(code: number) { this._status = code; return this; },
+    json(obj: unknown) { this._json = obj; return this; },
   };
-  res.json = (obj: any) => {
-    res._json = obj;
-    return res;
-  };
-  return res;
-}
+  return res as unknown as Response;
+}  
 
 describe('evidence quarantine flow', () => {
   it('stores file in quarantine and returns 400 when scanner flags infected', async () => {
@@ -36,8 +38,8 @@ describe('evidence quarantine flow', () => {
     await fs.mkdir(tmpdir, { recursive: true });
 
     // craft a minimal buffer that looks like a zip (docx magic header)
-    const req = makeReq(Buffer.from('PK\x03\x04malware'), 'bad.docx');
-    const res = makeRes();
+    const req = makeReq(Buffer.from('PK\x03\x04malware'), 'bad.docx') as unknown as Request;
+    const res = makeRes() as unknown as Response; 
 
     // force scanner to report infected via env override
     process.env.QETTA_TEST_FORCE_SCAN = 'infected';

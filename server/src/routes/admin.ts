@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from 'express';
+import { logger } from '../config/logger.js';
 const adminRouter = Router();
 
 export async function serveQuarantinePage(req: Request, res: Response) {
@@ -6,6 +7,7 @@ export async function serveQuarantinePage(req: Request, res: Response) {
     const filePath = new URL('../../static/quarantine.html', import.meta.url).pathname;
     res.sendFile(filePath);
   } catch (err) {
+    logger.error({ err }, 'Failed to serve quarantine UI');
     res.status(500).send('Unable to load admin UI');
   }
 }

@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
-import mammoth from 'mammoth';
-import puppeteer from 'puppeteer';
+// mammoth/puppeteer are dynamically imported where needed to avoid loading in tests
+
 import { ObjectId } from 'mongodb';
 import { getDb } from '../config/mongodb.js';
 import { env } from '../config/env.js';
@@ -108,7 +108,7 @@ export async function getTemplate(firmId: string, id: string) {
       placeholders: [],
       created_at: new Date(),
       updated_at: new Date(),
-    } as unknown as any;
+    } as unknown as { _id: string; firm_id: string; name: string; current_version: number; versions: TemplateVersion[]; placeholders: string[]; created_at: Date; updated_at: Date };
   }
 }
 

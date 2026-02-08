@@ -1,14 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { scanBuffer } from './virusScanService.js';
-import { execFile } from 'child_process';
-import fs from 'fs/promises';
 
 // Enable ClamAV mock and provide a mockable execFile implementation with toggle
 process.env.CLAMAV_SCAN_ENABLED = 'true';
 vi.mock('child_process', () => ({
-  execFile: (cmd: string, args: string[], cb: (err: any, stdout: string) => void) => {
-    if (typeof cmd === 'string' && cmd.includes('infected')) return cb({ code: 1, stdout: 'FOUND' });
-    if (typeof cmd === 'string' && cmd.includes('error')) return cb({ code: 2, stdout: 'ERR' });
+  execFile: (cmd: string, args: string[], cb: (err: unknown, stdout: string) => void) => {
+    if (typeof cmd === 'string' && cmd.includes('infected')) return cb({ code: 1, stdout: 'FOUND' }, 'FOUND');
+    if (typeof cmd === 'string' && cmd.includes('error')) return cb({ code: 2, stdout: 'ERR' }, 'ERR');
     return cb(null, 'OK');
   },
 }));

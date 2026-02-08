@@ -39,10 +39,12 @@ export async function applyRules(
   projectId: string,
   _rulesetId?: string,
 ): Promise<QaResult> {
+  // reference param until rule selector is implemented
+  void _rulesetId;
   logger.info({ projectId }, 'Applying settlement rules');
   // TODO: 부처별 + 법인 커스텀 룰 적용
   return runQualityCheck(projectId);
-}
+} 
 
 export async function generatePackage(projectId: string): Promise<string> {
   logger.info({ projectId }, 'Generating settlement package (4종)');

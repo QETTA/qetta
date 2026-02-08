@@ -42,7 +42,9 @@ export async function exportTrail(
   projectId: string,
   _format: 'json' | 'csv',
 ): Promise<string> {
+  // reference param to satisfy lint rule until exporter implemented
+  void _format;
   const trail = await getTrail(projectId);
   // TODO: PDF/Excel 내보내기 구현 (P1)
   return JSON.stringify(trail, null, 2);
-}
+} 

@@ -49,6 +49,9 @@ export async function validateEvidence(
   _evidence: Record<string, unknown>,
   _ruleset: SettlementRule[],
 ): Promise<{ passed: boolean; violations: string[] }> {
+  // reference params to satisfy lint rules until implementation
+  void _evidence;
+  void _ruleset;
   // TODO: 증빙 vs 규칙 매칭 검증 구현
   return { passed: true, violations: [] };
-}
+} 
