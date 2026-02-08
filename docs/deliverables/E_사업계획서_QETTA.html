@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QETTA 사업계획서 | 보조금 정산 자동 검수</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+@page { size: A4; margin: 20mm; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  color: #1e293b; background: #fff;
+  line-height: 1.7; -webkit-font-smoothing: antialiased;
+  max-width: 900px; margin: 0 auto; padding: 48px 40px;
+  font-size: 14px;
+}
+
+.header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 3px solid #0f172a; }
+.logo { font-size: 26px; font-weight: 900; letter-spacing: -0.03em; }
+.logo span { background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.meta { text-align: right; font-size: 12px; color: #64748b; }
+.meta strong { color: #0f172a; display: block; font-size: 14px; }
+
+.conf-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;
+  padding: 6px 14px; border-radius: 8px;
+  font-size: 12px; font-weight: 600; margin-bottom: 28px;
+}
+.conf-badge::before { content: ''; width: 6px; height: 6px; background: #ef4444; border-radius: 50%; }
+
+.toc { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 24px; margin-bottom: 32px; }
+.toc h3 { margin: 0 0 10px; font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.toc ol { padding-left: 20px; columns: 2; column-gap: 40px; }
+.toc li { font-size: 13px; color: #334155; margin-bottom: 4px; }
+
+h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+h2 { font-size: 17px; font-weight: 700; margin: 36px 0 14px; padding: 8px 16px; background: #0f172a; color: #fff; border-radius: 8px; letter-spacing: -0.01em; }
+h3 { font-size: 15px; font-weight: 700; margin: 20px 0 8px; color: #334155; }
+h4 { font-size: 13px; font-weight: 700; margin: 14px 0 6px; color: #475569; }
+p { margin-bottom: 8px; }
+ul, ol { padding-left: 22px; margin-bottom: 8px; }
+li { margin-bottom: 4px; font-size: 13px; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+table th, table td { padding: 8px 10px; border: 1px solid #e2e8f0; text-align: left; }
+table th { background: #f1f5f9; font-weight: 600; color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+.num-right { text-align: right; font-variant-numeric: tabular-nums; }
+.row-total { background: #f1f5f9; font-weight: 700; }
+.row-highlight { background: #ecfdf5; }
+
+.box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin: 14px 0; }
+.box-highlight { background: linear-gradient(135deg, #eef2ff, #f5f3ff); border-color: #c7d2fe; }
+.box-warn { background: #fef2f2; border-color: #fecaca; }
+.box-success { background: #ecfdf5; border-color: #a7f3d0; }
+.box h4 { margin-top: 0; }
+
+.badge { display: inline-flex; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+.badge-red { background: #fef2f2; color: #991b1b; }
+.badge-green { background: #ecfdf5; color: #065f46; }
+.badge-blue { background: #eef2ff; color: #3730a3; }
+.badge-yellow { background: #fffbeb; color: #92400e; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+.kpi-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; text-align: center; }
+.kpi-value { font-size: 24px; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; }
+.kpi-value.primary { color: #4f46e5; }
+.kpi-value.danger { color: #ef4444; }
+.kpi-value.success { color: #10b981; }
+.kpi-label { font-size: 11px; color: #64748b; margin-top: 4px; }
+
+.flow-row { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; align-items: center; }
+.flow-step { flex: 1; min-width: 120px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; }
+.flow-step h4 { margin: 0 0 4px; font-size: 12px; }
+.flow-step p { font-size: 11px; color: #64748b; margin: 0; }
+.flow-arrow { color: #94a3b8; font-size: 16px; flex: 0; min-width: auto; }
+
+.footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
+
+@media print {
+  body { padding: 24px; font-size: 12px; }
+  h2 { break-before: auto; }
+  .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="logo"><span>QETTA</span></div>
+  <div class="meta">
+    <strong>E. 사업계획서 (Business Plan)</strong>
+    v1.0 | 2026.02 | Confidential
+  </div>
+</div>
+
+<div class="conf-badge">CONFIDENTIAL &mdash; 외부 배포 시 사전 승인 필요</div>
+
+<h1>보조금 정산 자동 검수 &mdash; 사업계획서</h1>
+<p style="color:#64748b; font-size:13px;">회계법인 대상 B2B SaaS &middot; e나라도움 제출 직전 QA 레이어 &middot; 연 선불 + 건당 과금</p>
+
+<!-- ===== TOC ===== -->
+<div class="toc">
+  <h3>목차</h3>
+  <ol>
+    <li>Executive Summary</li>
+    <li>시장 문제 (Problem)</li>
+    <li>솔루션 (Solution)</li>
+    <li>시장 규모 (TAM / SAM / SOM)</li>
+    <li>비즈니스 모델</li>
+    <li>GTM 전략</li>
+    <li>경쟁 환경</li>
+    <li>재무 계획 (3개년)</li>
+    <li>개발 로드맵</li>
+    <li>팀 구성</li>
+    <li>자금 운용 계획</li>
+    <li>리스크 &amp; 완화</li>
+  </ol>
+</div>
+
+
+<!-- ================================================================ -->
+<h2>1. Executive Summary</h2>
+
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-value">225,710</div>
+    <div class="kpi-label">e나라도움 등록 보조사업</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value danger">0개</div>
+    <div class="kpi-label">정산 특화 SaaS (국내)</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value primary">254</div>
+    <div class="kpi-label">한국 회계법인 수</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value success">99.7%</div>
+    <div class="kpi-label">건당 마진율 (Starter)</div>
+  </div>
+</div>
+
+<div class="box box-highlight">
+  <h4>한 줄 요약</h4>
+  <p style="font-size:15px; font-weight:600; color:#3730a3; margin:0;">
+    QETTA는 회계법인이 e나라도움에 보조금 정산을 제출하기 직전, 증빙 누락&middot;부적격&middot;비목 불일치를 자동 검수하는 B2B SaaS입니다.
+  </p>
+</div>
+
+<table>
+  <tr><th style="width:140px;">항목</th><th>내용</th></tr>
+  <tr><td><strong>타겟 고객</strong></td><td>한국 회계법인 254개 (소형 CPA 3~15명 / 중견 CPA 20~100명)</td></tr>
+  <tr><td><strong>제품</strong></td><td>e나라도움 제출 직전 3단계 QA 레이어 (품질검수 &rarr; 노하우구조화 &rarr; 감사대비패키징)</td></tr>
+  <tr><td><strong>과금 단위</strong></td><td>1건 = 4종 산출물 패키지 (정산서 + 증빙목록 + 성과보고 초안 + 감사 체크리스트). 담당 전문가(CPA) 승인 시 과금.</td></tr>
+  <tr><td><strong>수익 모델</strong></td><td>연 선불 기본료 + 포함 건수 초과 시 건당 추가 과금</td></tr>
+  <tr><td><strong>건당 원가</strong></td><td>~720원 (Claude API + 인프라). 건당 25만원 기준 마진 99.7%</td></tr>
+  <tr><td><strong>시장 기회</strong></td><td>국내 정산 특화 SaaS 0개. 보조금 정산 검수 시장 ~60억/년.</td></tr>
+  <tr><td><strong>Y3 매출 목표</strong></td><td>법인 25개 확보 &rarr; 연 매출 ~3.3억 (기본 시나리오)</td></tr>
+  <tr><td><strong>핵심 차별점</strong></td><td>PII 자동 보호 + 부처별 정산 규칙 엔진 + 감사 대비 패키징 + 리퍼럴 파트너 모델</td></tr>
+</table>
+
+
+<!-- ================================================================ -->
+<h2>2. 시장 문제 (Problem)</h2>
+
+<h3>2.1 &ldquo;신청&rdquo;은 도구가 있지만, &ldquo;정산~감사&rdquo;는 수작업입니다</h3>
+<p>e나라도움은 보조금 <strong>신청과 집행 등록</strong>을 디지털화했지만, 정산 증빙 검수&middot;패키징&middot;감사 대비는 여전히 수작업입니다. 회계법인은 매 건마다 부처별로 다른 서식과 규칙을 수동으로 확인하고, 반려 시 처음부터 재작업합니다.</p>
+
+<h3>2.2 4대 Pain Point</h3>
+<table>
+  <tr><th style="width:60px;">#</th><th>문제</th><th>수치 근거</th><th>결과</th></tr>
+  <tr>
+    <td><span class="badge badge-red">P1</span></td>
+    <td><strong>반려 반복 &rarr; 건당 적자</strong></td>
+    <td>반려 재작업 인건비 80~150만원 &times; 평균 2.3회</td>
+    <td>건당 184~345만원 손실. 감사보수 1,520만원 대비 적자 구간 진입.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-red">P2</span></td>
+    <td><strong>속인화 &rarr; 퇴사 시 붕괴</strong></td>
+    <td>CPA 합격자 수습등록률 26% (2025)</td>
+    <td>정산 노하우가 담당자 머릿속에만 존재. 채용도 어려움.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-red">P3</span></td>
+    <td><strong>감사/점검 확대 &rarr; 본업 올스톱</strong></td>
+    <td>환수 집행 3년 새 3배 증가</td>
+    <td>소급 점검으로 3~5년 전 건도 대응 필요. 감사&middot;세무 업무 밀림.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-red">P4</span></td>
+    <td><strong>환수 1건 = 평판 파괴</strong></td>
+    <td>공공재정환수법 5배 제재부가금. 3,000만원 이상 명단 공표.</td>
+    <td>해당 매출 라인 소멸. 법인 신뢰 회복 불가.</td>
+  </tr>
+</table>
+
+<h3>2.3 Why Now? (2026 타이밍)</h3>
+<div class="box">
+  <ol>
+    <li><strong>공공재정환수법 본격 시행</strong> (2024~) &rarr; 5배 제재부가금 &rarr; 법인 리스크 인식 급증</li>
+    <li><strong>부정수급 적발 역대 최대</strong> (2024: 630건 / 493억원) &rarr; 감시 강화 추세 확정</li>
+    <li><strong>감사보수 3년 연속 하락</strong> + 인력난 &rarr; 비용 절감 자동화 도구 수요 급증</li>
+    <li><strong>대형 법인 AI 도입 시작</strong> &rarr; 소형/중견은 도구 부재 &rarr; &ldquo;뒤처지면 안 된다&rdquo; 인식 확산</li>
+    <li><strong>e나라도움 정산 기능 부재</strong> &rarr; 시스템 공백 그대로. 3년 내 해소 전망 없음.</li>
+  </ol>
+</div>
+
+
+<!-- ================================================================ -->
+<h2>3. 솔루션 (Solution)</h2>
+
+<h3>3.1 제품 포지셔닝</h3>
+<div class="box box-highlight">
+  <p style="font-size:14px; font-weight:600; color:#3730a3; margin:0;">
+    e나라도움을 대체하지 않습니다. <strong>제출 직전에 품질을 잡아주는 검수 레이어</strong>입니다.
+  </p>
+</div>
+
+<h3>3.2 3단계 QA 프로세스</h3>
+<div class="flow-row">
+  <div class="flow-step" style="border-color:#4f46e5;">
+    <h4>A. 품질검수</h4>
+    <p>증빙 누락&middot;부적격&middot;비목 불일치 자동 감지. 부처별 서식 적합성 검증.</p>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step" style="border-color:#7c3aed;">
+    <h4>B. 노하우 구조화</h4>
+    <p>부처별 정산 룰 + 법인 자체 체크리스트 시스템 내장. 담당자 교체에도 품질 유지.</p>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step" style="border-color:#10b981;">
+    <h4>C. 감사 대비 패키징</h4>
+    <p>4종 산출물을 하나의 패키지로 생성. 점검 당일 즉시 대응.</p>
+  </div>
+</div>
+
+<h3>3.3 1건 = 4종 산출물 패키지</h3>
+<table>
+  <tr><th>#</th><th>산출물</th><th>내용</th></tr>
+  <tr><td>1</td><td><strong>정산서</strong></td><td>집행내역 기반 정산서 자동 구성</td></tr>
+  <tr><td>2</td><td><strong>증빙목록</strong></td><td>비목별 증빙 매칭 + 누락 항목 식별</td></tr>
+  <tr><td>3</td><td><strong>성과보고 초안</strong></td><td>KPI 기반 성과보고서 초안 생성</td></tr>
+  <tr><td>4</td><td><strong>감사 체크리스트</strong></td><td>주요 지적사항 사전 점검 + 근거 규정 링크 + 검토 로그</td></tr>
+</table>
+<p style="font-size:12px; color:#64748b;">&bull; 4종이 모두 생성되고, <strong>담당 전문가(CPA)가 승인</strong>해야 1건으로 과금됩니다.</p>
+
+<h3>3.4 C-0: PII 자동 보호 (구매 차단 요인 해소)</h3>
+<div class="box box-warn">
+  <p><strong>회계법인의 #1 도입 장벽 = &ldquo;고객 개인정보가 외부로 나가면 안 된다&rdquo;</strong></p>
+  <ul>
+    <li>증빙 내 주민번호&middot;계좌번호&middot;연락처를 <strong>업로드 즉시 자동 탐지 &rarr; 마스킹</strong></li>
+    <li>마스킹 완료 데이터만 처리. 원본은 <strong>국내 서버에 AES-256 암호화 분리 저장</strong></li>
+    <li>처리 로그 실시간 제공. 개인정보보호법(PIPA) 준수.</li>
+    <li>이 기능이 없으면 파일럿 자체가 불가 &rarr; <strong>P0 (절대 필수)</strong></li>
+  </ul>
+</div>
+
+
+<!-- ================================================================ -->
+<h2>4. 시장 규모</h2>
+
+<h3>4.1 TAM / SAM / SOM</h3>
+<div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+  <div class="kpi-card" style="border-color:#e2e8f0;">
+    <div class="kpi-value" style="font-size:20px;">~60억/년</div>
+    <div class="kpi-label">TAM (총 시장)</div>
+  </div>
+  <div class="kpi-card" style="border-color:#c7d2fe;">
+    <div class="kpi-value primary" style="font-size:20px;">~25억/년</div>
+    <div class="kpi-label">SAM (접근 가능)</div>
+  </div>
+  <div class="kpi-card" style="border-color:#a7f3d0;">
+    <div class="kpi-value success" style="font-size:20px;">~3.3억/년</div>
+    <div class="kpi-label">SOM (Y3 목표)</div>
+  </div>
+</div>
+
+<table>
+  <tr><th style="width:80px;">구분</th><th>정의</th><th>산출 근거</th><th class="num-right">규모</th></tr>
+  <tr>
+    <td><strong>TAM</strong></td>
+    <td>한국 보조금 정산 검수 시장 전체</td>
+    <td>e나라도움 등록 225,710 보조사업 중 회계법인 관여 정산 ~30,000건/년 &times; 건당 평균 20만원</td>
+    <td class="num-right"><strong>~60억</strong></td>
+  </tr>
+  <tr>
+    <td><strong>SAM</strong></td>
+    <td>QETTA가 서비스 가능한 시장</td>
+    <td>소형+중견 회계법인 ~200개 &times; 평균 연 ARPA ~1,250만원 (기본료+건당)</td>
+    <td class="num-right"><strong>~25억</strong></td>
+  </tr>
+  <tr>
+    <td><strong>SOM</strong></td>
+    <td>Year 3 현실 확보 목표</td>
+    <td>법인 25개 (시장 점유 ~12.5%) &times; 평균 ARPA ~1,320만원</td>
+    <td class="num-right"><strong>~3.3억</strong></td>
+  </tr>
+</table>
+
+<h3>4.2 타겟 세그먼트</h3>
+<table>
+  <tr><th>세그먼트</th><th>규모</th><th>특성</th><th>QETTA 플랜</th><th>진입 우선순위</th></tr>
+  <tr>
+    <td><strong>소형 법인</strong></td>
+    <td>~150개 (CPA 3~15명)</td>
+    <td>인력 부족 심각, 정산 전담 없음, 가격 민감</td>
+    <td>Starter</td>
+    <td><span class="badge badge-green">1순위</span></td>
+  </tr>
+  <tr>
+    <td><strong>중견 법인</strong></td>
+    <td>~50개 (CPA 20~100명)</td>
+    <td>부처별 대량 정산, 커스텀 룰 필요, 리퍼럴 가능</td>
+    <td>Pro</td>
+    <td><span class="badge badge-green">1순위</span></td>
+  </tr>
+  <tr>
+    <td><strong>대형 법인</strong></td>
+    <td>~10개 (4대 법인 포함)</td>
+    <td>자체 시스템 보유, 긴 의사결정, 전사 도입</td>
+    <td>Firm</td>
+    <td><span class="badge badge-yellow">2순위</span></td>
+  </tr>
+</table>
+
+<h3>4.3 Account-Based Sales (ABS) 전략</h3>
+<div class="box">
+  <p><strong>전체 타겟 254개 법인</strong> &mdash; 마스 마케팅이 아닌 1:1 Account-Based 영업.</p>
+  <ul>
+    <li>법인 리스트 전수 확보 가능 (금감원 등록 기준 공개 데이터)</li>
+    <li>법인별 보조금 정산 건수, 감사보수, 인력 규모 추정 가능</li>
+    <li>Ideal Customer Profile (ICP): CPA 5~50명, 연 보조금 정산 10건 이상, 반려 경험 有</li>
+  </ul>
+</div>
+
+
+<!-- ================================================================ -->
+<h2>5. 비즈니스 모델</h2>
+
+<h3>5.1 가격 구조</h3>
+<table>
+  <tr><th>플랜</th><th>기본료</th><th>포함 건수</th><th>추가 건당</th><th>주요 기능</th></tr>
+  <tr>
+    <td><strong>Trial</strong></td>
+    <td>0원 (1~2주)</td>
+    <td>3건</td>
+    <td>&mdash;</td>
+    <td>증빙검수 + PII마스킹 + 패키지생성</td>
+  </tr>
+  <tr>
+    <td><strong>Starter</strong><br><small style="color:#64748b;">소형 법인</small></td>
+    <td>월 29만원<br><small style="color:#64748b;">연 348만원 선불</small></td>
+    <td>연 10건</td>
+    <td>건당 25만원</td>
+    <td>+ 감사 체크리스트 + 부처 룰 기본셋</td>
+  </tr>
+  <tr style="background:rgba(79,70,229,0.03);">
+    <td><strong>Pro</strong> <span class="badge badge-blue">추천</span><br><small style="color:#64748b;">중견 법인</small></td>
+    <td>월 79만원<br><small style="color:#64748b;">연 948만원 선불</small></td>
+    <td>연 80건</td>
+    <td>건당 18만원</td>
+    <td>+ 법인 커스텀 룰 + 우선지원 + 리퍼럴</td>
+  </tr>
+  <tr>
+    <td><strong>Firm</strong><br><small style="color:#64748b;">대형/전사</small></td>
+    <td>별도 협의</td>
+    <td>무제한</td>
+    <td>고정 단가</td>
+    <td>+ 전담 매니저 + 커스텀 연동 + SLA 99.5%</td>
+  </tr>
+</table>
+<p style="font-size:12px; color:#64748b;">* 모든 유료 플랜은 연 선불 구조. 월 단위 계약 대비 약 15~20% 절감. 파일럿 참여 법인은 확정 가격 12개월 고정.</p>
+
+<h3>5.2 건당 원가 구조</h3>
+<table>
+  <tr><th>항목</th><th>내역</th><th class="num-right">비용</th></tr>
+  <tr><td>정산서 구성</td><td>Claude Sonnet 1회 (~3K/2K tokens)</td><td class="num-right">~$0.04</td></tr>
+  <tr><td>증빙목록 매핑</td><td>Claude Sonnet 1회 (~2K/1K tokens)</td><td class="num-right">~$0.02</td></tr>
+  <tr><td>성과보고 초안</td><td>Claude Sonnet 1~2회 (~4K/3K tokens)</td><td class="num-right">~$0.06</td></tr>
+  <tr><td>감사 체크리스트</td><td>Claude Opus 1회 (~3K/2K tokens, 품질 우선)</td><td class="num-right">~$0.35</td></tr>
+  <tr><td>PII 탐지 보조</td><td>Claude Haiku 0~1회 (~1K/0.5K tokens)</td><td class="num-right">~$0.001</td></tr>
+  <tr class="row-total"><td colspan="2" style="text-align:right;">건당 API 합계</td><td class="num-right">~$0.47 (~650원)</td></tr>
+  <tr><td colspan="2" style="text-align:right;">건당 인프라 (DB+Storage)</td><td class="num-right">~$0.05 (~70원)</td></tr>
+  <tr class="row-highlight"><td colspan="2" style="text-align:right; font-weight:700;">건당 총 원가</td><td class="num-right"><strong>~$0.52 (~720원)</strong></td></tr>
+</table>
+
+<div class="box box-success">
+  <h4>마진 분석</h4>
+  <ul>
+    <li><strong>Starter 건당 25만원</strong>: 원가 720원 &rarr; 마진 <strong>99.7%</strong></li>
+    <li><strong>Pro 건당 18만원</strong>: 원가 720원 &rarr; 마진 <strong>99.6%</strong></li>
+    <li><strong>복잡 증빙 (100+ 항목)</strong>: 토큰 3~5배 증가 &rarr; 건당 ~3,000~4,000원. 여전히 마진 <strong>98%+</strong></li>
+    <li>소프트웨어 한계비용 ~0에 수렴 &rarr; 규모 확장 시 마진 구조 강화</li>
+  </ul>
+</div>
+
+<h3>5.3 가격 설정 근거</h3>
+<table>
+  <tr><th>비교 대상</th><th>시장 가격</th><th>QETTA</th><th>절감률</th></tr>
+  <tr>
+    <td>정산 대행 (외주)</td>
+    <td>건당 50~100만원</td>
+    <td>건당 18~25만원</td>
+    <td><strong>64~82% 절감</strong></td>
+  </tr>
+  <tr>
+    <td>반려 재작업 비용</td>
+    <td>건당 184~345만원 (2.3회 기준)</td>
+    <td>건당 18~25만원으로 사전 차단</td>
+    <td><strong>86~93% 절감</strong></td>
+  </tr>
+  <tr>
+    <td>감사보수 대비</td>
+    <td>건당 1,520만원 (소형 평균)</td>
+    <td>건당 25만원 = 감사보수의 1.6%</td>
+    <td><strong>ROI 즉시 체감</strong></td>
+  </tr>
+  <tr>
+    <td>환수 1건 방지</td>
+    <td>최소 3,000만원 + 최대 5배 제재</td>
+    <td>Trial 3건 무료</td>
+    <td><strong>보험 효과</strong></td>
+  </tr>
+</table>
+
+<h3>5.4 리퍼럴 파트너 모델 (Pro 이상)</h3>
+<div class="flow-row">
+  <div class="flow-step" style="border-color:#4f46e5;">
+    <h4>회계법인이<br>고객사 소개</h4>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step" style="border-color:#7c3aed;">
+    <h4>QETTA가<br>직접 서비스</h4>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step" style="border-color:#10b981;">
+    <h4>정산 완료 기준<br>수수료 지급</h4>
+  </div>
+</div>
+<ul>
+  <li><strong>수수료</strong>: 고객사 결제 건당 금액의 15~20% (법인 규모별 협의)</li>
+  <li><strong>Clawback</strong>: 고객사 12개월 이내 해지 시 잔여 기간 일할 계산 환수</li>
+  <li><strong>독립성</strong>: 감사/세무 독립성 침해 없음 (보조 도구, 자문 아님)</li>
+  <li><strong>전략적 의미</strong>: 법인이 자사 고객에게 부가가치를 제공하는 채널 &rarr; 낮은 해지율 + 자발적 확산</li>
+</ul>
+
+
+<!-- ================================================================ -->
+<h2>6. GTM 전략 (Go-to-Market)</h2>
+
+<h3>6.1 세일즈 퍼널</h3>
+<table>
+  <tr><th>단계</th><th>활동</th><th>전환 목표</th><th>기간</th></tr>
+  <tr>
+    <td><span class="badge badge-blue">인지</span></td>
+    <td>ICP 법인 직접 컨택 (이메일/전화/소개)</td>
+    <td>미팅 수락 30%</td>
+    <td>1~2주</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-blue">관심</span></td>
+    <td>15분 데모 + Pain Point 진단</td>
+    <td>파일럿 신청 50%</td>
+    <td>1회 미팅</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-green">파일럿</span></td>
+    <td>실제 정산 데이터 3건 무료 검수</td>
+    <td>유료 전환 60%</td>
+    <td>1~2주</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-green">전환</span></td>
+    <td>ROI 리포트 제공 &rarr; 연간 계약 체결</td>
+    <td>Starter/Pro 선택</td>
+    <td>1주</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-yellow">확장</span></td>
+    <td>사용량 증가 + 업그레이드 + 리퍼럴</td>
+    <td>ARPA 30%+ 성장</td>
+    <td>지속</td>
+  </tr>
+</table>
+<p style="font-size:12px; color:#64748b;">* 전체 세일즈 사이클: ICP 컨택 &rarr; 계약 체결까지 평균 4~6주</p>
+
+<h3>6.2 채널 전략 (Phase별)</h3>
+<table>
+  <tr><th>Phase</th><th>기간</th><th>채널</th><th>목표</th></tr>
+  <tr>
+    <td><strong>Phase 1</strong><br>직접 영업</td>
+    <td>Y1 H1</td>
+    <td>대표 직접 컨택 + 업계 인맥</td>
+    <td>파일럿 5개 법인 확보</td>
+  </tr>
+  <tr>
+    <td><strong>Phase 2</strong><br>리퍼럴</td>
+    <td>Y1 H2~</td>
+    <td>Pro 법인의 고객사 소개 (수수료 15~20%)</td>
+    <td>리퍼럴 채널 매출 비중 30%</td>
+  </tr>
+  <tr>
+    <td><strong>Phase 3</strong><br>콘텐츠+이벤트</td>
+    <td>Y2~</td>
+    <td>회계법인 세미나, 정산 가이드 콘텐츠, 업계 미디어</td>
+    <td>인바운드 리드 월 5건</td>
+  </tr>
+</table>
+
+<h3>6.3 핵심 세일즈 메시지</h3>
+<div class="box box-highlight">
+  <table style="border:none; margin:0;">
+    <tr style="border:none;"><td style="border:none; width:120px; font-weight:700; color:#3730a3;">대상</td><td style="border:none; font-weight:700; color:#3730a3;">메시지</td></tr>
+    <tr style="border:none;"><td style="border:none;">대표이사/파트너</td><td style="border:none;">&ldquo;환수 1건 방지 = 3,000만원 이상 리스크 회피. 파일럿 3건 무료.&rdquo;</td></tr>
+    <tr style="border:none;"><td style="border:none;">정산 담당자</td><td style="border:none;">&ldquo;반려 루프 없이 한 번에 통과. 15분이면 첫 검수 완료.&rdquo;</td></tr>
+    <tr style="border:none;"><td style="border:none;">감사 담당자</td><td style="border:none;">&ldquo;점검 당일 체크리스트+로그 즉시 제출. 자료 정리 시간 제로.&rdquo;</td></tr>
+  </table>
+</div>
+
+
+<!-- ================================================================ -->
+<h2>7. 경쟁 환경</h2>
+
+<h3>7.1 경쟁 지도</h3>
+<table>
+  <tr><th style="width:100px;">구분</th><th>플레이어</th><th>영역</th><th>QETTA 대비</th></tr>
+  <tr>
+    <td><span class="badge badge-red">직접 경쟁</span></td>
+    <td><strong>없음 (0개)</strong></td>
+    <td>정산 검수 특화 SaaS</td>
+    <td>국내 시장 공백. 진입 장벽 = 부처별 정산 규칙 DB + PII 처리.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-yellow">간접 경쟁</span></td>
+    <td>정산 대행 업체</td>
+    <td>회계법인/수행기관 외주</td>
+    <td>건당 50~100만 vs QETTA 18~25만. 비용 1/3 수준.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-yellow">간접 경쟁</span></td>
+    <td>내부 수작업</td>
+    <td>엑셀 + 담당자 경험</td>
+    <td>속인화 리스크. 반려 반복. QETTA로 구조화.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-blue">인접</span></td>
+    <td>e나라도움</td>
+    <td>보조금 신청/집행 등록</td>
+    <td>정산 검수 기능 없음. QETTA = e나라도움 앞단 QA.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-blue">인접</span></td>
+    <td>세금신고 SaaS (삼쩜삼 등)</td>
+    <td>개인/소기업 세무</td>
+    <td>보조금 정산과 무관. 카테고리 자체가 다름.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-blue">인접</span></td>
+    <td>ERP (SAP, 더존 등)</td>
+    <td>회계/자원관리</td>
+    <td>보조금 정산 특화 모듈 없음. 범용 도구.</td>
+  </tr>
+</table>
+
+<h3>7.2 방어 가능성 (Moat)</h3>
+<div class="box">
+  <ol>
+    <li><strong>부처별 정산 규칙 DB</strong>: 축적할수록 정확도 향상. 신규 진입자 동일 DB 구축에 6개월+.</li>
+    <li><strong>법인별 커스텀 룰</strong>: 법인이 자체 체크리스트를 입력할수록 전환 비용(switching cost) 상승.</li>
+    <li><strong>리퍼럴 네트워크</strong>: Pro 법인이 고객사를 소개할수록 네트워크 효과 발생. 자발적 확산 구조.</li>
+    <li><strong>감사 이력 아카이브</strong>: 사용 기간이 길어질수록 감사 대비 데이터 축적 &rarr; 이탈 비용 증가.</li>
+    <li><strong>PII 처리 신뢰</strong>: 개인정보 처리 실적 + 로그 투명성 = 회계법인 신뢰 자산. 후발 주자 대비 선점 우위.</li>
+  </ol>
+</div>
+
+
+<!-- ================================================================ -->
+<h2>8. 재무 계획 (3개년)</h2>
+
+<h3>8.1 매출 추정 &mdash; 기본 시나리오</h3>
+<table>
+  <tr><th>항목</th><th class="num-right">Year 1</th><th class="num-right">Year 2</th><th class="num-right">Year 3</th></tr>
+  <tr><td><strong>계약 법인 수</strong></td><td class="num-right">5개</td><td class="num-right">12개</td><td class="num-right">25개</td></tr>
+  <tr><td>&nbsp;&nbsp;Starter</td><td class="num-right">3</td><td class="num-right">5</td><td class="num-right">8</td></tr>
+  <tr><td>&nbsp;&nbsp;Pro</td><td class="num-right">2</td><td class="num-right">6</td><td class="num-right">13</td></tr>
+  <tr><td>&nbsp;&nbsp;Firm</td><td class="num-right">0</td><td class="num-right">1</td><td class="num-right">4</td></tr>
+  <tr><td colspan="4" style="padding:4px;"></td></tr>
+  <tr><td><strong>기본료 매출</strong></td><td class="num-right">2,940만</td><td class="num-right">9,828만</td><td class="num-right">24,708만</td></tr>
+  <tr><td>&nbsp;&nbsp;Starter (348만&times;N)</td><td class="num-right">1,044만</td><td class="num-right">1,740만</td><td class="num-right">2,784만</td></tr>
+  <tr><td>&nbsp;&nbsp;Pro (948만&times;N)</td><td class="num-right">1,896만</td><td class="num-right">5,688만</td><td class="num-right">12,324만</td></tr>
+  <tr><td>&nbsp;&nbsp;Firm (~2,400만&times;N)</td><td class="num-right">0</td><td class="num-right">2,400만</td><td class="num-right">9,600만</td></tr>
+  <tr><td colspan="4" style="padding:4px;"></td></tr>
+  <tr><td><strong>건당 추가 매출</strong></td><td class="num-right">500만</td><td class="num-right">3,200만</td><td class="num-right">8,300만</td></tr>
+  <tr class="row-highlight"><td><strong>총 매출</strong></td><td class="num-right"><strong>3,440만</strong></td><td class="num-right"><strong>13,028만</strong></td><td class="num-right"><strong>33,008만</strong></td></tr>
+  <tr><td colspan="4" style="padding:4px;"></td></tr>
+  <tr><td><strong>운영 비용 (인건비 제외)</strong></td><td class="num-right">300만</td><td class="num-right">700만</td><td class="num-right">1,300만</td></tr>
+  <tr><td>&nbsp;&nbsp;서버/인프라</td><td class="num-right">180만</td><td class="num-right">360만</td><td class="num-right">600만</td></tr>
+  <tr><td>&nbsp;&nbsp;Claude API</td><td class="num-right">50만</td><td class="num-right">200만</td><td class="num-right">500만</td></tr>
+  <tr><td>&nbsp;&nbsp;기타 SaaS (Sentry 등)</td><td class="num-right">70만</td><td class="num-right">140만</td><td class="num-right">200만</td></tr>
+  <tr><td colspan="4" style="padding:4px;"></td></tr>
+  <tr><td><strong>인건비</strong></td><td class="num-right">0 (대표 겸임)</td><td class="num-right">4,000만 (1명)</td><td class="num-right">12,000만 (3명)</td></tr>
+  <tr class="row-total"><td><strong>총 비용</strong></td><td class="num-right"><strong>300만</strong></td><td class="num-right"><strong>4,700만</strong></td><td class="num-right"><strong>13,300만</strong></td></tr>
+  <tr class="row-highlight"><td><strong>영업이익</strong></td><td class="num-right"><strong>3,140만</strong></td><td class="num-right"><strong>8,328만</strong></td><td class="num-right"><strong>19,708만</strong></td></tr>
+  <tr><td><strong>영업이익률</strong></td><td class="num-right">91.3%</td><td class="num-right">63.9%</td><td class="num-right">59.7%</td></tr>
+</table>
+<p style="font-size:11px; color:#64748b;">* Y1은 H2부터 매출 발생 (H1 파일럿 무료). 인건비는 대표 급여 제외 순수 채용 인력 기준.</p>
+
+<h3>8.2 시나리오 비교</h3>
+<table>
+  <tr><th>시나리오</th><th>Y1 법인</th><th class="num-right">Y1 매출</th><th>Y3 법인</th><th class="num-right">Y3 매출</th><th>전제</th></tr>
+  <tr>
+    <td><span class="badge badge-red">보수적</span></td>
+    <td>3개</td>
+    <td class="num-right">2,000만</td>
+    <td>15개</td>
+    <td class="num-right">2.0억</td>
+    <td>파일럿 전환 40%, 해지율 25%</td>
+  </tr>
+  <tr style="background:rgba(79,70,229,0.03);">
+    <td><span class="badge badge-blue">기본</span></td>
+    <td>5개</td>
+    <td class="num-right">3,440만</td>
+    <td>25개</td>
+    <td class="num-right">3.3억</td>
+    <td>파일럿 전환 60%, 해지율 15%</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-green">낙관적</span></td>
+    <td>8개</td>
+    <td class="num-right">5,500만</td>
+    <td>40개</td>
+    <td class="num-right">5.5억</td>
+    <td>파일럿 전환 75%, 리퍼럴 활성화</td>
+  </tr>
+</table>
+
+<h3>8.3 Unit Economics</h3>
+<table>
+  <tr><th>지표</th><th class="num-right">Year 1</th><th class="num-right">Year 2</th><th class="num-right">Year 3</th></tr>
+  <tr><td>ARPA (법인당 평균 매출)</td><td class="num-right">688만</td><td class="num-right">1,086만</td><td class="num-right">1,320만</td></tr>
+  <tr><td>CAC (고객획득비용)</td><td class="num-right">~50만</td><td class="num-right">~120만</td><td class="num-right">~150만</td></tr>
+  <tr><td>LTV (고객생애가치, 3년 기준)</td><td class="num-right">~2,000만</td><td class="num-right">~3,200만</td><td class="num-right">~4,000만</td></tr>
+  <tr class="row-highlight"><td><strong>LTV / CAC</strong></td><td class="num-right"><strong>40x</strong></td><td class="num-right"><strong>27x</strong></td><td class="num-right"><strong>27x</strong></td></tr>
+  <tr><td>월 해지율 (Churn)</td><td class="num-right">~1.5%</td><td class="num-right">~1.2%</td><td class="num-right">~1.0%</td></tr>
+  <tr><td>Net Revenue Retention</td><td class="num-right">110%</td><td class="num-right">120%</td><td class="num-right">125%</td></tr>
+</table>
+<p style="font-size:11px; color:#64748b;">* LTV/CAC &gt; 3x = 건강한 SaaS. 초기 직접 영업 → 낮은 CAC. Pro/Firm 업그레이드 → NRR &gt; 100%.</p>
+
+<h3>8.4 BEP (손익분기) 분석</h3>
+<div class="box box-success">
+  <ul>
+    <li><strong>인건비 제외 BEP</strong>: Y1 Q3 (유료 전환 1개 법인 시점). 운영비 300만 &lt; 기본료 최소 348만.</li>
+    <li><strong>인건비 포함 BEP</strong>: Y2 상반기 (누적 12개 법인 기본료 &gt; 인건비+운영비).</li>
+    <li><strong>핵심</strong>: 소프트웨어 한계비용 ~0 구조. 법인 1개 추가 = 거의 순수 마진.</li>
+  </ul>
+</div>
+
+
+<!-- ================================================================ -->
+<h2>9. 개발 로드맵</h2>
+
+<h3>9.1 MVP 개발 (12주)</h3>
+<table>
+  <tr><th style="width:100px;">Phase</th><th style="width:60px;">기간</th><th>산출물</th><th>검증 기준</th></tr>
+  <tr>
+    <td><strong>Phase 0</strong><br>기반</td>
+    <td>1~2주</td>
+    <td>DB 스키마 + 인덱스, firm 등록 API, PII 마스킹, 파일 업로드 파이프라인</td>
+    <td>법인 등록 &rarr; API key 발급, PII 마스킹 테스트 통과</td>
+  </tr>
+  <tr>
+    <td><strong>Phase 1</strong><br>QA 엔진</td>
+    <td>3~6주</td>
+    <td>증빙 업로드, QA 엔진 (3단계), 패키지 생성, 감사 추적</td>
+    <td>1건 End-to-End 파이프라인 동작</td>
+  </tr>
+  <tr>
+    <td><strong>Phase 2</strong><br>파일럿</td>
+    <td>7~12주</td>
+    <td>Web Portal (최소 UI), 부처별 규칙 3개, 과금/사용량 API</td>
+    <td>파일럿 법인 3건 실제 검수 완료</td>
+  </tr>
+</table>
+
+<h3>9.2 Post-MVP 로드맵</h3>
+<table>
+  <tr><th>분기</th><th>주요 마일스톤</th></tr>
+  <tr><td><strong>Y1 Q3</strong></td><td>파일럿 5개 법인 완료 &rarr; 유료 전환 시작. 가격 확정 (&#177;20% 조정).</td></tr>
+  <tr><td><strong>Y1 Q4</strong></td><td>Starter/Pro 10건 이상 정산 완료. 리퍼럴 파트너 1호 계약.</td></tr>
+  <tr><td><strong>Y2 H1</strong></td><td>부처 확장 (5개 부처). 법인 커스텀 룰 고도화. 개발 인력 1명 채용.</td></tr>
+  <tr><td><strong>Y2 H2</strong></td><td>법인 12개 돌파. Firm 플랜 1호 계약. NRR 120%+ 달성.</td></tr>
+  <tr><td><strong>Y3</strong></td><td>법인 25개. 리퍼럴 네트워크 자체 확산. CS 인력 채용. e나라도움 연동 탐색.</td></tr>
+</table>
+
+<h3>9.3 부처 확장 순서</h3>
+<table>
+  <tr><th>우선순위</th><th>부처</th><th>근거</th><th>시점</th></tr>
+  <tr><td>1</td><td><strong>중기부</strong></td><td>보조금 규모 최대. 중소기업 R&amp;D, 창업지원 등.</td><td>MVP (Phase 2)</td></tr>
+  <tr><td>2</td><td><strong>복지부</strong></td><td>사회서비스, 돌봄사업 등 대량 정산.</td><td>MVP (Phase 2)</td></tr>
+  <tr><td>3</td><td><strong>과기부</strong></td><td>R&amp;D 보조금. 증빙 복잡도 높음.</td><td>MVP (Phase 2)</td></tr>
+  <tr><td>4~5</td><td>산업부, 환경부</td><td>에너지/환경 보조금 확대 추세.</td><td>Y2 H1</td></tr>
+  <tr><td>6+</td><td>기타 부처</td><td>수요 기반 확장.</td><td>Y2 H2~</td></tr>
+</table>
+
+
+<!-- ================================================================ -->
+<h2>10. 팀 구성</h2>
+
+<table>
+  <tr><th style="width:100px;">역할</th><th>담당</th><th>주요 역량</th><th>시점</th></tr>
+  <tr>
+    <td><strong>대표/개발</strong></td>
+    <td>[대표자명]</td>
+    <td>풀스택 개발 + 제품 기획 + 세일즈</td>
+    <td>현재</td>
+  </tr>
+  <tr>
+    <td><strong>백엔드 개발</strong></td>
+    <td>채용 예정</td>
+    <td>Node.js/TypeScript, MongoDB, API 설계</td>
+    <td>Y2 H1</td>
+  </tr>
+  <tr>
+    <td><strong>CS/세일즈</strong></td>
+    <td>채용 예정</td>
+    <td>회계업계 경험, 법인 관계 관리, 온보딩</td>
+    <td>Y2 H2</td>
+  </tr>
+  <tr>
+    <td><strong>프론트엔드</strong></td>
+    <td>채용 예정</td>
+    <td>React, Web Portal 고도화</td>
+    <td>Y3</td>
+  </tr>
+</table>
+
+<div class="box">
+  <h4>도메인 자문 네트워크 (비상근)</h4>
+  <ul>
+    <li><strong>회계법인 파트너</strong>: 파일럿 법인 내 정산 실무 담당자 &rarr; 제품 피드백 + 규칙 검증</li>
+    <li><strong>법무</strong>: 약관/개인정보처리방침 검토 (외부 법무법인)</li>
+    <li><strong>보안</strong>: PII 처리/PIPA 준수 감사 (연 1회 외부 점검)</li>
+  </ul>
+</div>
+
+
+<!-- ================================================================ -->
+<h2>11. 자금 운용 계획</h2>
+
+<h3>11.1 초기 투자 필요 자금</h3>
+<table>
+  <tr><th>항목</th><th>내역</th><th class="num-right">금액</th></tr>
+  <tr><td>서버/인프라 (12개월)</td><td>DigitalOcean Droplet + MongoDB Atlas + 도메인</td><td class="num-right">180만</td></tr>
+  <tr><td>SaaS 도구 (12개월)</td><td>Sentry, UptimeRobot, 이메일, 기타</td><td class="num-right">70만</td></tr>
+  <tr><td>법무 비용</td><td>약관/개인정보처리방침 법무 검토</td><td class="num-right">200만</td></tr>
+  <tr><td>마케팅/세일즈</td><td>랜딩페이지, 세일즈 자료, 미팅 비용</td><td class="num-right">50만</td></tr>
+  <tr class="row-total"><td colspan="2"><strong>Y1 초기 필요 자금</strong></td><td class="num-right"><strong>500만</strong></td></tr>
+</table>
+
+<div class="box box-success">
+  <h4>자금 조달 전략: 부트스트랩 우선</h4>
+  <ul>
+    <li><strong>Y1</strong>: 자체 자금 500만 + Y1 H2 매출로 운영. 외부 투자 불필요.</li>
+    <li><strong>Y2</strong>: 매출 기반 채용 (영업이익 &gt; 인건비). 필요 시 정책자금(중기부 창업지원) 활용.</li>
+    <li><strong>Y3</strong>: 법인 25개 확보 후 Series A 검토 가능 (ARR 3.3억, NRR 125%).</li>
+    <li><strong>핵심</strong>: 건당 마진 99%+ 구조 &rarr; 매출 = 거의 순이익 &rarr; 빠른 자체 현금 확보.</li>
+  </ul>
+</div>
+
+<h3>11.2 자금 사용 계획 (Y1)</h3>
+<div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="kpi-card">
+    <div class="kpi-value primary" style="font-size:18px;">36%</div>
+    <div class="kpi-label">서버/인프라</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="font-size:18px;">40%</div>
+    <div class="kpi-label">법무/컴플라이언스</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="font-size:18px;">14%</div>
+    <div class="kpi-label">SaaS 도구</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="font-size:18px;">10%</div>
+    <div class="kpi-label">마케팅/세일즈</div>
+  </div>
+</div>
+
+
+<!-- ================================================================ -->
+<h2>12. 리스크 &amp; 완화</h2>
+
+<table>
+  <tr><th style="width:40px;">#</th><th>리스크</th><th>확률</th><th>영향</th><th>완화 전략</th></tr>
+  <tr>
+    <td>R1</td>
+    <td><strong>파일럿 전환율 저조</strong><br>법인이 무료 체험 후 유료 전환하지 않음</td>
+    <td><span class="badge badge-yellow">중</span></td>
+    <td><span class="badge badge-red">높음</span></td>
+    <td>
+      &bull; ROI 리포트 자동 생성 (반려 방지 건수 &times; 비용 산출)<br>
+      &bull; 12개월 가격 고정 인센티브<br>
+      &bull; 파일럿 중 밀착 지원 (대표 직접)
+    </td>
+  </tr>
+  <tr>
+    <td>R2</td>
+    <td><strong>PII 마스킹 누수</strong><br>개인정보 미탐지 &rarr; PIPA 위반</td>
+    <td><span class="badge badge-yellow">중</span></td>
+    <td><span class="badge badge-red">높음</span></td>
+    <td>
+      &bull; 정규식 + 패턴 이중 탐지<br>
+      &bull; 마스킹 실패 시 전송 차단 (fail-safe)<br>
+      &bull; PII 마스킹 실패 = PagerDuty P0 즉시 알림
+    </td>
+  </tr>
+  <tr>
+    <td>R3</td>
+    <td><strong>부처 서식 변경</strong><br>정산 규칙/서식이 예고 없이 변경</td>
+    <td><span class="badge badge-green">높음</span></td>
+    <td><span class="badge badge-yellow">중</span></td>
+    <td>
+      &bull; 규칙 DB 분리 (코드와 독립적 업데이트)<br>
+      &bull; 서식 변경 모니터링 + 법인 피드백 채널<br>
+      &bull; 변경 감지 시 24시간 내 규칙 업데이트
+    </td>
+  </tr>
+  <tr>
+    <td>R4</td>
+    <td><strong>Claude API 의존</strong><br>API 장애/가격 인상/서비스 중단</td>
+    <td><span class="badge badge-green">낮음</span></td>
+    <td><span class="badge badge-yellow">중</span></td>
+    <td>
+      &bull; 핵심 검수는 규칙 엔진 (Claude 불필요)<br>
+      &bull; Claude 장애 시 초안 생성만 대기 (검수 자체는 정상)<br>
+      &bull; 대체 LLM (GPT-4, Gemini) 프롬프트 사전 준비
+    </td>
+  </tr>
+  <tr>
+    <td>R5</td>
+    <td><strong>경쟁사 진입</strong><br>대형 회계 SaaS 또는 e나라도움 자체 기능 추가</td>
+    <td><span class="badge badge-green">낮음</span></td>
+    <td><span class="badge badge-yellow">중</span></td>
+    <td>
+      &bull; 선점 + 법인별 커스텀 룰 축적 = 전환 비용<br>
+      &bull; e나라도움 자체 기능 추가는 정부 프로세스상 2~3년 이상 소요<br>
+      &bull; 리퍼럴 네트워크 효과로 자발적 확산 구조 구축
+    </td>
+  </tr>
+  <tr>
+    <td>R6</td>
+    <td><strong>법인 보안 요구사항</strong><br>온프레미스 설치/추가 인증 요구</td>
+    <td><span class="badge badge-yellow">중</span></td>
+    <td><span class="badge badge-yellow">중</span></td>
+    <td>
+      &bull; Firm 플랜에서 커스텀 연동/SLA 99.5% 제공<br>
+      &bull; PII 처리 로그 실시간 제공으로 투명성 확보<br>
+      &bull; 보안 감사 보고서 연 1회 제공 (Firm)
+    </td>
+  </tr>
+</table>
+
+<div class="box box-warn">
+  <h4>Kill Criteria (사업 중단 기준)</h4>
+  <ul>
+    <li>파일럿 10개 법인 진행 후 유료 전환 2개 미만 (&lt;20%) &rarr; 제품-시장 적합성 재검토</li>
+    <li>Y1 종료 시점 월 매출 200만원 미만 &rarr; 피봇 또는 중단 결정</li>
+    <li>PII 사고 발생 시 &rarr; 즉시 서비스 중단 &rarr; 원인 해소 후 재개</li>
+  </ul>
+</div>
+
+
+<!-- ================================================================ -->
+<div style="margin-top:40px; background:linear-gradient(135deg, #eef2ff, #f5f3ff); border:1px solid #c7d2fe; border-radius:12px; padding:28px 32px;">
+  <h3 style="font-size:18px; font-weight:800; color:#3730a3; margin:0 0 12px;">핵심 투자 포인트 요약</h3>
+  <table style="border:none; margin:0;">
+    <tr style="border:none;">
+      <td style="border:none; padding:6px 12px 6px 0; font-weight:700; color:#3730a3; width:40px;">1.</td>
+      <td style="border:none; padding:6px 0;"><strong>시장 공백</strong>: 정산 특화 SaaS 국내 0개. 225,710 보조사업, 254 회계법인 대상 블루오션.</td>
+    </tr>
+    <tr style="border:none;">
+      <td style="border:none; padding:6px 12px 6px 0; font-weight:700; color:#3730a3;">2.</td>
+      <td style="border:none; padding:6px 0;"><strong>규제 순풍</strong>: 공공재정환수법 5배 제재 + 부정수급 적발 역대 최대 &rarr; 수요 급증 타이밍.</td>
+    </tr>
+    <tr style="border:none;">
+      <td style="border:none; padding:6px 12px 6px 0; font-weight:700; color:#3730a3;">3.</td>
+      <td style="border:none; padding:6px 0;"><strong>극한 마진</strong>: 건당 원가 720원 / 매출 18~25만원 &rarr; 마진 99.6%+. 소프트웨어 한계비용 ~0.</td>
+    </tr>
+    <tr style="border:none;">
+      <td style="border:none; padding:6px 12px 6px 0; font-weight:700; color:#3730a3;">4.</td>
+      <td style="border:none; padding:6px 0;"><strong>자체 확산</strong>: 리퍼럴 파트너 모델. 법인이 고객에게 소개 &rarr; 네트워크 효과 &rarr; 낮은 CAC.</td>
+    </tr>
+    <tr style="border:none;">
+      <td style="border:none; padding:6px 12px 6px 0; font-weight:700; color:#3730a3;">5.</td>
+      <td style="border:none; padding:6px 0;"><strong>부트스트랩 가능</strong>: Y1 필요 자금 500만원. 매출 = 거의 순이익 구조 &rarr; 외부 의존도 최소.</td>
+    </tr>
+  </table>
+</div>
+
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  &copy; 2026 QETTA &middot; partner@qetta.kr &middot; 본 문서는 내부 사업계획 목적이며, 수치는 추정치입니다.
+</div>
+
+</body>
+</html>

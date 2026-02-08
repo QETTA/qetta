@@ -1,0 +1,110 @@
+name: E2E (ClamAV + Puppeteer)
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ main ]
+
+jobs:
+  e2e:
+    name: E2E (ClamAV + Puppeteer)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Restore Puppeteer chromium cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache
+            node_modules/puppeteer/.local-chromium
+          key: puppeteer-chromium-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            puppeteer-chromium-${{ runner.os }}-
+
+      - name: Install system deps (Puppeteer + ClamAV)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates fonts-liberation fonts-noto-color-emoji libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libgbm1 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libxss1 libasound2 wget unzip
+          sudo apt-get install -y clamav clamav-daemon || true
+        continue-on-error: true
+
+      - name: Update ClamAV DB (best-effort)
+        run: |
+          for i in 1 2 3; do sudo freshclam && break || sleep 5; done
+        continue-on-error: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run E2E tests (with retries)
+        env:
+          CLAMAV_SCAN_ENABLED: 'true'
+          CLAMAV_COMMAND: 'clamscan'
+          CI: 'true'
+          MAX_RETRIES: '3'
+          SLEEP_SECONDS: '8'
+          CI_PUPPETEER_ARGS: '--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-gpu --single-process'
+          ARTIFACT_DIR: 'artifacts'
+        run: |
+          chmod +x ./scripts/run-e2e-retry.sh
+          ./scripts/run-e2e-retry.sh || true
+        # keep this best-effort for now; change to fail CI after stabilization
+        continue-on-error: true
+
+      - name: Collect diagnostic info (always)
+        if: ${{ always() }}
+        run: |
+          mkdir -p artifacts
+          echo "Collecting system diagnostics into artifacts/system_info.txt"
+          echo "Node: $(node -v)" > artifacts/system_info.txt || true
+          echo "npm: $(npm -v)" >> artifacts/system_info.txt || true
+          which clamscan 2>/dev/null || true >> artifacts/system_info.txt || true
+          clamscan --version 2>/dev/null >> artifacts/system_info.txt || true
+          node -e "try{console.log('puppeteer:'+require('puppeteer/package.json').version)}catch(e){console.log('puppeteer: missing')}" >> artifacts/system_info.txt || true
+          ls -la node_modules/puppeteer/.local-chromium >> artifacts/system_info.txt || true
+          env | grep -E 'CLAMAV|CI_PUPPETEER|MAX_RETRIES|SLEEP' >> artifacts/system_info.txt || true
+          if [ -f /var/log/clamav/freshclam.log ]; then cp /var/log/clamav/freshclam.log artifacts/ || true; fi
+          journalctl -n 200 --no-pager > artifacts/journalctl.txt 2>/dev/null || true
+
+      - name: Upload E2E artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: artifacts
+          if-no-files-found: warn
+
+      - name: Comment E2E artifacts on PR
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const runId = process.env.GITHUB_RUN_ID;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const arts = await github.rest.actions.listWorkflowRunArtifacts({ owner, repo, run_id: runId });
+            const art = arts.data.artifacts.find((a) => a.name === 'e2e-artifacts');
+            if (!art) {
+              core.info('No e2e-artifacts found for this run');
+              return;
+            }
+
+            const downloadUrl = art.archive_download_url;
+            const prNumber = context.payload.pull_request?.number;
+            if (!prNumber) {
+              core.info('No pull_request number in payload; skipping comment');
+              return;
+            }
+
+            const body = `E2E artifacts for workflow run [#${runId}](${process.env.GITHUB_SERVER_URL}/${owner}/${repo}/actions/runs/${runId}) are available: [download zip](${downloadUrl})`;
+            await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
