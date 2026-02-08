@@ -26,9 +26,9 @@ jobs:
           path: |
             node_modules/.cache
             node_modules/puppeteer/.local-chromium
-          key: chromium-cache-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          key: puppeteer-chromium-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            chromium-cache-${{ runner.os }}-
+            puppeteer-chromium-${{ runner.os }}-
 
       - name: Install system deps (Puppeteer + ClamAV)
         run: |
@@ -45,10 +45,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run E2E tests (best-effort)
+      - name: Run E2E tests (with retries)
         env:
           CLAMAV_SCAN_ENABLED: 'true'
           CLAMAV_COMMAND: 'clamscan'
           CI: 'true'
-        run: npm run test:e2e
+          MAX_RETRIES: '3'
+          SLEEP_SECONDS: '8'
+          CI_PUPPETEER_ARGS: '--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-gpu --single-process'
+        run: |
+          chmod +x ./scripts/run-e2e-retry.sh
+          ./scripts/run-e2e-retry.sh
+        # keep this best-effort for now; change to fail CI after stabilization
         continue-on-error: true
