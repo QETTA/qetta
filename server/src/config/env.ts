@@ -26,6 +26,13 @@ const envSchema = z.object({
   MAX_EVIDENCE_SIZE_MB: z.coerce.number().default(50),
   PII_AUTO_DELETE_DAYS: z.coerce.number().default(90),
 
+  // ClamAV / Virus scan
+  CLAMAV_SCAN_ENABLED: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('false'),
+  CLAMAV_COMMAND: z.string().default('clamscan'),
+
   // CORS
   CORS_ORIGIN: z.string().default('*'),
 

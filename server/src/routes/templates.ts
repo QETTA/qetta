@@ -8,6 +8,7 @@ import { importTemplateDto, renderTemplateDto } from '../dto/template.dto.js';
 export const templatesRouter = Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
+import { logger } from '../config/logger.js';
 
 // POST /api/qetta/v1/templates/import
 templatesRouter.post('/import', upload.single('file'), async (req: Request, res: Response) => {
@@ -17,6 +18,25 @@ templatesRouter.post('/import', upload.single('file'), async (req: Request, res:
 
   const firmId = req.firmAccount!.firm_id;
   const body = importTemplateDto.parse(req.body);
+
+  // Virus scan
+  try {
+    const { scanBuffer } = await import('../services/virusScanService.js');
+    const scan = await scanBuffer(file.buffer);
+    if (!scan.clean) {
+      await auditService.logAction({
+        project_id: body.project_id ?? '',
+        firm_id: firmId,
+        actor_id: firmId,
+        action: 'template.quarantined',
+        detail: { filename: file.originalname, reason: scan.reason },
+      });
+      return res.status(400).json({ error: 'File quarantined: virus detected' });
+    }
+  } catch (err) {
+    // If scanning fails, log and continue
+    logger.warn({ err }, 'Template virus scanning failed; proceeding with import');
+  }
 
   const result = await templateService.importTemplate(firmId, file, body.name, body.description);
 
