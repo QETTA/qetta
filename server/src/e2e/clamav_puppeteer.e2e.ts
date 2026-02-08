@@ -20,6 +20,8 @@ async function hasCommand(cmd: string) {
   }
 }
 
+// legacy helper (kept for quick generation when needed) - silenced for lint
+/* eslint-disable @typescript-eslint/no-unused-vars */
 function makeMinimalDocxBuffer(placeholderName = 'company_name') {
   const zip = new PizZip();
   const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">\n  <w:body>\n    <w:p><w:r><w:t>{{${placeholderName}}}</w:t></w:r></w:p>\n  </w:body>\n</w:document>`;
@@ -32,6 +34,7 @@ function makeMinimalDocxBuffer(placeholderName = 'company_name') {
 
   return zip.generate({ type: 'nodebuffer' });
 }
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 describe('E2E - ClamAV + Puppeteer (best-effort)', () => {
   it('detects EICAR as infected when clamscan available', async () => {
@@ -55,11 +58,21 @@ describe('E2E - ClamAV + Puppeteer (best-effort)', () => {
     const tplDir = path.join(process.cwd(), 'storage', 'templates', tplId);
     await fs.mkdir(tplDir, { recursive: true });
 
-    const docxPath = path.join(tplDir, 'v1_simple.docx');
+    const fixtureDir = path.join(process.cwd(), 'server', 'test', 'fixtures');
+    await fs.mkdir(fixtureDir, { recursive: true });
 
-    // write a minimal docx with a placeholder
-    const buf = makeMinimalDocxBuffer('company_name');
-    await fs.writeFile(docxPath, buf);
+    const fixturePath = path.join(fixtureDir, 'simple.docx');
+    // create fixture if missing
+    try {
+      await fs.stat(fixturePath);
+    } catch {
+      const { createSimpleDocx } = await import('../../src/test/utils/createDocxFixture.js');
+      await createSimpleDocx(fixturePath, 'company_name');
+    }
+
+    const docxPath = path.join(tplDir, 'v1_simple.docx');
+    // copy fixture into template storage path
+    await fs.copyFile(fixturePath, docxPath);
 
     try {
       const out = await renderTemplate('firm-e2e', tplId, { company_name: 'ACME E2E' }, 'pdf');
