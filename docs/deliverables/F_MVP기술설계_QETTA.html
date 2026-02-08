@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QETTA MVP 기술설계서 | 보조금 정산 자동 검수</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+@page { size: A4; margin: 24px; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  color: #1e293b; background: #fff;
+  line-height: 1.7; -webkit-font-smoothing: antialiased;
+  max-width: 900px; margin: 0 auto; padding: 40px 36px;
+  font-size: 14px;
+}
+code, pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+  border-radius: 10px; overflow-x: auto; margin: 12px 0;
+  line-height: 1.6;
+}
+pre .comment { color: #64748b; }
+pre .keyword { color: #818cf8; }
+pre .string { color: #34d399; }
+pre .type { color: #fbbf24; }
+
+.header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 3px solid #0f172a; }
+.logo { font-size: 26px; font-weight: 900; letter-spacing: -0.03em; }
+.logo span { background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.meta { text-align: right; font-size: 12px; color: #64748b; }
+.meta strong { color: #0f172a; display: block; font-size: 14px; }
+
+h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+h2 {
+  font-size: 17px; font-weight: 700; margin: 36px 0 14px;
+  padding: 8px 16px; background: #0f172a; color: #fff;
+  border-radius: 8px; letter-spacing: -0.01em;
+}
+h3 { font-size: 15px; font-weight: 700; margin: 20px 0 8px; color: #334155; }
+h4 { font-size: 13px; font-weight: 700; margin: 14px 0 6px; color: #475569; }
+
+p { margin-bottom: 8px; }
+ul, ol { padding-left: 22px; margin-bottom: 8px; }
+li { margin-bottom: 4px; font-size: 13px; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+table th, table td { padding: 8px 10px; border: 1px solid #e2e8f0; text-align: left; }
+table th { background: #f1f5f9; font-weight: 600; color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+
+.badge { display: inline-flex; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; }
+.badge-p0 { background: #fef2f2; color: #991b1b; }
+.badge-p1 { background: #fffbeb; color: #92400e; }
+.badge-p2 { background: #ecfdf5; color: #065f46; }
+.badge-new { background: #eef2ff; color: #3730a3; }
+.badge-ext { background: #f0fdf4; color: #166534; }
+
+.box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin: 14px 0; }
+.box-warn { background: #fef2f2; border-color: #fecaca; }
+.box-info { background: #eff6ff; border-color: #bfdbfe; }
+.box h4 { margin-top: 0; }
+
+.arch-diagram {
+  background: #0f172a; color: #e2e8f0; padding: 20px; border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5;
+  white-space: pre; overflow-x: auto; margin: 16px 0;
+}
+
+.flow-row { display: flex; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+.flow-step {
+  flex: 1; min-width: 140px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 14px 16px; text-align: center; position: relative;
+}
+.flow-step h4 { margin: 0 0 4px; font-size: 12px; }
+.flow-step p { font-size: 11px; color: #64748b; margin: 0; }
+.flow-arrow { align-self: center; color: #94a3b8; font-size: 18px; flex: 0; min-width: auto; background: none; border: none; padding: 0; }
+
+.footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><span>QETTA</span> MVP 기술설계서</div>
+  <div class="meta">
+    <strong>F. Technical Architecture (MVP)</strong>
+    v1.0 | 2026.02 | Confidential
+  </div>
+</div>
+
+<h1>보조금 정산 자동 검수 &mdash; MVP 기술 아키텍처</h1>
+<p style="color:#64748b; font-size:13px;">기존 kidsmap-mobile/server 코드베이스 확장 기반 &middot; Phase 0~2 (12주) &middot; 회계법인 파일럿 3건 검증 목표</p>
+
+<!-- ======================================= -->
+<h2>1. 기존 코드베이스 현황 (확장 기반)</h2>
+
+<h3>1.1 아키텍처 스택</h3>
+<table>
+  <tr><th>레이어</th><th>기술</th><th>위치</th></tr>
+  <tr><td>런타임</td><td>Node.js + Express + TypeScript (ESM)</td><td>server/src/</td></tr>
+  <tr><td>DB</td><td>MongoDB Atlas 7.0 (mongodb 드라이버)</td><td>config/mongodb.ts</td></tr>
+  <tr><td>AI</td><td>Claude API (@anthropic-ai/sdk)</td><td>services/botService.ts</td></tr>
+  <tr><td>인증</td><td>deviceAuth (x-device-id) + partnerAuth (API key SHA-256)</td><td>middleware/</td></tr>
+  <tr><td>배포</td><td>DigitalOcean Droplet + Docker + GHCR</td><td>infra/</td></tr>
+  <tr><td>검증</td><td>Zod (env, DTO), TSC --noEmit</td><td>config/env.ts, dto/</td></tr>
+</table>
+
+<h3>1.2 재사용 가능한 기존 모듈</h3>
+<table>
+  <tr><th>모듈</th><th>현재 용도</th><th>정산 QA 재사용 방법</th></tr>
+  <tr>
+    <td><code>botService.ts</code></td>
+    <td>Claude API 호출 (대화형 봇)</td>
+    <td><span class="badge badge-ext">확장</span> 정산서/성과보고 초안 생성 프롬프트 추가</td>
+  </tr>
+  <tr>
+    <td><code>partnerService.ts</code></td>
+    <td>파트너 기관/카페 관리, API key 발급</td>
+    <td><span class="badge badge-ext">확장</span> 회계법인 계정 = Partner Org, API key로 접근</td>
+  </tr>
+  <tr>
+    <td><code>referralService.ts</code></td>
+    <td>리퍼럴 이벤트 추적, 정산 계산</td>
+    <td><span class="badge badge-ext">확장</span> 건당 과금 정산 + clawback 로직</td>
+  </tr>
+  <tr>
+    <td><code>partnerAuth.ts</code></td>
+    <td>API key SHA-256 인증 미들웨어</td>
+    <td><span class="badge badge-ext">재사용</span> 회계법인 멀티테넌트 접근 제어</td>
+  </tr>
+  <tr>
+    <td><code>admissionEngineV1.ts</code></td>
+    <td>베이지안 입소 점수 계산</td>
+    <td><span class="badge badge-ext">패턴</span> 규칙 엔진 구조 참고 (증빙 검수 룰)</td>
+  </tr>
+  <tr>
+    <td><code>userMemoryService.ts</code></td>
+    <td>사용자별 기억 저장/검색</td>
+    <td><span class="badge badge-ext">패턴</span> 법인별 커스텀 룰 저장 구조 참고</td>
+  </tr>
+</table>
+
+<h3>1.3 기존 MongoDB 컬렉션 (26개)</h3>
+<p style="font-size:12px; color:#64748b;">places, refinedInsights, peerActivities, dataBlocks, conversations, users, children, user_memories, user_subscriptions, group_buys, partner_orgs, partner_cafes, partner_api_keys, partner_widgets, referral_links, referral_events, referral_attributions, payout_ledgers, admission_scores, admission_scores_v1, admission_blocks, to_subscriptions, to_alerts, to_detections, waitlist_snapshots, external_posts</p>
+
+<!-- ======================================= -->
+<h2>2. MVP 신규 모듈 설계</h2>
+
+<h3>2.1 시스템 아키텍처 다이어그램</h3>
+<div class="arch-diagram">
+ <span class="comment">┌─────────────────────────────────────────────────────────────────────┐</span>
+ <span class="comment">│                        회계법인 사용자 (Web Portal)                     │</span>
+ <span class="comment">└──────────────────────────┬──────────────────────────────────────────┘</span>
+                           │ HTTPS + API Key (partnerAuth)
+ <span class="comment">┌──────────────────────────▼──────────────────────────────────────────┐</span>
+ <span class="comment">│</span>  <span class="keyword">Express Server</span> (기존 server/src/)                                  <span class="comment">│</span>
+ <span class="comment">│</span>                                                                     <span class="comment">│</span>
+ <span class="comment">│</span>  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐              <span class="comment">│</span>
+ <span class="comment">│</span>  │ <span class="type">NEW</span> Routes   │  │ <span class="type">NEW</span> Services │  │ <span class="type">EXT</span> Services  │              <span class="comment">│</span>
+ <span class="comment">│</span>  │              │  │              │  │                │              <span class="comment">│</span>
+ <span class="comment">│</span>  │ /settlement  │→ │ qaEngine     │  │ botService     │              <span class="comment">│</span>
+ <span class="comment">│</span>  │ /evidence    │→ │ piiMasker    │  │ partnerService │              <span class="comment">│</span>
+ <span class="comment">│</span>  │ /audit       │→ │ docGenerator │  │ referralService│              <span class="comment">│</span>
+ <span class="comment">│</span>  │ /firm        │→ │ ruleManager  │  │                │              <span class="comment">│</span>
+ <span class="comment">│</span>  └─────────────┘  │ auditTrail   │  └────────────────┘              <span class="comment">│</span>
+ <span class="comment">│</span>                    └──────┬───────┘                                  <span class="comment">│</span>
+ <span class="comment">└───────────────────────────┼──────────────────────────────────────────┘</span>
+                            │
+              ┌─────────────┼─────────────┐
+              ▼             ▼             ▼
+    <span class="string">MongoDB Atlas</span>    <span class="string">Claude API</span>    <span class="string">File Storage</span>
+    (7 new collections) (마스킹 후)    (증빙 원본/암호화)
+</div>
+
+<h3>2.2 신규 서비스 모듈 (5개)</h3>
+
+<h4>S1. <code>settlementQaService.ts</code> <span class="badge badge-p0">P0-MVP</span></h4>
+<div class="box">
+  <p><strong>역할</strong>: 3단계 QA 엔진 (품질검수 → 노하우구조화 → 감사대비패키징)</p>
+  <ul>
+    <li><code>runQualityCheck(projectId)</code> &mdash; 증빙 누락/부적격/비목 불일치 자동 감지</li>
+    <li><code>applyRules(projectId, rulesetId)</code> &mdash; 부처별 + 법인 커스텀 룰 적용</li>
+    <li><code>generatePackage(projectId)</code> &mdash; 정산 완료 패키지 4종 생성 (담당자 승인 시 = 1건 과금 확정)</li>
+    <li><code>getQaReport(projectId)</code> &mdash; 검수 결과 리포트 (경고/통과 항목별)</li>
+  </ul>
+  <p><strong>패턴</strong>: admissionEngineV1.ts의 규칙 엔진 구조 + botService.ts의 Claude API 호출 조합</p>
+</div>
+
+<h4>S2. <code>piiMaskingService.ts</code> <span class="badge badge-p0">C-0 필수</span></h4>
+<div class="box box-warn">
+  <p><strong>역할</strong>: 모든 데이터 처리 전 PII 자동 탐지 & 마스킹 (구매 차단 요인 해소)</p>
+  <ul>
+    <li><code>detectPii(text)</code> &mdash; 정규식 + 패턴 매칭 (주민번호, 계좌, 연락처, 이메일)</li>
+    <li><code>maskDocument(doc)</code> &mdash; 문서 전체 PII 마스킹 처리</li>
+    <li><code>storeOriginal(docId, encrypted)</code> &mdash; 원본 국내 암호화 분리 저장</li>
+    <li><code>getProcessingLog(projectId)</code> &mdash; PII 처리 이력 실시간 조회</li>
+  </ul>
+  <p><strong>PII 패턴 (한국)</strong>:</p>
+  <pre><span class="comment">// 주민번호: 6자리-7자리</span>
+<span class="keyword">const</span> RRN = <span class="string">/\d{6}[-\s]?[1-4]\d{6}/g</span>;
+<span class="comment">// 계좌번호: 은행별 패턴</span>
+<span class="keyword">const</span> BANK_ACCT = <span class="string">/\d{3,4}[-\s]?\d{2,6}[-\s]?\d{2,6}[-\s]?\d{0,3}/g</span>;
+<span class="comment">// 휴대폰: 010-XXXX-XXXX</span>
+<span class="keyword">const</span> PHONE = <span class="string">/01[016789][-\s]?\d{3,4}[-\s]?\d{4}/g</span>;</pre>
+  <p><strong>핵심 원칙</strong>: Claude API로 전송되는 데이터는 반드시 마스킹 후 전송. 원본은 국외 이전 불가.</p>
+</div>
+
+<h4>S3. <code>documentGeneratorService.ts</code> <span class="badge badge-p0">P0-MVP</span></h4>
+<div class="box">
+  <p><strong>역할</strong>: 정산 완료 패키지 4종 산출물 생성</p>
+  <ul>
+    <li><code>generateSettlementReport(projectId)</code> &mdash; 집행내역 기반 정산서 구성</li>
+    <li><code>generateEvidenceList(projectId)</code> &mdash; 증빙목록 자동 매핑</li>
+    <li><code>generatePerformanceDraft(projectId)</code> &mdash; 성과보고서 KPI 초안 (Claude API)</li>
+    <li><code>generateAuditChecklist(projectId)</code> &mdash; 감사 대비 체크리스트 + 근거 규정 링크</li>
+  </ul>
+  <p><strong>Claude API 활용</strong>: botService.ts의 <code>generateClaudeResponse()</code> 패턴 확장. 시스템 프롬프트에 부처별 정산 규정 주입.</p>
+</div>
+
+<h4>S4. <code>settlementRuleService.ts</code> <span class="badge badge-p1">P1</span></h4>
+<div class="box">
+  <p><strong>역할</strong>: 부처별 정산 규칙 관리 + 법인 커스텀 체크리스트</p>
+  <ul>
+    <li><code>getRuleset(ministryCode)</code> &mdash; 부처별 기본 규칙셋 조회</li>
+    <li><code>upsertFirmRule(firmId, rule)</code> &mdash; 법인 커스텀 룰 저장 (userMemoryService 패턴)</li>
+    <li><code>validateEvidence(evidence, ruleset)</code> &mdash; 증빙 vs 규칙 매칭 검증</li>
+  </ul>
+  <p><strong>MVP 범위</strong>: 주요 3개 부처 (중기부, 복지부, 과기부) 기본 규칙셋만. 보조금 규모 순 우선 지원. 이후 확장.</p>
+</div>
+
+<h4>S5. <code>auditTrailService.ts</code> <span class="badge badge-p0">P0-MVP</span></h4>
+<div class="box">
+  <p><strong>역할</strong>: 모든 작업의 감사 추적 로그 (규정 근거 + 타임스탬프)</p>
+  <ul>
+    <li><code>logAction(action)</code> &mdash; 생성/수정/검수/마스킹/승인 모든 액션 기록</li>
+    <li><code>getTrail(projectId)</code> &mdash; 프로젝트별 전체 이력 조회</li>
+    <li><code>exportTrail(projectId, format)</code> &mdash; 감사 대비 이력 내보내기 (PDF/Excel)</li>
+  </ul>
+</div>
+
+<!-- ======================================= -->
+<h2>3. 신규 MongoDB 컬렉션 (7개)</h2>
+
+<table>
+  <tr><th>컬렉션</th><th>용도</th><th>주요 인덱스</th><th>P</th></tr>
+  <tr>
+    <td><code>settlement_projects</code></td>
+    <td>정산 프로젝트 단위 (1 프로젝트 = N건)</td>
+    <td>firm_id+status, created_at</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+  <tr>
+    <td><code>settlement_packages</code></td>
+    <td>정산 완료 패키지 (과금 단위 = 1건)</td>
+    <td>project_id, firm_id+status, completed_at</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+  <tr>
+    <td><code>settlement_evidences</code></td>
+    <td>증빙 문서 메타데이터 + 검수 결과</td>
+    <td>package_id, type+status</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+  <tr>
+    <td><code>settlement_rules</code></td>
+    <td>부처별 + 법인별 정산 규칙</td>
+    <td>ministry_code, firm_id</td>
+    <td><span class="badge badge-p1">P1</span></td>
+  </tr>
+  <tr>
+    <td><code>settlement_audit_logs</code></td>
+    <td>모든 작업 감사 추적 로그</td>
+    <td>project_id+timestamp, actor_id</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+  <tr>
+    <td><code>firm_accounts</code></td>
+    <td>회계법인 계정 (partner_orgs 확장)</td>
+    <td>firm_id (unique), plan_type</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+  <tr>
+    <td><code>pii_processing_logs</code></td>
+    <td>PII 처리 이력 (PIPA 준수)</td>
+    <td>document_id, processed_at</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+</table>
+
+<!-- ======================================= -->
+<h2>4. 신규 API 엔드포인트</h2>
+
+<h3>4.1 라우트 구조</h3>
+<pre><span class="comment">// server/src/index.ts 에 추가</span>
+
+<span class="comment">// 정산 QA 서비스 라우트 (API key 인증)</span>
+app.use(<span class="string">'/api/qetta/v1/settlement'</span>, requirePartnerOrg, settlementRouter);
+app.use(<span class="string">'/api/qetta/v1/evidence'</span>,   requirePartnerOrg, evidenceRouter);
+app.use(<span class="string">'/api/qetta/v1/audit'</span>,      requirePartnerOrg, auditRouter);
+app.use(<span class="string">'/api/qetta/v1/firm'</span>,       requirePartnerOrg, firmRouter);
+app.use(<span class="string">'/api/qetta/v1/rules'</span>,      requirePartnerOrg, rulesRouter);</pre>
+
+<h3>4.2 엔드포인트 상세</h3>
+<table>
+  <tr><th>Method</th><th>Path</th><th>설명</th><th>P</th></tr>
+  <tr><td>POST</td><td>/api/qetta/v1/settlement/projects</td><td>정산 프로젝트 생성</td><td><span class="badge badge-p0">P0</span></td></tr>
+  <tr><td>GET</td><td>/api/qetta/v1/settlement/projects/:id</td><td>프로젝트 상세 조회</td><td><span class="badge badge-p0">P0</span></td></tr>
+  <tr><td>POST</td><td>/api/qetta/v1/settlement/projects/:id/run-qa</td><td>QA 엔진 실행 (3단계)</td><td><span class="badge badge-p0">P0</span></td></tr>
+  <tr><td>GET</td><td>/api/qetta/v1/settlement/projects/:id/report</td><td>검수 결과 리포트</td><td><span class="badge badge-p0">P0</span></td></tr>
+  <tr><td>POST</td><td>/api/qetta/v1/settlement/projects/:id/generate</td><td>패키지 4종 생성 (=1건)</td><td><span class="badge badge-p0">P0</span></td></tr>
+  <tr><td>POST</td><td>/api/qetta/v1/evidence/upload</td><td>증빙 문서 업로드 + PII 마스킹</td><td><span class="badge badge-p0">P0</span></td></tr>
+  <tr><td>GET</td><td>/api/qetta/v1/evidence/:id/status</td><td>증빙 검수 상태 조회</td><td><span class="badge badge-p0">P0</span></td></tr>
+  <tr><td>GET</td><td>/api/qetta/v1/audit/:projectId</td><td>감사 추적 로그 조회</td><td><span class="badge badge-p0">P0</span></td></tr>
+  <tr><td>GET</td><td>/api/qetta/v1/audit/:projectId/export</td><td>감사 로그 내보내기</td><td><span class="badge badge-p1">P1</span></td></tr>
+  <tr><td>POST</td><td>/api/qetta/v1/firm/register</td><td>회계법인 등록 (파일럿 신청)</td><td><span class="badge badge-p0">P0</span></td></tr>
+  <tr><td>GET</td><td>/api/qetta/v1/firm/:id/usage</td><td>사용량/과금 현황 조회</td><td><span class="badge badge-p1">P1</span></td></tr>
+  <tr><td>GET</td><td>/api/qetta/v1/rules/:ministry</td><td>부처별 기본 룰셋 조회</td><td><span class="badge badge-p1">P1</span></td></tr>
+  <tr><td>PUT</td><td>/api/qetta/v1/rules/firm/:firmId</td><td>법인 커스텀 룰 저장</td><td><span class="badge badge-p1">P1</span></td></tr>
+</table>
+
+<!-- ======================================= -->
+<h2>5. 데이터 흐름 (1건 생성 과정)</h2>
+
+<div class="flow-row">
+  <div class="flow-step" style="border-color:#4f46e5;">
+    <h4>1. 증빙 업로드</h4>
+    <p>회계법인이 집행내역 + 증빙 문서 업로드</p>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step" style="border-color:#ef4444;">
+    <h4>2. PII 마스킹</h4>
+    <p>주민번호/계좌/연락처 자동 탐지 & 마스킹. 원본 분리 저장.</p>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step" style="border-color:#f59e0b;">
+    <h4>3. 품질 검수</h4>
+    <p>부처별 규칙 매칭. 누락/부적격/비목 불일치 감지.</p>
+  </div>
+</div>
+<div class="flow-row">
+  <div class="flow-step" style="border-color:#10b981;">
+    <h4>4. 패키지 생성</h4>
+    <p>정산서 + 증빙목록 + 성과보고 초안 + 체크리스트. Claude API로 초안 생성.</p>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step" style="border-color:#8b5cf6;">
+    <h4>5. 전문가 승인</h4>
+    <p>담당 CPA가 검토/수정 후 <strong>승인</strong> 시 "완료" 처리. 이 시점에 1건 과금 확정.</p>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step" style="border-color:#0f172a;">
+    <h4>6. 감사 아카이브</h4>
+    <p>전체 이력 + 검토 로그 + 타임스탬프 아카이브.</p>
+  </div>
+</div>
+
+<!-- ======================================= -->
+<h2>5-1. 파일 업로드 미들웨어</h2>
+
+<div class="box box-warn">
+  <h4>기존 코드베이스에 파일 업로드 인프라 없음 &mdash; 신규 구축 필수</h4>
+  <p>증빙 업로드(POST /api/qetta/v1/evidence/upload)는 P0 필수. 아래 스택으로 구현.</p>
+</div>
+
+<table>
+  <tr><th>계층</th><th>도구</th><th>역할</th></tr>
+  <tr><td>미들웨어</td><td><code>multer</code> (memory storage)</td><td>multipart/form-data 파싱. 메모리 버퍼로 수신 후 PII 마스킹 먼저 실행.</td></tr>
+  <tr><td>검증 1</td><td><code>fileValidation.ts</code> <span class="badge badge-new">NEW</span></td><td>확장자 화이트리스트: pdf, xlsx, docx, hwp, csv, jpg, png. magic bytes 이중 검증.</td></tr>
+  <tr><td>검증 2</td><td>MAX_EVIDENCE_SIZE_MB env</td><td>파일 크기 제한 (default 50MB). multer limits 옵션.</td></tr>
+  <tr><td>스캔</td><td>ClamAV (clamdscan)</td><td>바이러스/악성코드 스캔. 격리 저장 후 스캔 통과 시 처리 진행.</td></tr>
+  <tr><td>저장</td><td>FILE_STORAGE_PATH (로컬 &rarr; S3 전환)</td><td>PII 마스킹 완료본: 일반 저장. 원본: AES-256 암호화 분리 저장.</td></tr>
+</table>
+
+<pre><span class="comment">// server/src/middleware/fileValidation.ts (NEW)</span>
+<span class="keyword">const</span> ALLOWED_EXTENSIONS = <span class="keyword">new</span> Set([<span class="string">'.pdf'</span>, <span class="string">'.xlsx'</span>, <span class="string">'.docx'</span>, <span class="string">'.hwp'</span>, <span class="string">'.csv'</span>, <span class="string">'.jpg'</span>, <span class="string">'.png'</span>]);
+<span class="keyword">const</span> MAGIC_BYTES: Record&lt;<span class="type">string</span>, <span class="type">Buffer</span>&gt; = {
+  <span class="string">'.pdf'</span>:  Buffer.from([0x25, 0x50, 0x44, 0x46]),         <span class="comment">// %PDF</span>
+  <span class="string">'.xlsx'</span>: Buffer.from([0x50, 0x4B, 0x03, 0x04]),         <span class="comment">// PK zip</span>
+  <span class="string">'.docx'</span>: Buffer.from([0x50, 0x4B, 0x03, 0x04]),         <span class="comment">// PK zip</span>
+  <span class="string">'.hwp'</span>:  Buffer.from([0xD0, 0xCF, 0x11, 0xE0]),         <span class="comment">// OLE2</span>
+};
+
+<span class="keyword">export function</span> <span class="type">validateFile</span>(file: Express.Multer.File): <span class="type">boolean</span> {
+  <span class="keyword">const</span> ext = path.extname(file.originalname).toLowerCase();
+  <span class="keyword">if</span> (!ALLOWED_EXTENSIONS.has(ext)) <span class="keyword">return false</span>;
+  <span class="keyword">const</span> magic = MAGIC_BYTES[ext];
+  <span class="keyword">if</span> (magic &amp;&amp; !file.buffer.subarray(0, magic.length).equals(magic)) <span class="keyword">return false</span>;
+  <span class="keyword">return true</span>;
+}</pre>
+
+<!-- ======================================= -->
+<h2>5-2. 건당 원가 구조 (Claude API)</h2>
+
+<table>
+  <tr><th>산출물</th><th>Claude 호출</th><th>예상 토큰 (input/output)</th><th>모델</th><th>예상 비용</th></tr>
+  <tr><td>정산서 자동 구성</td><td>1회</td><td>~3K / ~2K</td><td>Sonnet</td><td>~$0.04</td></tr>
+  <tr><td>증빙목록 매핑</td><td>1회</td><td>~2K / ~1K</td><td>Sonnet</td><td>~$0.02</td></tr>
+  <tr><td>성과보고 초안</td><td>1~2회</td><td>~4K / ~3K</td><td>Sonnet</td><td>~$0.06</td></tr>
+  <tr><td>감사 체크리스트</td><td>1회</td><td>~3K / ~2K</td><td>Opus (품질 우선)</td><td>~$0.35</td></tr>
+  <tr><td>PII 탐지 (보조)</td><td>0~1회</td><td>~1K / ~0.5K</td><td>Haiku</td><td>~$0.001</td></tr>
+  <tr><td colspan="4" style="text-align:right; font-weight:700;">건당 API 합계</td><td><strong>~$0.47 (~650원)</strong></td></tr>
+  <tr><td colspan="4" style="text-align:right; font-weight:700;">건당 인프라 (DB+Storage)</td><td><strong>~$0.05 (~70원)</strong></td></tr>
+  <tr><td colspan="4" style="text-align:right; font-weight:700; background:#ecfdf5;">건당 총 원가</td><td style="background:#ecfdf5;"><strong>~$0.52 (~720원)</strong></td></tr>
+</table>
+
+<div class="box box-info">
+  <h4>마진 분석</h4>
+  <ul>
+    <li><strong>Starter 건당 25만원</strong>: 원가 720원 &rarr; 마진 99.7% &rarr; 고정비(서버+인건비) 커버 후에도 충분</li>
+    <li><strong>Pro 건당 18만원</strong>: 원가 720원 &rarr; 마진 99.6%</li>
+    <li><strong>BEP 분석</strong>: 월 서버 비용 $50 + 인건비 제외 시, Starter 1건으로 API+인프라 비용 커버</li>
+    <li><strong>리스크</strong>: 복잡한 증빙(100+ 항목) 시 토큰 3~5배 증가 가능 &rarr; 건당 $2~3 (약 3,000~4,000원). 여전히 마진 98%+</li>
+  </ul>
+</div>
+
+<!-- ======================================= -->
+<h2>6. 보안 아키텍처</h2>
+
+<h3>6.1 PII 데이터 흐름</h3>
+<pre><span class="comment">// 데이터 흐름</span>
+[증빙 원본] → <span class="keyword">piiMaskingService</span>.maskDocument()
+    ├── [마스킹된 데이터] → Claude API (국외 전송 OK)
+    │                      → settlement_evidences (DB)
+    │                      → QA 엔진 처리
+    └── [원본 + PII] → <span class="string">국내 암호화 저장</span> (AES-256)
+                       → pii_processing_logs (처리 이력)
+                       → 계약 종료 90일 후 삭제</pre>
+
+<h3>6.2 인증 구조</h3>
+<table>
+  <tr><th>접근 주체</th><th>인증 방식</th><th>기존 모듈</th></tr>
+  <tr><td>회계법인 (API)</td><td>API Key + SHA-256 (partnerAuth)</td><td><code>middleware/partnerAuth.ts</code> 재사용</td></tr>
+  <tr><td>회계법인 (Web)</td><td>이메일 인증 + 세션 (추후)</td><td>신규 개발 (P1)</td></tr>
+  <tr><td>내부 관리자</td><td>Admin Key (adminKeyAuth)</td><td><code>middleware/adminKeyAuth.ts</code> 재사용</td></tr>
+</table>
+
+<h3>6.3 PIPA 준수 체크리스트</h3>
+<div class="box box-warn">
+  <ul>
+    <li><strong>국외이전 동의</strong>: Claude API 사용 시 마스킹 데이터만 전송. 이용법인 동의 수집 UI 필수.</li>
+    <li><strong>처리 로그</strong>: pii_processing_logs 컬렉션에 모든 PII 탐지/마스킹/접근/삭제 기록.</li>
+    <li><strong>파기</strong>: 계약 종료 + 90일 후 자동 삭제 배치 (cron job).</li>
+    <li><strong>접근 통제</strong>: firm_id 기반 Row-Level Security. 다른 법인 데이터 접근 불가.</li>
+  </ul>
+</div>
+
+<!-- ======================================= -->
+<h2>6-4. Firm별 Rate Limiting</h2>
+
+<div class="box">
+  <p><strong>목적</strong>: 법인별 플랜에 따른 API 호출 제한으로 남용 방지 + 공정 사용 보장</p>
+</div>
+
+<table>
+  <tr><th>플랜</th><th>분당 요청</th><th>시간당 QA 실행</th><th>일일 업로드</th><th>동시 패키지 생성</th></tr>
+  <tr><td>Trial</td><td>30 req/min</td><td>5회</td><td>20건</td><td>1건</td></tr>
+  <tr><td>Starter</td><td>60 req/min</td><td>15회</td><td>50건</td><td>3건</td></tr>
+  <tr><td>Pro</td><td>120 req/min</td><td>30회</td><td>200건</td><td>10건</td></tr>
+  <tr><td>Firm</td><td>별도 협의</td><td>별도 협의</td><td>별도 협의</td><td>별도 협의</td></tr>
+</table>
+
+<pre><span class="comment">// server/src/middleware/firmRateLimit.ts (NEW)</span>
+<span class="keyword">import</span> rateLimit <span class="keyword">from</span> <span class="string">'express-rate-limit'</span>;
+
+<span class="keyword">const</span> PLAN_LIMITS: Record&lt;<span class="type">string</span>, { windowMs: <span class="type">number</span>; max: <span class="type">number</span> }&gt; = {
+  trial:   { windowMs: 60_000, max: 30 },
+  starter: { windowMs: 60_000, max: 60 },
+  pro:     { windowMs: 60_000, max: 120 },
+  firm:    { windowMs: 60_000, max: 300 },
+};
+
+<span class="keyword">export const</span> firmRateLimit = (req, res, next) =&gt; {
+  <span class="keyword">const</span> plan = req.firmAccount?.plan_type ?? <span class="string">'trial'</span>;
+  <span class="keyword">const</span> limit = PLAN_LIMITS[plan] ?? PLAN_LIMITS.trial;
+  <span class="comment">// firm_id 기반 키로 법인별 독립 카운터</span>
+  <span class="keyword">return</span> rateLimit({ ...limit, keyGenerator: (r) =&gt; r.firmAccount.firm_id })(req, res, next);
+};</pre>
+
+<div class="box box-info">
+  <h4>초과 시 동작</h4>
+  <ul>
+    <li>HTTP 429 Too Many Requests + <code>Retry-After</code> 헤더 반환</li>
+    <li>audit_logs에 rate_limit_exceeded 이벤트 기록 (남용 패턴 분석용)</li>
+    <li>Firm 플랜은 초과 시 429 대신 큐잉 후 순차 처리 (SLA 보장)</li>
+  </ul>
+</div>
+
+<!-- ======================================= -->
+<h2>6-5. Monitoring &amp; APM</h2>
+
+<table>
+  <tr><th>계층</th><th>도구</th><th>대상</th><th>P</th></tr>
+  <tr>
+    <td>애플리케이션</td>
+    <td>Pino (structured JSON logging)</td>
+    <td>모든 요청/응답, 에러, 성능 메트릭</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+  <tr>
+    <td>인프라</td>
+    <td>DigitalOcean Monitoring</td>
+    <td>CPU, Memory, Disk, Network (Droplet)</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+  <tr>
+    <td>APM</td>
+    <td>Sentry (에러 추적 + 성능)</td>
+    <td>uncaught exceptions, slow transactions, Claude API latency</td>
+    <td><span class="badge badge-p1">P1</span></td>
+  </tr>
+  <tr>
+    <td>헬스체크</td>
+    <td>GET /health (기존)</td>
+    <td>Express + MongoDB 연결 상태</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+  <tr>
+    <td>업타임</td>
+    <td>UptimeRobot / Better Stack</td>
+    <td>/health 30초 간격 외부 모니터링</td>
+    <td><span class="badge badge-p0">P0</span></td>
+  </tr>
+</table>
+
+<h4>핵심 메트릭 (알림 기준)</h4>
+<table>
+  <tr><th>메트릭</th><th>WARNING</th><th>CRITICAL</th><th>알림 채널</th></tr>
+  <tr><td>API 응답 시간 (p95)</td><td>&gt; 3초</td><td>&gt; 10초</td><td>Slack + Email</td></tr>
+  <tr><td>Claude API 에러율</td><td>&gt; 5%</td><td>&gt; 15%</td><td>Slack + PagerDuty</td></tr>
+  <tr><td>QA 패키지 생성 실패율</td><td>&gt; 3%</td><td>&gt; 10%</td><td>Slack + Email</td></tr>
+  <tr><td>PII 마스킹 실패</td><td>&gt; 0건</td><td>N/A (즉시 차단)</td><td>PagerDuty (P0)</td></tr>
+  <tr><td>MongoDB 연결 풀 사용률</td><td>&gt; 70%</td><td>&gt; 90%</td><td>Slack</td></tr>
+  <tr><td>디스크 사용률 (증빙 저장)</td><td>&gt; 70%</td><td>&gt; 85%</td><td>Slack + Email</td></tr>
+</table>
+
+<pre><span class="comment">// server/src/config/logger.ts (기존 확장)</span>
+<span class="keyword">import</span> pino <span class="keyword">from</span> <span class="string">'pino'</span>;
+
+<span class="keyword">export const</span> logger = pino({
+  level: process.env.LOG_LEVEL ?? <span class="string">'info'</span>,
+  transport: process.env.NODE_ENV === <span class="string">'development'</span>
+    ? { target: <span class="string">'pino-pretty'</span> }
+    : <span class="keyword">undefined</span>,
+  <span class="comment">// 프로덕션: JSON → DigitalOcean Logs → 필터링</span>
+});
+
+<span class="comment">// 요청별 메트릭 자동 기록</span>
+app.use((req, res, next) =&gt; {
+  <span class="keyword">const</span> start = Date.now();
+  res.on(<span class="string">'finish'</span>, () =&gt; {
+    logger.info({
+      method: req.method, path: req.path,
+      status: res.statusCode,
+      duration_ms: Date.now() - start,
+      firm_id: req.firmAccount?.firm_id,
+    });
+  });
+  next();
+});</pre>
+
+<!-- ======================================= -->
+<h2>7. 파일 구조 (신규 추가)</h2>
+
+<pre><span class="comment">server/src/</span>
+├── routes/
+│   ├── settlement.ts        <span class="keyword">NEW</span>  정산 프로젝트 CRUD + QA 실행
+│   ├── evidence.ts          <span class="keyword">NEW</span>  증빙 업로드/조회
+│   ├── audit.ts             <span class="keyword">NEW</span>  감사 로그
+│   ├── firm.ts              <span class="keyword">NEW</span>  회계법인 등록/관리
+│   └── rules.ts             <span class="keyword">NEW</span>  부처별/법인별 룰 관리
+├── services/
+│   ├── settlementQaService.ts    <span class="keyword">NEW</span>  QA 엔진 (핵심)
+│   ├── piiMaskingService.ts      <span class="keyword">NEW</span>  PII 탐지/마스킹
+│   ├── documentGeneratorService.ts <span class="keyword">NEW</span>  패키지 생성
+│   ├── settlementRuleService.ts  <span class="keyword">NEW</span>  규칙 관리
+│   ├── auditTrailService.ts      <span class="keyword">NEW</span>  감사 추적
+│   ├── botService.ts             <span class="string">EXT</span>  Claude 프롬프트 확장
+│   ├── partnerService.ts         <span class="string">EXT</span>  법인 등록 로직 추가
+│   └── referralService.ts        <span class="string">EXT</span>  건당 과금 정산 추가
+├── dto/
+│   ├── settlement.dto.ts    <span class="keyword">NEW</span>  Zod 스키마 (프로젝트/패키지/증빙)
+│   └── firm.dto.ts          <span class="keyword">NEW</span>  Zod 스키마 (법인 등록/조회)
+├── config/
+│   └── mongodb-indexes.ts   <span class="string">EXT</span>  7개 컬렉션 인덱스 추가
+└── middleware/
+    ├── firmRls.ts           <span class="keyword">NEW</span>  법인별 Row-Level Security
+    ├── firmRateLimit.ts     <span class="keyword">NEW</span>  플랜별 Rate Limiting
+    └── fileValidation.ts    <span class="keyword">NEW</span>  확장자+magic bytes+사이즈 검증</pre>
+
+<!-- ======================================= -->
+<h2>8. 개발 로드맵 (12주)</h2>
+
+<table>
+  <tr><th>Phase</th><th>기간</th><th>산출물</th><th>검증 기준</th></tr>
+  <tr>
+    <td><strong>Phase 0</strong><br>기반</td>
+    <td>1~2주</td>
+    <td>
+      DB 스키마 + 인덱스<br>
+      firm 등록 API<br>
+      partnerAuth 연동<br>
+      piiMaskingService (C-0)<br>
+      multer + fileValidation 미들웨어<br>
+      ClamAV 연동 (바이러스 스캔)
+    </td>
+    <td>
+      법인 등록 → API key 발급<br>
+      PII 마스킹 단위 테스트 통과<br>
+      파일 업로드 → 검증 → 격리 파이프라인 동작<br>
+      typecheck 통과
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Phase 1</strong><br>QA 엔진</td>
+    <td>3~6주</td>
+    <td>
+      증빙 업로드 API<br>
+      settlementQaService (품질검수)<br>
+      documentGeneratorService<br>
+      auditTrailService
+    </td>
+    <td>
+      증빙 업로드 → PII 마스킹 → 검수 → 패키지 생성<br>
+      1건 End-to-End 파이프라인 동작<br>
+      감사 로그 기록 확인
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Phase 2</strong><br>파일럿</td>
+    <td>7~12주</td>
+    <td>
+      Web Portal (최소 UI)<br>
+      부처별 규칙 3개<br>
+      과금/사용량 API<br>
+      리퍼럴 건당 정산
+    </td>
+    <td>
+      파일럿 법인 3건 실제 검수<br>
+      패키지 품질 만족도 확인<br>
+      건당 과금 정확성 검증
+    </td>
+  </tr>
+</table>
+
+<!-- ======================================= -->
+<h2>9. 기술 의사결정 기록 (ADR)</h2>
+
+<table>
+  <tr><th>#</th><th>결정</th><th>근거</th><th>대안 (기각)</th></tr>
+  <tr>
+    <td>1</td>
+    <td>기존 코드베이스 확장</td>
+    <td>botService, partnerAuth, referralService 재사용 가능. 별도 서비스 분리 시 인프라 비용 2배.</td>
+    <td>별도 마이크로서비스 → 12주 MVP 불가</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>PII 마스킹 → Claude API</td>
+    <td>PIPA 국외이전 규제. 원본 국내 저장 필수. 마스킹 후 전송만 합법적.</td>
+    <td>전체 국내 LLM → 품질 미달</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>MongoDB 유지 (PostgreSQL 아님)</td>
+    <td>기존 26개 컬렉션 + 인프라 통일. 증빙 메타데이터는 문서형 적합.</td>
+    <td>PostgreSQL → 마이그레이션 비용 과다</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>partnerAuth로 멀티테넌트</td>
+    <td>이미 API key 발급/검증 구현됨. firm_id 기반 RLS 추가만 필요.</td>
+    <td>자체 인증 시스템 → 개발 비용 과다</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td>/api/qetta/v1/* 버전 네임스페이스</td>
+    <td>기존 /api/ujuz/*와 분리 + URL 기반 API 버저닝. 향후 v2 호환성 유지 대비.</td>
+    <td>/api/qetta/* (버전 없음) → Breaking change 시 기존 클라이언트 장애</td>
+  </tr>
+</table>
+
+<!-- ======================================= -->
+<h2>10. 환경변수 추가</h2>
+
+<table>
+  <tr><th>변수</th><th>용도</th><th>필수</th></tr>
+  <tr><td><code>PII_ENCRYPTION_KEY</code></td><td>PII 원본 암호화 (AES-256)</td><td>P0 필수</td></tr>
+  <tr><td><code>FILE_STORAGE_PATH</code></td><td>증빙 파일 저장 경로 (로컬/S3)</td><td>P0 필수</td></tr>
+  <tr><td><code>SETTLEMENT_CLAUDE_MODEL</code></td><td>정산 생성용 Claude 모델 ID</td><td>default: claude-sonnet-4-5-20250929</td></tr>
+  <tr><td><code>MAX_EVIDENCE_SIZE_MB</code></td><td>증빙 파일 최대 크기</td><td>default: 50</td></tr>
+  <tr><td><code>PII_AUTO_DELETE_DAYS</code></td><td>계약종료 후 PII 자동 삭제 일수</td><td>default: 90</td></tr>
+  <tr><td><code>SENTRY_DSN</code></td><td>Sentry 에러 추적 DSN</td><td>선택 (P1)</td></tr>
+  <tr><td><code>UPTIME_CHECK_URL</code></td><td>외부 업타임 모니터링 콜백 URL</td><td>선택</td></tr>
+</table>
+
+<!-- ======================================= -->
+<h2>11. 리스크 & 완화</h2>
+
+<table>
+  <tr><th>리스크</th><th>영향</th><th>완화</th></tr>
+  <tr>
+    <td>Claude API 비용 초과</td>
+    <td>건당 원가 상승</td>
+    <td>Sonnet 모델 기본 사용 + 캐싱 + 프롬프트 최적화. Opus는 감사 체크리스트만.</td>
+  </tr>
+  <tr>
+    <td>PII 마스킹 누수</td>
+    <td>PIPA 위반 + 신뢰 파괴</td>
+    <td>정규식 + ML 패턴 이중 탐지. 마스킹 실패 시 전송 차단 (fail-safe).</td>
+  </tr>
+  <tr>
+    <td>부처별 서식 변경</td>
+    <td>검수 정확도 하락</td>
+    <td>규칙 DB 분리. 서식 변경 감지 시 알림 + 수동 업데이트 절차.</td>
+  </tr>
+  <tr>
+    <td>파일럿 법인 낮은 참여</td>
+    <td>검증 데이터 부족</td>
+    <td>Trial 3건 무료 + 12개월 가격 고정 인센티브. 인터뷰 대상 법인 우선 접근.</td>
+  </tr>
+  <tr>
+    <td>파일 업로드 보안</td>
+    <td>악성 파일 실행</td>
+    <td>확장자 화이트리스트 (pdf,xlsx,docx,hwp) + 바이러스 스캔 + 격리 저장.</td>
+  </tr>
+</table>
+
+<div class="footer">
+  &copy; 2026 QETTA &middot; 본 문서는 내부 기술 설계안이며, 파일럿 진행에 따라 업데이트됩니다.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QETTA 피칭덱 | 보조금 정산 자동 검수</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+@page { size: 16in 9in; margin: 0; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; }
+body {
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  color: #1e293b; background: #0a0a0a;
+  line-height: 1.6; -webkit-font-smoothing: antialiased;
+}
+
+/* ===== SLIDE SYSTEM ===== */
+.slide {
+  width: 100%; max-width: 1280px; margin: 0 auto;
+  aspect-ratio: 16 / 9;
+  padding: 64px 80px;
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; overflow: hidden;
+  page-break-after: always;
+  background: #fff;
+}
+.slide + .slide { margin-top: 4px; }
+
+/* Backgrounds */
+.bg-dark { background: #0f172a; color: #fff; }
+.bg-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%); color: #fff; }
+.bg-white { background: #fff; color: #1e293b; }
+.bg-light { background: #f8fafc; color: #1e293b; }
+.bg-accent { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%); color: #fff; }
+
+/* Slide number */
+.slide-num {
+  position: absolute; bottom: 28px; right: 40px;
+  font-size: 12px; font-weight: 500; opacity: 0.35;
+  letter-spacing: 0.05em;
+}
+.bg-dark .slide-num, .bg-gradient .slide-num, .bg-accent .slide-num { color: #fff; }
+
+/* Logo */
+.slide-logo {
+  position: absolute; top: 32px; left: 40px;
+  font-size: 18px; font-weight: 900; letter-spacing: -0.03em;
+}
+.slide-logo span { background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.bg-dark .slide-logo span, .bg-gradient .slide-logo span { background: linear-gradient(135deg, #818cf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.bg-accent .slide-logo span { -webkit-text-fill-color: rgba(255,255,255,0.7); }
+
+/* Conf badge */
+.conf-mark {
+  position: absolute; top: 32px; right: 40px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  opacity: 0.3; text-transform: uppercase;
+}
+
+/* Typography */
+.mega { font-size: 56px; font-weight: 900; line-height: 1.15; letter-spacing: -0.03em; }
+.title { font-size: 38px; font-weight: 800; line-height: 1.25; letter-spacing: -0.02em; }
+.subtitle { font-size: 20px; font-weight: 400; line-height: 1.6; opacity: 0.65; margin-top: 16px; }
+.label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 20px;
+  padding: 6px 16px; border-radius: 100px;
+}
+.label-purple { background: rgba(79,70,229,0.1); color: #818cf8; }
+.label-dark { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+.label-white { background: rgba(79,70,229,0.08); color: #4f46e5; }
+.label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.text-gradient {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed, #a855f7);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.text-gradient-light {
+  background: linear-gradient(135deg, #818cf8, #a78bfa);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+/* Layout helpers */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.split-40-60 { display: grid; grid-template-columns: 2fr 3fr; gap: 60px; align-items: start; }
+.split-60-40 { display: grid; grid-template-columns: 3fr 2fr; gap: 60px; align-items: start; }
+.center { text-align: center; }
+.gap-sm { gap: 12px; }
+.gap-md { gap: 20px; }
+.mt-auto { margin-top: auto; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
+.mt-40 { margin-top: 40px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+
+/* Cards */
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 28px 24px;
+}
+.card-white {
+  background: #fff; border: 1px solid #e2e8f0;
+  border-radius: 16px; padding: 28px 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card-highlight {
+  background: linear-gradient(135deg, rgba(79,70,229,0.04), rgba(124,58,237,0.06));
+  border: 1.5px solid rgba(79,70,229,0.2);
+  border-radius: 16px; padding: 28px 24px;
+}
+
+/* KPI */
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kpi-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.kpi { text-align: center; padding: 24px 16px; border-radius: 16px; }
+.kpi-dark { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+.kpi-light { background: #f8fafc; border: 1px solid #e2e8f0; }
+.kpi-value { font-size: 36px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.2; }
+.kpi-value-lg { font-size: 48px; }
+.kpi-label { font-size: 12px; font-weight: 500; opacity: 0.5; margin-top: 6px; letter-spacing: 0.02em; }
+.color-indigo { color: #818cf8; }
+.color-red { color: #f87171; }
+.color-green { color: #34d399; }
+.color-white { color: #fff; }
+.color-purple { color: #a78bfa; }
+.color-primary { color: #4f46e5; }
+.color-danger { color: #ef4444; }
+.color-success { color: #10b981; }
+
+/* Tables */
+.deck-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.deck-table th, .deck-table td { padding: 12px 14px; text-align: left; }
+.deck-table th {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: #64748b; border-bottom: 2px solid #e2e8f0;
+}
+.deck-table td { border-bottom: 1px solid #f1f5f9; }
+.deck-table .highlight-row { background: rgba(79,70,229,0.04); }
+.deck-table .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.deck-table-dark th { color: rgba(255,255,255,0.4); border-bottom-color: rgba(255,255,255,0.1); }
+.deck-table-dark td { border-bottom-color: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+
+/* Badges */
+.badge { display: inline-flex; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; }
+.badge-red { background: #fef2f2; color: #991b1b; }
+.badge-green { background: #ecfdf5; color: #065f46; }
+.badge-blue { background: #eef2ff; color: #3730a3; }
+.badge-yellow { background: #fffbeb; color: #92400e; }
+.badge-dark-red { background: rgba(239,68,68,0.15); color: #fca5a5; }
+
+/* Flow */
+.flow { display: flex; align-items: center; gap: 12px; }
+.flow-step {
+  flex: 1; padding: 20px 16px; border-radius: 14px;
+  text-align: center;
+}
+.flow-step-dark { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); }
+.flow-step-white { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+.flow-step h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.flow-step p { font-size: 11px; opacity: 0.55; }
+.flow-arrow { font-size: 18px; opacity: 0.3; flex: 0; }
+
+/* Pain cards */
+.pain-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.pain-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px; padding: 24px;
+}
+.pain-card .icon { font-size: 24px; margin-bottom: 12px; }
+.pain-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.pain-card p { font-size: 12px; opacity: 0.5; line-height: 1.6; }
+.pain-card .stat {
+  display: inline-flex; margin-top: 10px; padding: 4px 12px;
+  background: rgba(239,68,68,0.12); border-radius: 6px;
+  font-size: 11px; font-weight: 600; color: #fca5a5;
+}
+
+/* Moat list */
+.moat-list { list-style: none; }
+.moat-list li {
+  padding: 14px 0; border-bottom: 1px solid #f1f5f9;
+  display: flex; align-items: flex-start; gap: 14px;
+  font-size: 14px;
+}
+.moat-list li:last-child { border-bottom: none; }
+.moat-num {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff; font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Risk */
+.risk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.risk-card {
+  background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 12px; padding: 20px;
+}
+.risk-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.risk-card p { font-size: 11px; color: #64748b; line-height: 1.6; }
+
+/* Decorative elements */
+.deco-circle {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%);
+}
+.deco-1 { width: 500px; height: 500px; top: -200px; right: -150px; }
+.deco-2 { width: 350px; height: 350px; bottom: -100px; left: -100px; background: radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%); }
+
+/* Responsive fallback */
+@media (max-width: 1024px) {
+  .slide { padding: 40px 48px; aspect-ratio: auto; min-height: 100vh; }
+  .mega { font-size: 40px; }
+  .title { font-size: 28px; }
+  .split, .split-40-60, .split-60-40 { grid-template-columns: 1fr; gap: 32px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .pain-grid { grid-template-columns: 1fr; }
+  .risk-grid { grid-template-columns: 1fr; }
+}
+
+@media print {
+  body { background: #fff; }
+  .slide { box-shadow: none; margin: 0; page-break-inside: avoid; }
+  .slide + .slide { margin-top: 0; }
+}
+</style>
+</head>
+<body>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 01: COVER -->
+<!-- ============================================================ -->
+<div class="slide bg-gradient" style="justify-content:center; text-align:center;">
+  <div class="deco-circle deco-1"></div>
+  <div class="deco-circle deco-2"></div>
+  <div class="conf-mark">Confidential &middot; 2026.02</div>
+
+  <div style="position:relative; z-index:1;">
+    <div style="font-size: 42px; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 8px;">
+      <span class="text-gradient-light">QETTA</span>
+    </div>
+    <div style="width:60px; height:3px; background:linear-gradient(90deg, #818cf8, #a78bfa); margin:20px auto 32px; border-radius:2px;"></div>
+
+    <h1 class="mega" style="max-width:800px; margin:0 auto;">
+      보조금 정산,<br>반려 전에 잡습니다
+    </h1>
+    <p class="subtitle" style="max-width:560px; margin:20px auto 0;">
+      e나라도움 제출 직전 QA 레이어<br>
+      회계법인 대상 B2B SaaS
+    </p>
+
+    <div style="margin-top:48px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
+      <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px 28px;">
+        <div style="font-size:11px; opacity:0.4; margin-bottom:4px; letter-spacing:0.05em;">CONTACT</div>
+        <div style="font-size:14px; font-weight:600;">partner@qetta.kr</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px 28px;">
+        <div style="font-size:11px; opacity:0.4; margin-bottom:4px; letter-spacing:0.05em;">VERSION</div>
+        <div style="font-size:14px; font-weight:600;">v1.0 Pilot</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">01</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 02: PROBLEM — 시장 문제 -->
+<!-- ============================================================ -->
+<div class="slide bg-dark">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <span class="label label-dark">Problem</span>
+  <h2 class="title">&lsquo;신청&rsquo;은 디지털화됐지만,<br>&lsquo;정산~감사&rsquo;는 아직 수작업입니다</h2>
+
+  <div class="pain-grid mt-32">
+    <div class="pain-card">
+      <div class="icon">&#9888;</div>
+      <h4>반려 반복 &rarr; 건당 적자</h4>
+      <p>부처별 서식이 다르고 매년 바뀝니다. 반려 재작업 인건비 80~150만원 &times; 평균 2.3회.</p>
+      <div class="stat">건당 184~345만원 손실</div>
+    </div>
+    <div class="pain-card">
+      <div class="icon">&#128101;</div>
+      <h4>속인화 &rarr; 퇴사 시 붕괴</h4>
+      <p>정산 노하우가 담당자 머릿속에만 존재. CPA 합격자 수습등록률 26%&mdash;채용도 어렵습니다.</p>
+      <div class="stat">수습등록률 26% (2025)</div>
+    </div>
+    <div class="pain-card">
+      <div class="icon">&#128269;</div>
+      <h4>감사/점검 확대 &rarr; 본업 올스톱</h4>
+      <p>소급 점검으로 3~5년 전 건도 대응 필요. 감사&middot;세무 업무가 밀립니다.</p>
+      <div class="stat">환수 집행 3년 새 3배 증가</div>
+    </div>
+    <div class="pain-card">
+      <div class="icon">&#128680;</div>
+      <h4>환수 1건 = 평판 파괴</h4>
+      <p>3,000만원 이상 환수 시 명단 공표. 해당 매출 라인이 소멸합니다.</p>
+      <div class="stat">최대 5배 제재부가금</div>
+    </div>
+  </div>
+
+  <div class="slide-num">02</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 03: WHY NOW -->
+<!-- ============================================================ -->
+<div class="slide bg-white">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <span class="label label-white">Why Now</span>
+  <h2 class="title">2026년, 왜 지금인가</h2>
+  <p style="font-size:16px; color:#64748b; margin-top:8px; max-width:640px;">5가지 구조적 변화가 동시에 일어나고 있습니다.</p>
+
+  <div style="display:grid; grid-template-columns:1fr; gap:0; margin-top:32px; max-width:880px;">
+    <div style="display:flex; align-items:flex-start; gap:20px; padding:20px 0; border-bottom:1px solid #f1f5f9;">
+      <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #4f46e5, #7c3aed); color:#fff; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</div>
+      <div>
+        <div style="font-size:15px; font-weight:700;">공공재정환수법 본격 시행</div>
+        <div style="font-size:13px; color:#64748b; margin-top:2px;">5배 제재부가금 &rarr; 법인 리스크 인식 급증</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:flex-start; gap:20px; padding:20px 0; border-bottom:1px solid #f1f5f9;">
+      <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #4f46e5, #7c3aed); color:#fff; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</div>
+      <div>
+        <div style="font-size:15px; font-weight:700;">부정수급 적발 역대 최대</div>
+        <div style="font-size:13px; color:#64748b; margin-top:2px;">2024년 630건 / 493억원 &rarr; 감시 강화 추세 확정</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:flex-start; gap:20px; padding:20px 0; border-bottom:1px solid #f1f5f9;">
+      <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #4f46e5, #7c3aed); color:#fff; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</div>
+      <div>
+        <div style="font-size:15px; font-weight:700;">감사보수 3년 연속 하락 + 인력난</div>
+        <div style="font-size:13px; color:#64748b; margin-top:2px;">비용 절감 자동화 도구 수요 급증</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:flex-start; gap:20px; padding:20px 0; border-bottom:1px solid #f1f5f9;">
+      <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #4f46e5, #7c3aed); color:#fff; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">4</div>
+      <div>
+        <div style="font-size:15px; font-weight:700;">대형 법인 자동화 도입 시작</div>
+        <div style="font-size:13px; color:#64748b; margin-top:2px;">소형/중견은 도구 부재 &rarr; &ldquo;뒤처지면 안 된다&rdquo; 인식 확산</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:flex-start; gap:20px; padding:20px 0;">
+      <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #4f46e5, #7c3aed); color:#fff; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">5</div>
+      <div>
+        <div style="font-size:15px; font-weight:700;">e나라도움 정산 기능 부재</div>
+        <div style="font-size:13px; color:#64748b; margin-top:2px;">시스템 공백 그대로. 3년 내 해소 전망 없음.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">03</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 04: SOLUTION — 3단계 QA -->
+<!-- ============================================================ -->
+<div class="slide bg-white">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <div class="center">
+    <span class="label label-white">Solution</span>
+    <h2 class="title">e나라도움 제출 직전, <span class="text-gradient">3단계 자동 검수</span></h2>
+    <p style="font-size:15px; color:#64748b; margin-top:8px;">e나라도움을 대체하지 않습니다. 제출 직전에 품질을 잡아주는 검수 레이어입니다.</p>
+  </div>
+
+  <div class="flow mt-40">
+    <div class="flow-step flow-step-white" style="border-color:#4f46e5;">
+      <div style="width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; font-size:18px; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">A</div>
+      <h4>품질검수</h4>
+      <p style="font-size:12px; color:#64748b; line-height:1.6; margin-top:6px;">증빙 누락&middot;부적격&middot;비목 불일치 자동 감지. 부처별 서식 적합성 검증.</p>
+      <div style="margin-top:12px; display:inline-flex; padding:4px 12px; border-radius:100px; font-size:11px; font-weight:600; background:rgba(79,70,229,0.08); color:#4f46e5;">반려 루프 차단</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step flow-step-white" style="border-color:#7c3aed;">
+      <div style="width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; font-size:18px; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">B</div>
+      <h4>노하우 구조화</h4>
+      <p style="font-size:12px; color:#64748b; line-height:1.6; margin-top:6px;">부처별 정산 룰 + 법인 자체 체크리스트를 시스템에 내장. 담당자 교체에도 품질 유지.</p>
+      <div style="margin-top:12px; display:inline-flex; padding:4px 12px; border-radius:100px; font-size:11px; font-weight:600; background:rgba(124,58,237,0.08); color:#7c3aed;">속인화 해소</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step flow-step-white" style="border-color:#10b981;">
+      <div style="width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,#10b981,#34d399); color:#fff; font-size:18px; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">C</div>
+      <h4>감사 대비 패키징</h4>
+      <p style="font-size:12px; color:#64748b; line-height:1.6; margin-top:6px;">4종 산출물을 하나의 패키지로 생성. 점검 당일 즉시 대응.</p>
+      <div style="margin-top:12px; display:inline-flex; padding:4px 12px; border-radius:100px; font-size:11px; font-weight:600; background:rgba(16,185,129,0.08); color:#10b981;">점검 당일 대응</div>
+    </div>
+  </div>
+
+  <div style="margin-top:32px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:20px 28px;">
+    <div style="font-size:13px; font-weight:700; color:#4f46e5; margin-bottom:8px;">1건 = 정산 완료 패키지 1세트</div>
+    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+      <span style="font-size:13px; font-weight:600; background:#fff; border:1px solid #e2e8f0; padding:6px 14px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;"><span style="width:5px; height:5px; background:#10b981; border-radius:50%;"></span>정산서</span>
+      <span style="font-size:13px; font-weight:600; background:#fff; border:1px solid #e2e8f0; padding:6px 14px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;"><span style="width:5px; height:5px; background:#10b981; border-radius:50%;"></span>증빙목록</span>
+      <span style="font-size:13px; font-weight:600; background:#fff; border:1px solid #e2e8f0; padding:6px 14px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;"><span style="width:5px; height:5px; background:#10b981; border-radius:50%;"></span>성과보고 초안</span>
+      <span style="font-size:13px; font-weight:600; background:#fff; border:1px solid #e2e8f0; padding:6px 14px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;"><span style="width:5px; height:5px; background:#10b981; border-radius:50%;"></span>감사 체크리스트</span>
+      <span style="font-size:12px; color:#64748b; display:inline-flex; align-items:center;">&rarr; 담당 전문가(CPA) 승인 시 과금</span>
+    </div>
+  </div>
+
+  <div class="slide-num">04</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 05: PII 보호 (구매 차단 요인 해소) -->
+<!-- ============================================================ -->
+<div class="slide bg-dark">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <div class="split">
+    <div>
+      <span class="label label-dark">Core Feature</span>
+      <h2 class="title">개인정보 자동 보호<br><span style="color:#f87171;">구매 차단 요인 #1 해소</span></h2>
+      <p style="font-size:15px; opacity:0.55; margin-top:16px; line-height:1.8;">
+        회계법인의 최대 도입 장벽:<br>
+        &ldquo;고객 개인정보가 외부로 나가면 안 된다&rdquo;
+      </p>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <div style="width:32px; height:32px; border-radius:8px; background:rgba(79,70,229,0.15); display:flex; align-items:center; justify-content:center; font-size:16px;">&#128270;</div>
+          <div style="font-size:14px; font-weight:700;">자동 탐지</div>
+        </div>
+        <div style="font-size:13px; opacity:0.6; line-height:1.7;">주민번호&middot;계좌번호&middot;연락처를 업로드 즉시 패턴 인식 &rarr; 자동 마스킹</div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <div style="width:32px; height:32px; border-radius:8px; background:rgba(16,185,129,0.15); display:flex; align-items:center; justify-content:center; font-size:16px;">&#128274;</div>
+          <div style="font-size:14px; font-weight:700;">분리 저장</div>
+        </div>
+        <div style="font-size:13px; opacity:0.6; line-height:1.7;">마스킹 데이터만 처리. 원본은 국내 서버 AES-256 암호화 분리 저장.</div>
+      </div>
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <div style="width:32px; height:32px; border-radius:8px; background:rgba(248,113,113,0.15); display:flex; align-items:center; justify-content:center; font-size:16px;">&#128203;</div>
+          <div style="font-size:14px; font-weight:700;">처리 로그</div>
+        </div>
+        <div style="font-size:13px; opacity:0.6; line-height:1.7;">PII 처리 내역 실시간 제공. 개인정보보호법(PIPA) 준수. 마스킹 실패 시 전송 차단.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">05</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 06: MARKET SIZE -->
+<!-- ============================================================ -->
+<div class="slide bg-white">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <span class="label label-white">Market</span>
+  <h2 class="title">시장 규모 &mdash; <span class="text-gradient">정산 특화 SaaS 국내 0개</span></h2>
+
+  <div class="kpi-row-3 mt-32">
+    <div class="kpi kpi-light">
+      <div class="kpi-value color-primary" style="font-size:32px;">~60억/년</div>
+      <div class="kpi-label">TAM &mdash; 보조금 정산 검수 시장 전체</div>
+      <div style="font-size:11px; color:#94a3b8; margin-top:8px;">~30,000건/년 &times; 건당 평균 20만원</div>
+    </div>
+    <div class="kpi kpi-light" style="border-color:rgba(79,70,229,0.2);">
+      <div class="kpi-value color-primary" style="font-size:32px;">~25억/년</div>
+      <div class="kpi-label">SAM &mdash; QETTA 서비스 가능 시장</div>
+      <div style="font-size:11px; color:#94a3b8; margin-top:8px;">소형+중견 법인 ~200개 &times; 평균 ARPA ~1,250만</div>
+    </div>
+    <div class="kpi" style="background:linear-gradient(135deg,rgba(79,70,229,0.06),rgba(124,58,237,0.08)); border:1.5px solid rgba(79,70,229,0.2); border-radius:16px;">
+      <div class="kpi-value color-primary" style="font-size:32px;">~3.3억/년</div>
+      <div class="kpi-label" style="color:#4f46e5;">SOM &mdash; Year 3 현실 목표</div>
+      <div style="font-size:11px; color:#64748b; margin-top:8px;">법인 25개 (점유 ~12.5%) &times; ARPA ~1,320만</div>
+    </div>
+  </div>
+
+  <div class="split mt-32" style="gap:40px;">
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:12px;">타겟 세그먼트</div>
+      <table class="deck-table" style="font-size:12px;">
+        <tr><th>세그먼트</th><th>규모</th><th>플랜</th><th>우선순위</th></tr>
+        <tr><td><strong>소형 법인</strong> (CPA 3~15)</td><td>~150개</td><td>Starter</td><td><span class="badge badge-green">1순위</span></td></tr>
+        <tr><td><strong>중견 법인</strong> (CPA 20~100)</td><td>~50개</td><td>Pro</td><td><span class="badge badge-green">1순위</span></td></tr>
+        <tr><td><strong>대형 법인</strong> (4대 포함)</td><td>~10개</td><td>Firm</td><td><span class="badge badge-yellow">2순위</span></td></tr>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:12px;">ABS (Account-Based Sales)</div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
+        <div style="font-size:28px; font-weight:900; color:#4f46e5; margin-bottom:4px;">254</div>
+        <div style="font-size:12px; color:#64748b; margin-bottom:12px;">전체 한국 회계법인 (금감원 등록)</div>
+        <ul style="font-size:12px; color:#475569; list-style:none; line-height:2;">
+          <li style="display:flex; gap:8px;"><span style="width:5px; height:5px; background:#10b981; border-radius:50%; flex-shrink:0; margin-top:7px;"></span>법인 리스트 전수 확보 가능</li>
+          <li style="display:flex; gap:8px;"><span style="width:5px; height:5px; background:#10b981; border-radius:50%; flex-shrink:0; margin-top:7px;"></span>ICP: CPA 5~50명, 연 정산 10건+</li>
+          <li style="display:flex; gap:8px;"><span style="width:5px; height:5px; background:#10b981; border-radius:50%; flex-shrink:0; margin-top:7px;"></span>마스 마케팅 불필요 &rarr; 1:1 영업</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">06</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 07: BUSINESS MODEL -->
+<!-- ============================================================ -->
+<div class="slide bg-light">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <span class="label label-white">Business Model</span>
+  <h2 class="title">연 선불 + 건당 과금</h2>
+
+  <table class="deck-table mt-24">
+    <tr>
+      <th>플랜</th>
+      <th>기본료</th>
+      <th>포함 건수</th>
+      <th>추가 건당</th>
+      <th>주요 기능</th>
+    </tr>
+    <tr>
+      <td><strong>Trial</strong><br><span style="font-size:11px; color:#64748b;">도입 전 검증</span></td>
+      <td><strong style="font-size:16px;">0원</strong><br><span style="font-size:11px; color:#64748b;">1~2주 한정</span></td>
+      <td>3건</td>
+      <td style="color:#cbd5e1;">&mdash;</td>
+      <td style="font-size:12px;">증빙검수 + PII마스킹 + 패키지생성</td>
+    </tr>
+    <tr>
+      <td><strong>Starter</strong><br><span style="font-size:11px; color:#64748b;">소형 법인 (CPA 3~15)</span></td>
+      <td><strong style="font-size:16px;">월 29만원</strong><br><span style="font-size:11px; color:#64748b;">연 348만원 선불</span></td>
+      <td>연 10건</td>
+      <td>건당 25만원</td>
+      <td style="font-size:12px;">+ 감사 체크리스트 + 부처 룰 기본셋</td>
+    </tr>
+    <tr class="highlight-row" style="border-left:3px solid #4f46e5;">
+      <td><strong>Pro</strong> <span class="badge badge-blue">추천</span><br><span style="font-size:11px; color:#64748b;">중견 법인 (CPA 20~100)</span></td>
+      <td><strong style="font-size:16px;">월 79만원</strong><br><span style="font-size:11px; color:#64748b;">연 948만원 선불</span></td>
+      <td>연 80건</td>
+      <td>건당 18만원</td>
+      <td style="font-size:12px;">+ 법인 커스텀 룰 + 우선지원 + 리퍼럴</td>
+    </tr>
+    <tr>
+      <td><strong>Firm</strong><br><span style="font-size:11px; color:#64748b;">대형/전사 도입</span></td>
+      <td><strong style="font-size:16px;">별도 협의</strong><br><span style="font-size:11px; color:#64748b;">연 단위 계약</span></td>
+      <td>무제한</td>
+      <td>고정 단가</td>
+      <td style="font-size:12px;">+ 전담 매니저 + 커스텀 연동 + SLA 99.5%</td>
+    </tr>
+  </table>
+  <div style="font-size:11px; color:#94a3b8; margin-top:8px;">* 파일럿 참여 법인은 확정 가격 12개월 고정. 모든 유료 플랜 연 선불 구조 (월 대비 15~20% 절감).</div>
+
+  <div class="slide-num">07</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 08: UNIT ECONOMICS -->
+<!-- ============================================================ -->
+<div class="slide bg-dark">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <span class="label label-dark">Unit Economics</span>
+  <h2 class="title">건당 원가 <span style="color:#34d399;">720원</span>, 마진 <span style="color:#34d399;">99.7%</span></h2>
+
+  <div class="split mt-32" style="gap:48px;">
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:16px; opacity:0.7;">건당 원가 상세</div>
+      <table class="deck-table deck-table-dark" style="font-size:12px;">
+        <tr><th>항목</th><th style="text-align:right;">비용</th></tr>
+        <tr><td>정산서 구성 (Sonnet &times;1)</td><td style="text-align:right;">~$0.04</td></tr>
+        <tr><td>증빙목록 매핑 (Sonnet &times;1)</td><td style="text-align:right;">~$0.02</td></tr>
+        <tr><td>성과보고 초안 (Sonnet &times;1~2)</td><td style="text-align:right;">~$0.06</td></tr>
+        <tr><td>감사 체크리스트 (Opus &times;1)</td><td style="text-align:right;">~$0.35</td></tr>
+        <tr><td>PII 탐지 보조 (Haiku &times;0~1)</td><td style="text-align:right;">~$0.001</td></tr>
+        <tr><td>인프라 (DB+Storage)</td><td style="text-align:right;">~$0.05</td></tr>
+        <tr style="border-top:2px solid rgba(255,255,255,0.15);"><td><strong>건당 총 원가</strong></td><td style="text-align:right; font-size:16px; font-weight:900; color:#34d399;">~$0.52 (~720원)</td></tr>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:16px; opacity:0.7;">마진 비교</div>
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:12px; opacity:0.5;">Starter 건당 25만원</div>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-top:4px;">
+          <span style="font-size:28px; font-weight:900; color:#34d399;">99.7%</span>
+          <span style="font-size:12px; opacity:0.5;">마진</span>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:12px; opacity:0.5;">Pro 건당 18만원</div>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-top:4px;">
+          <span style="font-size:28px; font-weight:900; color:#34d399;">99.6%</span>
+          <span style="font-size:12px; opacity:0.5;">마진</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px; opacity:0.5;">복잡 증빙 (100+ 항목)</div>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-top:4px;">
+          <span style="font-size:28px; font-weight:900; color:#34d399;">98%+</span>
+          <span style="font-size:12px; opacity:0.5;">여전히 초고마진</span>
+        </div>
+      </div>
+      <div style="margin-top:16px; font-size:12px; opacity:0.4; line-height:1.6;">
+        소프트웨어 한계비용 ~0에 수렴<br>규모 확장 시 마진 구조 강화
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">08</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 09: GTM STRATEGY -->
+<!-- ============================================================ -->
+<div class="slide bg-white">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <span class="label label-white">GTM Strategy</span>
+  <h2 class="title">세일즈 퍼널 + 리퍼럴 확산</h2>
+
+  <div class="split mt-32" style="gap:48px;">
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:16px;">세일즈 퍼널</div>
+      <div style="display:grid; gap:8px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; display:flex; align-items:center; gap:14px;">
+          <span class="badge badge-blue">인지</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">ICP 법인 직접 컨택</div>
+            <div style="font-size:11px; color:#64748b;">미팅 수락 30%</div>
+          </div>
+        </div>
+        <div style="text-align:center; font-size:14px; color:#cbd5e1;">&darr;</div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; display:flex; align-items:center; gap:14px;">
+          <span class="badge badge-blue">관심</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">15분 데모 + Pain 진단</div>
+            <div style="font-size:11px; color:#64748b;">파일럿 신청 50%</div>
+          </div>
+        </div>
+        <div style="text-align:center; font-size:14px; color:#cbd5e1;">&darr;</div>
+        <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:14px 18px; display:flex; align-items:center; gap:14px;">
+          <span class="badge badge-green">파일럿</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">실제 정산 3건 무료 검수</div>
+            <div style="font-size:11px; color:#065f46; font-weight:600;">유료 전환 60%</div>
+          </div>
+        </div>
+        <div style="text-align:center; font-size:14px; color:#cbd5e1;">&darr;</div>
+        <div style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:10px; padding:14px 18px; display:flex; align-items:center; gap:14px;">
+          <span class="badge badge-blue">전환</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">ROI 리포트 &rarr; 연간 계약</div>
+            <div style="font-size:11px; color:#3730a3;">세일즈 사이클 4~6주</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:16px;">리퍼럴 파트너 모델 (Pro 이상)</div>
+      <div style="background:linear-gradient(135deg,#eef2ff,#f5f3ff); border:1px solid #c7d2fe; border-radius:14px; padding:24px;">
+        <div class="flow" style="margin-bottom:16px;">
+          <div style="flex:1; text-align:center; font-size:12px; font-weight:600; padding:12px; background:#fff; border-radius:8px; border:1px solid #c7d2fe;">회계법인이<br>고객사 소개</div>
+          <div style="font-size:14px; color:#818cf8;">&rarr;</div>
+          <div style="flex:1; text-align:center; font-size:12px; font-weight:600; padding:12px; background:#fff; border-radius:8px; border:1px solid #c7d2fe;">QETTA가<br>직접 서비스</div>
+          <div style="font-size:14px; color:#818cf8;">&rarr;</div>
+          <div style="flex:1; text-align:center; font-size:12px; font-weight:600; padding:12px; background:#fff; border-radius:8px; border:1px solid #c7d2fe;">정산 완료 기준<br>수수료 지급</div>
+        </div>
+        <div style="font-size:12px; color:#4338ca; line-height:2;">
+          &bull; 수수료: 고객사 결제 건당 금액의 <strong>15~20%</strong><br>
+          &bull; 독립성: 감사/세무 독립성 침해 없음<br>
+          &bull; 전략적 의미: 법인이 고객에 부가가치 제공 &rarr; 자발적 확산
+        </div>
+      </div>
+
+      <div style="margin-top:16px; font-size:14px; font-weight:700; margin-bottom:8px;">핵심 메시지</div>
+      <div style="font-size:12px; line-height:2; color:#475569;">
+        <strong>대표이사</strong>: &ldquo;환수 1건 방지 = 3,000만원+ 리스크 회피&rdquo;<br>
+        <strong>정산 담당자</strong>: &ldquo;반려 없이 한 번에 통과. 15분이면 첫 검수&rdquo;<br>
+        <strong>감사 담당자</strong>: &ldquo;점검 당일 즉시 대응. 자료 정리 시간 제로&rdquo;
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">09</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 10: COMPETITIVE LANDSCAPE -->
+<!-- ============================================================ -->
+<div class="slide bg-light">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <span class="label label-white">Competition &amp; Moat</span>
+  <h2 class="title">경쟁 = <span class="text-gradient">없음</span>. 방어 가능성 = <span class="text-gradient">5중</span>.</h2>
+
+  <div class="split mt-24" style="gap:48px;">
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:12px;">경쟁 지도</div>
+      <table class="deck-table" style="font-size:12px;">
+        <tr><th>구분</th><th>플레이어</th><th>QETTA 대비</th></tr>
+        <tr>
+          <td><span class="badge badge-red">직접 경쟁</span></td>
+          <td><strong>없음 (0개)</strong></td>
+          <td>국내 시장 완전 공백</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-yellow">간접</span></td>
+          <td>정산 대행 업체</td>
+          <td>건당 50~100만 vs QETTA 18~25만</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-yellow">간접</span></td>
+          <td>내부 수작업 (엑셀)</td>
+          <td>속인화 리스크. 반려 반복.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">인접</span></td>
+          <td>e나라도움</td>
+          <td>정산 검수 기능 없음</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">인접</span></td>
+          <td>ERP (더존, SAP 등)</td>
+          <td>보조금 정산 모듈 없음</td>
+        </tr>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:12px;">5중 방어벽 (Moat)</div>
+      <ol class="moat-list">
+        <li>
+          <div class="moat-num">1</div>
+          <div><strong>부처별 정산 규칙 DB</strong><div style="font-size:12px; color:#64748b;">축적 &rarr; 정확도 향상. 신규 진입자 6개월+.</div></div>
+        </li>
+        <li>
+          <div class="moat-num">2</div>
+          <div><strong>법인별 커스텀 룰</strong><div style="font-size:12px; color:#64748b;">자체 체크리스트 입력 &rarr; 전환 비용 상승.</div></div>
+        </li>
+        <li>
+          <div class="moat-num">3</div>
+          <div><strong>리퍼럴 네트워크</strong><div style="font-size:12px; color:#64748b;">Pro 법인 &rarr; 고객사 소개 &rarr; 네트워크 효과.</div></div>
+        </li>
+        <li>
+          <div class="moat-num">4</div>
+          <div><strong>감사 이력 아카이브</strong><div style="font-size:12px; color:#64748b;">사용 기간 &uarr; &rarr; 이탈 비용 &uarr;.</div></div>
+        </li>
+        <li>
+          <div class="moat-num">5</div>
+          <div><strong>PII 처리 신뢰</strong><div style="font-size:12px; color:#64748b;">처리 실적 + 로그 투명성 = 신뢰 자산.</div></div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="slide-num">10</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 11: 3-YEAR FINANCIALS -->
+<!-- ============================================================ -->
+<div class="slide bg-white">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <span class="label label-white">Financials</span>
+  <h2 class="title">3개년 재무 계획</h2>
+
+  <div class="split mt-24" style="gap:40px; align-items:start;">
+    <div>
+      <table class="deck-table" style="font-size:12px;">
+        <tr><th>항목</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr>
+        <tr><td><strong>계약 법인</strong></td><td class="num">5개</td><td class="num">12개</td><td class="num">25개</td></tr>
+        <tr style="font-size:11px; color:#94a3b8;"><td>&nbsp;&nbsp;Starter / Pro / Firm</td><td class="num">3/2/0</td><td class="num">5/6/1</td><td class="num">8/13/4</td></tr>
+        <tr><td><strong>기본료 매출</strong></td><td class="num">2,940만</td><td class="num">9,828만</td><td class="num">24,708만</td></tr>
+        <tr><td><strong>건당 추가 매출</strong></td><td class="num">500만</td><td class="num">3,200만</td><td class="num">8,300만</td></tr>
+        <tr style="background:#ecfdf5;"><td><strong>총 매출</strong></td><td class="num" style="font-weight:800;">3,440만</td><td class="num" style="font-weight:800;">1.3억</td><td class="num" style="font-weight:800;">3.3억</td></tr>
+        <tr><td><strong>운영비 (인건비 제외)</strong></td><td class="num">300만</td><td class="num">700만</td><td class="num">1,300만</td></tr>
+        <tr><td><strong>인건비</strong></td><td class="num">0 (대표 겸임)</td><td class="num">4,000만 (1명)</td><td class="num">1.2억 (3명)</td></tr>
+        <tr style="background:#f1f5f9;"><td><strong>영업이익</strong></td><td class="num" style="font-weight:800;">3,140만</td><td class="num" style="font-weight:800;">8,328만</td><td class="num" style="font-weight:800;">1.97억</td></tr>
+        <tr><td><strong>영업이익률</strong></td><td class="num" style="font-weight:700; color:#10b981;">91.3%</td><td class="num" style="font-weight:700; color:#10b981;">63.9%</td><td class="num" style="font-weight:700; color:#10b981;">59.7%</td></tr>
+      </table>
+      <div style="font-size:10px; color:#94a3b8; margin-top:6px;">* Y1은 H2부터 매출 발생 (H1 파일럿 무료). 인건비는 대표 급여 제외.</div>
+    </div>
+
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:12px;">Unit Economics (Year 3)</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
+          <div style="font-size:22px; font-weight:900; color:#4f46e5;">1,320만</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">ARPA</div>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
+          <div style="font-size:22px; font-weight:900; color:#4f46e5;">~150만</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">CAC</div>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
+          <div style="font-size:22px; font-weight:900; color:#10b981;">~4,000만</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">LTV (3년)</div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(79,70,229,0.06),rgba(124,58,237,0.08)); border:1.5px solid rgba(79,70,229,0.2); border-radius:10px; padding:16px; text-align:center;">
+          <div style="font-size:22px; font-weight:900; color:#4f46e5;">27x</div>
+          <div style="font-size:11px; color:#4f46e5; margin-top:2px;">LTV / CAC</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; font-size:14px; font-weight:700; margin-bottom:8px;">BEP (손익분기)</div>
+      <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:16px;">
+        <div style="font-size:12px; line-height:2; color:#065f46;">
+          <strong>인건비 제외</strong>: Y1 Q3 (유료 전환 1법인)<br>
+          <strong>인건비 포함</strong>: Y2 상반기 (누적 12법인)<br>
+          <strong>핵심</strong>: 법인 1개 추가 = 거의 순수 마진
+        </div>
+      </div>
+
+      <div style="margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; text-align:center;">
+          <div style="font-size:14px; font-weight:800; color:#4f46e5;">~1.0%/월</div>
+          <div style="font-size:10px; color:#64748b;">해지율</div>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; text-align:center;">
+          <div style="font-size:14px; font-weight:800; color:#4f46e5;">125%</div>
+          <div style="font-size:10px; color:#64748b;">NRR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">11</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 12: ROADMAP -->
+<!-- ============================================================ -->
+<div class="slide bg-dark">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <span class="label label-dark">Roadmap</span>
+  <h2 class="title">MVP 12주 + Post-MVP 로드맵</h2>
+
+  <div class="split mt-32" style="gap:48px; align-items:start;">
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:16px; opacity:0.7;">MVP 개발 (12주)</div>
+      <div style="display:grid; gap:12px;">
+        <div class="card">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+            <div style="padding:4px 10px; border-radius:6px; background:rgba(79,70,229,0.15); font-size:11px; font-weight:700; color:#818cf8;">Phase 0</div>
+            <span style="font-size:12px; opacity:0.5;">1~2주</span>
+          </div>
+          <div style="font-size:13px; font-weight:600;">기반 구축</div>
+          <div style="font-size:11px; opacity:0.5; margin-top:4px;">DB 스키마 + PII 마스킹 + 파일 업로드 + firm 등록 API</div>
+        </div>
+        <div class="card">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+            <div style="padding:4px 10px; border-radius:6px; background:rgba(124,58,237,0.15); font-size:11px; font-weight:700; color:#a78bfa;">Phase 1</div>
+            <span style="font-size:12px; opacity:0.5;">3~6주</span>
+          </div>
+          <div style="font-size:13px; font-weight:600;">QA 엔진</div>
+          <div style="font-size:11px; opacity:0.5; margin-top:4px;">증빙 업로드 + 3단계 QA + 패키지 생성 + 감사 추적</div>
+        </div>
+        <div class="card">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+            <div style="padding:4px 10px; border-radius:6px; background:rgba(16,185,129,0.15); font-size:11px; font-weight:700; color:#34d399;">Phase 2</div>
+            <span style="font-size:12px; opacity:0.5;">7~12주</span>
+          </div>
+          <div style="font-size:13px; font-weight:600;">파일럿</div>
+          <div style="font-size:11px; opacity:0.5; margin-top:4px;">Web Portal (최소 UI) + 부처별 규칙 3개 + 과금/사용량 API</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; font-size:14px; font-weight:700; margin-bottom:8px; opacity:0.7;">부처 확장 순서</div>
+      <div style="display:flex; gap:8px;">
+        <div style="padding:6px 14px; border-radius:8px; background:rgba(79,70,229,0.15); font-size:12px; font-weight:600; color:#818cf8;">1. 중기부</div>
+        <div style="padding:6px 14px; border-radius:8px; background:rgba(124,58,237,0.1); font-size:12px; font-weight:600; color:#a78bfa;">2. 복지부</div>
+        <div style="padding:6px 14px; border-radius:8px; background:rgba(168,85,247,0.1); font-size:12px; font-weight:600; color:#c084fc;">3. 과기부</div>
+        <div style="padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.06); font-size:12px; font-weight:500; opacity:0.4;">4+ 산업부, 환경부...</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:16px; opacity:0.7;">Post-MVP</div>
+      <div style="display:grid; gap:8px;">
+        <div style="display:flex; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:12px; font-weight:700; color:#818cf8; min-width:60px;">Y1 Q3</div>
+          <div style="font-size:12px; opacity:0.6;">파일럿 5법인 완료 &rarr; 유료 전환. 가격 확정.</div>
+        </div>
+        <div style="display:flex; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:12px; font-weight:700; color:#818cf8; min-width:60px;">Y1 Q4</div>
+          <div style="font-size:12px; opacity:0.6;">Starter/Pro 10건+ 정산 완료. 리퍼럴 1호 계약.</div>
+        </div>
+        <div style="display:flex; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:12px; font-weight:700; color:#a78bfa; min-width:60px;">Y2 H1</div>
+          <div style="font-size:12px; opacity:0.6;">부처 5개 확장. 커스텀 룰 고도화. 개발 1명 채용.</div>
+        </div>
+        <div style="display:flex; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:12px; font-weight:700; color:#a78bfa; min-width:60px;">Y2 H2</div>
+          <div style="font-size:12px; opacity:0.6;">법인 12개. Firm 1호 계약. NRR 120%+.</div>
+        </div>
+        <div style="display:flex; gap:16px; padding:14px 0;">
+          <div style="font-size:12px; font-weight:700; color:#c084fc; min-width:60px;">Y3</div>
+          <div style="font-size:12px; opacity:0.6;">법인 25개. 리퍼럴 자체 확산. CS 채용. Series A 검토.</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px; border-color:rgba(248,113,113,0.2); background:rgba(248,113,113,0.05);">
+        <div style="font-size:12px; font-weight:700; color:#f87171; margin-bottom:6px;">Kill Criteria</div>
+        <div style="font-size:11px; opacity:0.5; line-height:1.8;">
+          &bull; 파일럿 10법인 중 유료 전환 &lt;2개 (&lt;20%)<br>
+          &bull; Y1 종료 시 월 매출 &lt;200만원<br>
+          &bull; PII 사고 발생 시 즉시 중단
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">12</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 13: TEAM + FUNDING -->
+<!-- ============================================================ -->
+<div class="slide bg-white">
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <div class="split" style="gap:60px; align-items:start;">
+    <div>
+      <span class="label label-white">Team</span>
+      <h2 class="title" style="font-size:30px;">팀 구성</h2>
+
+      <div style="margin-top:24px; display:grid; gap:12px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:20px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; font-size:14px; display:flex; align-items:center; justify-content:center;">&#128104;&#8205;&#128187;</div>
+            <div>
+              <div style="font-size:14px; font-weight:700;">[대표자명]</div>
+              <div style="font-size:11px; color:#64748b;">대표 / 개발 / 세일즈</div>
+            </div>
+            <span class="badge badge-green" style="margin-left:auto;">현재</span>
+          </div>
+          <div style="font-size:12px; color:#475569;">풀스택 개발 + 제품 기획 + 세일즈. Y1은 1인 운영.</div>
+        </div>
+        <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:12px; padding:16px 20px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="font-size:13px; font-weight:600;">백엔드 개발</div>
+            <span class="badge badge-yellow" style="margin-left:auto;">Y2 H1</span>
+          </div>
+        </div>
+        <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:12px; padding:16px 20px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="font-size:13px; font-weight:600;">CS / 세일즈</div>
+            <span class="badge badge-yellow" style="margin-left:auto;">Y2 H2</span>
+          </div>
+        </div>
+        <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:12px; padding:16px 20px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="font-size:13px; font-weight:600;">프론트엔드</div>
+            <span class="badge badge-yellow" style="margin-left:auto;">Y3</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:6px;">자문 네트워크 (비상근)</div>
+        <div style="font-size:11px; color:#64748b; line-height:1.8;">
+          &bull; 파일럿 법인 내 정산 실무자 &rarr; 제품 피드백<br>
+          &bull; 외부 법무법인 &rarr; 약관/PIPA 검토<br>
+          &bull; 보안 감사 &rarr; 연 1회 외부 점검
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <span class="label label-white">Funding</span>
+      <h2 class="title" style="font-size:30px;">자금 운용</h2>
+
+      <div style="margin-top:24px; background:linear-gradient(135deg,#ecfdf5,#f0fdf4); border:1px solid #a7f3d0; border-radius:14px; padding:24px;">
+        <div style="font-size:16px; font-weight:800; color:#065f46; margin-bottom:4px;">부트스트랩 우선</div>
+        <div style="font-size:13px; color:#047857; line-height:1.8;">
+          Y1 필요 자금 <strong>500만원</strong>. 매출 = 거의 순이익 구조.<br>
+          외부 투자 없이 자체 현금 확보 가능.
+        </div>
+      </div>
+
+      <div style="margin-top:20px; font-size:14px; font-weight:700; margin-bottom:12px;">Y1 초기 투자 (500만원)</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; text-align:center;">
+          <div style="font-size:20px; font-weight:900; color:#4f46e5;">180만</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">서버/인프라 (36%)</div>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; text-align:center;">
+          <div style="font-size:20px; font-weight:900; color:#4f46e5;">200만</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">법무/컴플라이언스 (40%)</div>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; text-align:center;">
+          <div style="font-size:20px; font-weight:900; color:#4f46e5;">70만</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">SaaS 도구 (14%)</div>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; text-align:center;">
+          <div style="font-size:20px; font-weight:900; color:#4f46e5;">50만</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">마케팅/세일즈 (10%)</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; font-size:14px; font-weight:700; margin-bottom:8px;">자금 조달 전략</div>
+      <div style="font-size:12px; color:#475569; line-height:2;">
+        <strong>Y1</strong>: 자체 자금 500만 + H2 매출<br>
+        <strong>Y2</strong>: 매출 기반 채용. 필요 시 정책자금 활용.<br>
+        <strong>Y3</strong>: 25법인 확보 후 Series A 검토 가능<br>
+        <span style="font-size:11px; color:#94a3b8;">(ARR 3.3억, NRR 125%, LTV/CAC 27x)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">13</div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SLIDE 14: CLOSING — ASK -->
+<!-- ============================================================ -->
+<div class="slide bg-gradient" style="justify-content:center; text-align:center;">
+  <div class="deco-circle deco-1"></div>
+  <div class="deco-circle deco-2"></div>
+  <div class="slide-logo"><span>QETTA</span></div>
+  <div class="conf-mark">Confidential</div>
+
+  <div style="position:relative; z-index:1;">
+    <h2 class="mega" style="max-width:800px; margin:0 auto;">
+      정산 특화 SaaS <span style="color:#34d399;">국내 0개.</span><br>
+      지금이 진입 타이밍입니다.
+    </h2>
+
+    <div style="margin-top:40px; display:grid; grid-template-columns:repeat(5,1fr); gap:16px; max-width:900px; margin-left:auto; margin-right:auto;">
+      <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:24px 16px;">
+        <div style="font-size:11px; opacity:0.4; margin-bottom:6px;">시장</div>
+        <div style="font-size:18px; font-weight:900;">~60억/년</div>
+        <div style="font-size:10px; opacity:0.35; margin-top:2px;">경쟁사 0개</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:24px 16px;">
+        <div style="font-size:11px; opacity:0.4; margin-bottom:6px;">마진</div>
+        <div style="font-size:18px; font-weight:900; color:#34d399;">99.7%</div>
+        <div style="font-size:10px; opacity:0.35; margin-top:2px;">건당 원가 720원</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:24px 16px;">
+        <div style="font-size:11px; opacity:0.4; margin-bottom:6px;">LTV/CAC</div>
+        <div style="font-size:18px; font-weight:900; color:#818cf8;">27x</div>
+        <div style="font-size:10px; opacity:0.35; margin-top:2px;">건강한 SaaS (&gt;3x)</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:24px 16px;">
+        <div style="font-size:11px; opacity:0.4; margin-bottom:6px;">Y3 매출</div>
+        <div style="font-size:18px; font-weight:900;">3.3억</div>
+        <div style="font-size:10px; opacity:0.35; margin-top:2px;">법인 25개</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:24px 16px;">
+        <div style="font-size:11px; opacity:0.4; margin-bottom:6px;">초기 자금</div>
+        <div style="font-size:18px; font-weight:900;">500만</div>
+        <div style="font-size:10px; opacity:0.35; margin-top:2px;">부트스트랩 가능</div>
+      </div>
+    </div>
+
+    <div style="margin-top:48px;">
+      <div style="display:inline-flex; align-items:center; gap:10px; background:linear-gradient(135deg,#4f46e5,#7c3aed); padding:18px 40px; border-radius:14px; font-size:17px; font-weight:700;">
+        파일럿 3건 무료 &mdash; 효과를 먼저 확인하세요 &rarr;
+      </div>
+    </div>
+
+    <div style="margin-top:24px; display:flex; gap:32px; justify-content:center; flex-wrap:wrap;">
+      <div style="font-size:13px; opacity:0.5;">
+        <span style="opacity:0.6;">Email</span>&nbsp;&nbsp;partner@qetta.kr
+      </div>
+      <div style="font-size:13px; opacity:0.5;">
+        <span style="opacity:0.6;">Version</span>&nbsp;&nbsp;v1.0 Pilot &middot; 2026.02
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-num">14</div>
+</div>
+
+
+</body>
+</html>
