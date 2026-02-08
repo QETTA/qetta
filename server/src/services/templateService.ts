@@ -139,10 +139,19 @@ export async function renderTemplate(
   if (format === 'pdf') {
     // Convert DOCX buffer to HTML then PDF
     try {
-      const mammothResult = await (await import('mammoth')).convertToHtml({ buffer: buf });
+      // dynamic import — types may not exist in test environments
+      // @ts-expect-error - dynamic import may not have types in test env
+      const mammoth = await import('mammoth');
+      const mammothResult = await mammoth.convertToHtml({ buffer: buf });
       const html = mammothResult.value;
 
-      const browser = await (await import('puppeteer')).launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+      // @ts-expect-error - dynamic import may not have types in test env
+      const puppeteer = await import('puppeteer');
+      // Compose reliable Puppeteer args for CI/containers and allow overriding via env
+      const extraArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process'];
+      const envArgs = process.env.CI_PUPPETEER_ARGS ? process.env.CI_PUPPETEER_ARGS.split(' ') : [];
+      const args = envArgs.concat(extraArgs);
+      const browser = await puppeteer.launch({ args });
       const page = await browser.newPage();
       await page.setContent(html, { waitUntil: 'networkidle0' });
       const pdfBuf = await page.pdf({ format: 'A4' });

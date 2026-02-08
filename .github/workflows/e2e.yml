@@ -1,0 +1,54 @@
+name: E2E (ClamAV + Puppeteer)
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ main ]
+
+jobs:
+  e2e:
+    name: E2E (ClamAV + Puppeteer)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Restore Puppeteer chromium cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache
+            node_modules/puppeteer/.local-chromium
+          key: chromium-cache-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            chromium-cache-${{ runner.os }}-
+
+      - name: Install system deps (Puppeteer + ClamAV)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates fonts-liberation fonts-noto-color-emoji libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libgbm1 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libxss1 libasound2 wget unzip
+          sudo apt-get install -y clamav clamav-daemon || true
+        continue-on-error: true
+
+      - name: Update ClamAV DB (best-effort)
+        run: |
+          for i in 1 2 3; do sudo freshclam && break || sleep 5; done
+        continue-on-error: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run E2E tests (best-effort)
+        env:
+          CLAMAV_SCAN_ENABLED: 'true'
+          CLAMAV_COMMAND: 'clamscan'
+          CI: 'true'
+        run: npm run test:e2e
+        continue-on-error: true
