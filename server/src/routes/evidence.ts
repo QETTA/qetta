@@ -36,6 +36,26 @@ evidenceRouter.post('/upload', upload.single('file'), async (req: Request, res: 
     return;
   }
 
+  // Virus scan
+  try {
+    const { scanBuffer } = await import('../services/virusScanService.js');
+    const scan = await scanBuffer(file.buffer);
+    if (!scan.clean) {
+      await auditService.logAction({
+        project_id: projectId,
+        firm_id: firmId,
+        actor_id: firmId,
+        action: 'evidence.quarantined',
+        detail: { filename: file.originalname, reason: scan.reason },
+      });
+      res.status(400).json({ error: 'File quarantined: virus detected' });
+      return;
+    }
+  } catch (err) {
+    // If scanning fails, log and continue (fail-open)
+    logger.warn({ err }, 'Virus scanning failed; proceeding with upload');
+  }
+
   // PII 탐지 (텍스트 기반 - PDF/docx 파싱은 추후 구현)
   const textContent = file.buffer.toString('utf-8');
   const { detections } = piiService.maskText(textContent);
