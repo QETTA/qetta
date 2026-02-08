@@ -82,3 +82,29 @@ jobs:
           name: e2e-artifacts
           path: artifacts
           if-no-files-found: warn
+
+      - name: Comment E2E artifacts on PR
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const runId = process.env.GITHUB_RUN_ID;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const arts = await github.rest.actions.listWorkflowRunArtifacts({ owner, repo, run_id: runId });
+            const art = arts.data.artifacts.find((a) => a.name === 'e2e-artifacts');
+            if (!art) {
+              core.info('No e2e-artifacts found for this run');
+              return;
+            }
+
+            const downloadUrl = art.archive_download_url;
+            const prNumber = context.payload.pull_request?.number;
+            if (!prNumber) {
+              core.info('No pull_request number in payload; skipping comment');
+              return;
+            }
+
+            const body = `E2E artifacts for workflow run [#${runId}](${process.env.GITHUB_SERVER_URL}/${owner}/${repo}/actions/runs/${runId}) are available: [download zip](${downloadUrl})`;
+            await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
