@@ -16,6 +16,7 @@ import { auditRouter } from './routes/audit.js';
 import { firmRouter } from './routes/firm.js';
 import { rulesRouter } from './routes/rules.js';
 import { templatesRouter } from './routes/templates.js';
+import { quarantineRouter } from './routes/quarantine.js';
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use('/api/qetta/v1/audit', ...qettaAuth, auditRouter);
 app.use('/api/qetta/v1/firm', ...qettaAuth, firmRouter);
 app.use('/api/qetta/v1/rules', ...qettaAuth, rulesRouter);
 app.use('/api/qetta/v1/templates', ...qettaAuth, templatesRouter);
+app.use('/api/qetta/v1/quarantine', ...qettaAuth, quarantineRouter);
 
 // --- Error handler ---
 app.use(errorHandler);
