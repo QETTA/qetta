@@ -1,0 +1,48 @@
+{
+  "name": "qetta-dev-panel",
+  "displayName": "QETTA Dev Panel",
+  "publisher": "qetta",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "activationEvents": ["onView:qettaPanel"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "qetta",
+          "title": "QETTA"
+        }
+      ]
+    },
+    "views": {
+      "qetta": [
+        {
+          "id": "qettaPanel",
+          "name": "Dev Panel"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "qetta.startDev",
+        "title": "Start Dev Server"
+      },
+      {
+        "command": "qetta.openCompass",
+        "title": "Copy MongoDB Connection String"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p .",
+    "watch": "tsc -w -p ."
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/vscode": "^1.80.0"
+  }
+}
