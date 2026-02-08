@@ -6,3 +6,15 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    depends_on:
+      - clamav
+
+  clamav:
+    image: mkodockx/docker-clamav:alpine
+    container_name: clamav
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "clamdscan --version || exit 1"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
