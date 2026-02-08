@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 
 export type ProjectStatus = 'draft' | 'uploading' | 'qa_running' | 'reviewed' | 'approved' | 'archived';
-export type EvidenceStatus = 'uploaded' | 'pii_masked' | 'validated' | 'rejected' | 'approved';
+export type EvidenceStatus = 'uploaded' | 'pii_masked' | 'validated' | 'rejected' | 'approved' | 'quarantined';
 export type PlanType = 'trial' | 'starter' | 'pro' | 'firm';
 
 export interface SettlementProject {
@@ -49,6 +49,8 @@ export interface SettlementEvidence {
   pii_detected: boolean;
   pii_fields?: string[];
   qa_notes?: string[];
+  quarantine_path?: string;
+  quarantine_reason?: string;
   created_at: Date;
 }
 

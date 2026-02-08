@@ -14,6 +14,11 @@ export interface ScanResult {
 }
 
 export async function scanBuffer(buffer: Buffer): Promise<ScanResult> {
+  // Test override: allow tests to force scan result via QETTA_TEST_FORCE_SCAN
+  const forced = process.env.QETTA_TEST_FORCE_SCAN;
+  if (forced === 'infected') return { clean: false, reason: 'FORCED_TEST_INFECTED' };
+  if (forced === 'clean') return { clean: true };
+
   // Check runtime env directly so tests can toggle scanning
   const scanEnabled = (process.env.CLAMAV_SCAN_ENABLED || '').toString() === 'true';
   if (!scanEnabled) {
