@@ -463,7 +463,7 @@ export async function waitForJob(
       }
     })
 
-    events.on('failed', ({ jobId: failedId, failedReason }) => {
+    events.on('failed', ({ jobId: failedId, failedReason }: { jobId: string; failedReason: string }) => {
       if (failedId === jobId) {
         clearTimeout(timer)
         resolve({
