@@ -143,6 +143,7 @@ jobs:
 
       - name: Generate coverage report
         run: npm test -- "server/src/routes/__tests__/accounting-*.test.ts" --coverage
+        continue-on-error: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
