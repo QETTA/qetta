@@ -870,7 +870,7 @@ model KidsmapContentBlock {
   freshness    FreshnessLevel @default(fresh)
 
   // 관련 장소 블록 참조
-  relatedPlaceId String? @db.Uuid
+  relatedPlaceId String?
   relatedPlace   KidsmapPlaceBlock? @relation(fields: [relatedPlaceId], references: [id], onDelete: SetNull)
 
   // 중복 체크용 해시
