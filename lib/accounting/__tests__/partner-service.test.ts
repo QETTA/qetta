@@ -8,7 +8,7 @@ import { createHash } from 'crypto'
 import { factories, createMockPrisma } from './utils/test-helpers'
 
 // Mock Prisma
-const mockPrisma = createMockPrisma()
+const // Mock setup done above
 vi.mock('@/lib/db/prisma', () => ({
   prisma: mockPrisma
 }))
@@ -28,14 +28,14 @@ const createPartner = async (data: {
   }
 
   // Check for duplicates
-  const existing = await mockPrisma.referralPartner.findUnique({
+  const existing = await mockPrismaInstance.referralPartner.findUnique({
     where: { businessNumber: data.businessNumber }
   })
   if (existing) {
     return { success: false, error: 'Business number already registered' }
   }
 
-  const partner = await mockPrisma.referralPartner.create({ data })
+  const partner = await mockPrismaInstance.referralPartner.create({ data })
   return { success: true, data: partner }
 }
 
@@ -50,7 +50,7 @@ const createCafe = async (data: {
   }
 
   // Verify partner exists and is active
-  const partner = await mockPrisma.referralPartner.findUnique({
+  const partner = await mockPrismaInstance.referralPartner.findUnique({
     where: { id: data.partnerId }
   })
   if (!partner) {
@@ -60,7 +60,7 @@ const createCafe = async (data: {
     return { success: false, error: 'Partner is not active' }
   }
 
-  const cafe = await mockPrisma.referralCafe.create({ data })
+  const cafe = await mockPrismaInstance.referralCafe.create({ data })
   return { success: true, data: cafe }
 }
 
@@ -80,7 +80,7 @@ const generateApiKey = async (data: {
   const keyHash = createHash('sha256').update(rawKey).digest('hex')
   const keyPrefix = rawKey.slice(0, 12)
 
-  const apiKey = await mockPrisma.partnerApiKey.create({
+  const apiKey = await mockPrismaInstance.partnerApiKey.create({
     data: {
       partnerId: data.partnerId,
       keyHash,
@@ -104,7 +104,7 @@ const getPartnerStats = async (partnerId: string, useRawSQL = true) => {
   if (useRawSQL) {
     // Optimized: Single raw SQL query (eliminates N+1)
     const startTime = Date.now()
-    const result = await mockPrisma.$queryRaw`
+    const result = await mockPrismaInstance.$queryRaw`
       SELECT
         COUNT(DISTINCT c.id)::int as total_cafes,
         COUNT(DISTINCT rl.id)::int as total_links,
@@ -127,19 +127,19 @@ const getPartnerStats = async (partnerId: string, useRawSQL = true) => {
   } else {
     // Naive: Multiple queries (N+1 problem)
     const startTime = Date.now()
-    const partner = await mockPrisma.referralPartner.findUnique({ where: { id: partnerId } })
-    const cafes = await mockPrisma.referralCafe.findMany({ where: { partnerId, status: 'ACTIVE' } })
+    const partner = await mockPrismaInstance.referralPartner.findUnique({ where: { id: partnerId } })
+    const cafes = await mockPrismaInstance.referralCafe.findMany({ where: { partnerId, status: 'ACTIVE' } })
 
     let totalLinks = 0
     let totalConversions = 0
     let totalCommission = 0
 
     for (const cafe of cafes) {
-      const links = await mockPrisma.referralLink.findMany({ where: { cafeId: cafe.id, status: 'ACTIVE' } })
+      const links = await mockPrismaInstance.referralLink.findMany({ where: { cafeId: cafe.id, status: 'ACTIVE' } })
       totalLinks += links.length
 
       for (const link of links) {
-        const conversions = await mockPrisma.referralConversion.findMany({ where: { linkId: link.id } })
+        const conversions = await mockPrismaInstance.referralConversion.findMany({ where: { linkId: link.id } })
         totalConversions += conversions.length
         totalCommission += conversions.reduce((sum, c) => sum + Number(c.commissionAmount), 0)
       }
@@ -161,7 +161,7 @@ const getPartnerStats = async (partnerId: string, useRawSQL = true) => {
 }
 
 const updatePartnerStatus = async (partnerId: string, status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED') => {
-  const partner = await mockPrisma.referralPartner.update({
+  const partner = await mockPrismaInstance.referralPartner.update({
     where: { id: partnerId },
     data: { status }
   })
@@ -175,14 +175,14 @@ describe('Partner Service - N+1 Query Elimination (CRITICAL)', () => {
 
   it('uses raw SQL for partner stats (single query)', async () => {
     const partnerId = 'partner-123'
-    mockPrisma.$queryRaw.mockResolvedValue([
+    mockPrismaInstance.$queryRaw.mockResolvedValue([
       { total_cafes: 5, total_links: 20, total_conversions: 100, total_commission: 1500 }
     ])
 
     const result = await getPartnerStats(partnerId, true)
 
     expect(result.success).toBe(true)
-    expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(1)
+    expect(mockPrismaInstance.$queryRaw).toHaveBeenCalledTimes(1)
     expect(result.data.total_cafes).toBe(5)
     expect(result.data.total_conversions).toBe(100)
   })
@@ -202,24 +202,24 @@ describe('Partner Service - N+1 Query Elimination (CRITICAL)', () => {
       factories.conversion('user-2', 'link-2', { commissionAmount: 10 })
     ]
 
-    mockPrisma.referralPartner.findUnique.mockResolvedValue(factories.partner({ id: partnerId }))
-    mockPrisma.referralCafe.findMany.mockResolvedValue(cafes)
-    mockPrisma.referralLink.findMany.mockResolvedValueOnce([links[0]]).mockResolvedValueOnce([links[1]])
-    mockPrisma.referralConversion.findMany.mockResolvedValueOnce([conversions[0]]).mockResolvedValueOnce([conversions[1]])
+    mockPrismaInstance.referralPartner.findUnique.mockResolvedValue(factories.partner({ id: partnerId }))
+    mockPrismaInstance.referralCafe.findMany.mockResolvedValue(cafes)
+    mockPrismaInstance.referralLink.findMany.mockResolvedValueOnce([links[0]]).mockResolvedValueOnce([links[1]])
+    mockPrismaInstance.referralConversion.findMany.mockResolvedValueOnce([conversions[0]]).mockResolvedValueOnce([conversions[1]])
 
     const result = await getPartnerStats(partnerId, false)
 
     expect(result.success).toBe(true)
     // 1 partner query + 1 cafes query + 2 links queries + 2 conversions queries = 6 queries
-    expect(mockPrisma.referralPartner.findUnique).toHaveBeenCalledTimes(1)
-    expect(mockPrisma.referralCafe.findMany).toHaveBeenCalledTimes(1)
-    expect(mockPrisma.referralLink.findMany).toHaveBeenCalledTimes(2)
-    expect(mockPrisma.referralConversion.findMany).toHaveBeenCalledTimes(2)
+    expect(mockPrismaInstance.referralPartner.findUnique).toHaveBeenCalledTimes(1)
+    expect(mockPrismaInstance.referralCafe.findMany).toHaveBeenCalledTimes(1)
+    expect(mockPrismaInstance.referralLink.findMany).toHaveBeenCalledTimes(2)
+    expect(mockPrismaInstance.referralConversion.findMany).toHaveBeenCalledTimes(2)
   })
 
   it('raw SQL query completes in <100ms (performance target)', async () => {
     const partnerId = 'partner-123'
-    mockPrisma.$queryRaw.mockImplementation(async () => {
+    mockPrismaInstance.$queryRaw.mockImplementation(async () => {
       // Simulate realistic database query time
       await new Promise(resolve => setTimeout(resolve, 50))
       return [{ total_cafes: 10, total_links: 50, total_conversions: 200, total_commission: 5000 }]
@@ -233,7 +233,7 @@ describe('Partner Service - N+1 Query Elimination (CRITICAL)', () => {
 
   it('handles partner with zero data correctly', async () => {
     const partnerId = 'partner-empty'
-    mockPrisma.$queryRaw.mockResolvedValue([])
+    mockPrismaInstance.$queryRaw.mockResolvedValue([])
 
     const result = await getPartnerStats(partnerId, true)
 
@@ -252,7 +252,7 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
 
   it('generates API key with SHA-256 hash', async () => {
     const partnerId = 'partner-123'
-    mockPrisma.partnerApiKey.create.mockResolvedValue({
+    mockPrismaInstance.partnerApiKey.create.mockResolvedValue({
       id: 'key-123',
       partnerId,
       keyHash: createHash('sha256').update('pk_live_test123').digest('hex'),
@@ -278,7 +278,7 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
     const partnerId = 'partner-123'
     const keyHash = createHash('sha256').update('pk_live_secret123').digest('hex')
 
-    mockPrisma.partnerApiKey.create.mockResolvedValue({
+    mockPrismaInstance.partnerApiKey.create.mockResolvedValue({
       id: 'key-123',
       partnerId,
       keyHash,
@@ -298,7 +298,7 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
     expect(result.data.rawKey).toBeDefined()
 
     // Simulate database lookup (raw key not stored)
-    const dbRecord = await mockPrisma.partnerApiKey.findUnique({ where: { id: 'key-123' } })
+    const dbRecord = await mockPrismaInstance.partnerApiKey.findUnique({ where: { id: 'key-123' } })
     expect(dbRecord).not.toHaveProperty('rawKey')
   })
 
@@ -306,7 +306,7 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
     const rawKey = 'pk_live_abc123xyz789'
     const keyHash = createHash('sha256').update(rawKey).digest('hex')
 
-    mockPrisma.partnerApiKey.findUnique.mockResolvedValue({
+    mockPrismaInstance.partnerApiKey.findUnique.mockResolvedValue({
       id: 'key-123',
       partnerId: 'partner-123',
       keyHash,
@@ -318,7 +318,7 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
 
     // Simulate authentication check
     const providedKeyHash = createHash('sha256').update(rawKey).digest('hex')
-    const apiKey = await mockPrisma.partnerApiKey.findUnique({ where: { keyHash: providedKeyHash } })
+    const apiKey = await mockPrismaInstance.partnerApiKey.findUnique({ where: { keyHash: providedKeyHash } })
 
     expect(apiKey).toBeDefined()
     expect(apiKey?.keyHash).toBe(keyHash)
@@ -328,7 +328,7 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
     const rawKey = 'pk_live_expired123'
     const keyHash = createHash('sha256').update(rawKey).digest('hex')
 
-    mockPrisma.partnerApiKey.findUnique.mockResolvedValue({
+    mockPrismaInstance.partnerApiKey.findUnique.mockResolvedValue({
       id: 'key-123',
       partnerId: 'partner-123',
       keyHash,
@@ -338,7 +338,7 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
       expiresAt: new Date(Date.now() - 24 * 60 * 60 * 1000) // Expired yesterday
     })
 
-    const apiKey = await mockPrisma.partnerApiKey.findUnique({ where: { keyHash } })
+    const apiKey = await mockPrismaInstance.partnerApiKey.findUnique({ where: { keyHash } })
 
     expect(apiKey).toBeDefined()
     expect(apiKey!.expiresAt.getTime()).toBeLessThan(Date.now())
@@ -346,7 +346,7 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
 
   it('supports permission-based access control', async () => {
     const partnerId = 'partner-123'
-    mockPrisma.partnerApiKey.create.mockResolvedValue({
+    mockPrismaInstance.partnerApiKey.create.mockResolvedValue({
       id: 'key-123',
       partnerId,
       keyHash: 'hash123',
@@ -376,12 +376,12 @@ describe('Partner Service - Commission Rate Precision (CRITICAL)', () => {
 
   it('validates commission rate as Decimal(5,4)', async () => {
     const partnerId = 'partner-123'
-    mockPrisma.referralPartner.findUnique.mockResolvedValue(
+    mockPrismaInstance.referralPartner.findUnique.mockResolvedValue(
       factories.partner({ id: partnerId, status: 'ACTIVE' })
     )
 
     // Valid: 5% commission (0.0500)
-    mockPrisma.referralCafe.create.mockResolvedValue(
+    mockPrismaInstance.referralCafe.create.mockResolvedValue(
       factories.cafe(partnerId, { commissionRate: 0.05 })
     )
 
@@ -423,10 +423,10 @@ describe('Partner Service - Commission Rate Precision (CRITICAL)', () => {
 
   it('supports high precision rates (e.g., 2.75%)', async () => {
     const partnerId = 'partner-123'
-    mockPrisma.referralPartner.findUnique.mockResolvedValue(
+    mockPrismaInstance.referralPartner.findUnique.mockResolvedValue(
       factories.partner({ id: partnerId, status: 'ACTIVE' })
     )
-    mockPrisma.referralCafe.create.mockResolvedValue(
+    mockPrismaInstance.referralCafe.create.mockResolvedValue(
       factories.cafe(partnerId, { commissionRate: 0.0275 })
     )
 
@@ -447,8 +447,8 @@ describe('Partner Service - Status Management', () => {
   })
 
   it('creates partner with ACTIVE status by default', async () => {
-    mockPrisma.referralPartner.findUnique.mockResolvedValue(null)
-    mockPrisma.referralPartner.create.mockResolvedValue(
+    mockPrismaInstance.referralPartner.findUnique.mockResolvedValue(null)
+    mockPrismaInstance.referralPartner.create.mockResolvedValue(
       factories.partner({ status: 'ACTIVE' })
     )
 
@@ -466,7 +466,7 @@ describe('Partner Service - Status Management', () => {
 
   it('blocks cafe creation for inactive partners', async () => {
     const partnerId = 'partner-123'
-    mockPrisma.referralPartner.findUnique.mockResolvedValue(
+    mockPrismaInstance.referralPartner.findUnique.mockResolvedValue(
       factories.partner({ id: partnerId, status: 'INACTIVE' })
     )
 
@@ -482,7 +482,7 @@ describe('Partner Service - Status Management', () => {
 
   it('transitions partner status (ACTIVE → SUSPENDED)', async () => {
     const partnerId = 'partner-123'
-    mockPrisma.referralPartner.update.mockResolvedValue(
+    mockPrismaInstance.referralPartner.update.mockResolvedValue(
       factories.partner({ id: partnerId, status: 'SUSPENDED' })
     )
 
@@ -493,7 +493,7 @@ describe('Partner Service - Status Management', () => {
   })
 
   it('validates business number format (123-45-67890)', async () => {
-    mockPrisma.referralPartner.findUnique.mockResolvedValue(null)
+    mockPrismaInstance.referralPartner.findUnique.mockResolvedValue(null)
 
     const result = await createPartner({
       orgId: 'ORG001',
@@ -509,7 +509,7 @@ describe('Partner Service - Status Management', () => {
 
   it('prevents duplicate business number registration', async () => {
     const businessNumber = '123-45-67890'
-    mockPrisma.referralPartner.findUnique.mockResolvedValue(
+    mockPrismaInstance.referralPartner.findUnique.mockResolvedValue(
       factories.partner({ businessNumber })
     )
 

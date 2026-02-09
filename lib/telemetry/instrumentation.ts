@@ -5,13 +5,18 @@
  * @see Plan: Part C1 - Infrastructure & Observability
  */
 
-import { NodeSDK } from '@opentelemetry/sdk-node'
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { Resource } from '@opentelemetry/resources'
-import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import { CompositePropagator, W3CBaggagePropagator, W3CTraceContextPropagator } from '@opentelemetry/core'
+// OpenTelemetry imports commented out - install packages to enable:
+// npm install @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node
+// @opentelemetry/exporter-trace-otlp-http @opentelemetry/semantic-conventions
+// @opentelemetry/sdk-trace-base @opentelemetry/core
+
+// import { NodeSDK } from '@opentelemetry/sdk-node'
+// import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
+// import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+// import { Resource } from '@opentelemetry/resources'
+// import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
+// import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
+// import { CompositePropagator, W3CBaggagePropagator, W3CTraceContextPropagator } from '@opentelemetry/core'
 
 /**
  * Initialize OpenTelemetry SDK

@@ -7,10 +7,10 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { factories, createMockPrisma, createHash } from './utils/test-helpers'
 
 // Mock dependencies
-let mockPrisma: ReturnType<typeof createMockPrisma>
+const mockPrismaInstance = createMockPrisma()
 
 vi.mock('@/lib/db/prisma', () => ({
-  prisma: mockPrisma
+  prisma: mockPrismaInstance
 }))
 
 // Import after mocking
@@ -26,7 +26,7 @@ import {
 
 describe('ReferralService', () => {
   beforeEach(() => {
-    mockPrisma = createMockPrisma() as any
+    // Mock setup done above as any
     vi.clearAllMocks()
   })
 
@@ -41,11 +41,11 @@ describe('ReferralService', () => {
       const cafe = factories.cafe('partner-1', { commissionRate: 0.05 })
       const link = factories.referralLink(cafe.id)
 
-      mockPrisma.referralLink.findUnique.mockResolvedValue({
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue({
         ...link,
         cafe
       })
-      mockPrisma.referralConversion.findUnique.mockResolvedValue(null) // No existing attribution
+      mockPrismaInstance.referralConversion.findUnique.mockResolvedValue(null) // No existing attribution
 
       const conversion = factories.conversion(userId, linkId, {
         amount: 100,
@@ -53,7 +53,7 @@ describe('ReferralService', () => {
         commissionAmount: 5
       })
 
-      mockPrisma.$transaction.mockImplementation(async (callback) => {
+      mockPrismaInstance.$transaction.mockImplementation(async (callback) => {
         const tx = {
           referralConversion: {
             create: vi.fn().mockResolvedValue(conversion)
@@ -87,7 +87,7 @@ describe('ReferralService', () => {
       const userId = 'user-123'
       const existingConversion = factories.conversion(userId, 'link-old')
 
-      mockPrisma.referralConversion.findUnique.mockResolvedValue(existingConversion)
+      mockPrismaInstance.referralConversion.findUnique.mockResolvedValue(existingConversion)
 
       const result = await attributeConversion({
         userId,
@@ -108,16 +108,16 @@ describe('ReferralService', () => {
       const cafe = factories.cafe('partner-1', { commissionRate: 0.08 }) // 8%
       const link = factories.referralLink(cafe.id)
 
-      mockPrisma.referralLink.findUnique.mockResolvedValue({
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue({
         ...link,
         cafe
       })
-      mockPrisma.referralConversion.findUnique.mockResolvedValue(null)
+      mockPrismaInstance.referralConversion.findUnique.mockResolvedValue(null)
 
       const amount = 250.00
       const expectedCommission = amount * 0.08 // 20.00
 
-      mockPrisma.$transaction.mockImplementation(async (callback) => {
+      mockPrismaInstance.$transaction.mockImplementation(async (callback) => {
         const tx = {
           referralConversion: {
             create: vi.fn().mockImplementation((data) => {
@@ -155,13 +155,13 @@ describe('ReferralService', () => {
       const cafe = factories.cafe('partner-1')
       const link = factories.referralLink(cafe.id)
 
-      mockPrisma.referralLink.findUnique.mockResolvedValue({ ...link, cafe })
-      mockPrisma.referralConversion.findUnique.mockResolvedValue(null)
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue({ ...link, cafe })
+      mockPrismaInstance.referralConversion.findUnique.mockResolvedValue(null)
 
       const expectedIpHash = createHash('sha256').update(ipAddress).digest('hex')
       const expectedUaHash = createHash('sha256').update(userAgent).digest('hex')
 
-      mockPrisma.$transaction.mockImplementation(async (callback) => {
+      mockPrismaInstance.$transaction.mockImplementation(async (callback) => {
         const tx = {
           referralConversion: {
             create: vi.fn().mockImplementation((data) => {
@@ -188,7 +188,7 @@ describe('ReferralService', () => {
         amount: 100
       })
 
-      expect(mockPrisma.$transaction).toHaveBeenCalled()
+      expect(mockPrismaInstance.$transaction).toHaveBeenCalled()
     })
   })
 
@@ -209,7 +209,7 @@ describe('ReferralService', () => {
       const cafe = factories.cafe('partner-1')
       const partner = factories.partner()
 
-      mockPrisma.referralConversion.findFirst.mockResolvedValue({
+      mockPrismaInstance.referralConversion.findFirst.mockResolvedValue({
         ...recentConversion,
         link: {
           ...link,
@@ -236,7 +236,7 @@ describe('ReferralService', () => {
       const userAgent = 'Mozilla/5.0'
 
       // No recent conversions found
-      mockPrisma.referralConversion.findFirst.mockResolvedValue(null)
+      mockPrismaInstance.referralConversion.findFirst.mockResolvedValue(null)
 
       const result = await findAttributionFallback({
         ipAddress,
@@ -261,7 +261,7 @@ describe('ReferralService', () => {
         attributedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
       })
 
-      mockPrisma.referralConversion.findFirst.mockResolvedValue({
+      mockPrismaInstance.referralConversion.findFirst.mockResolvedValue({
         ...mostRecent,
         link: {
           id: 'link-new',
@@ -285,8 +285,8 @@ describe('ReferralService', () => {
       const shortCode = 'ABCD1234'
       const link = factories.referralLink('cafe-1', { shortCode, clicks: 10 })
 
-      mockPrisma.referralLink.findUnique.mockResolvedValue(link)
-      mockPrisma.referralLink.update.mockResolvedValue({
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue(link)
+      mockPrismaInstance.referralLink.update.mockResolvedValue({
         ...link,
         clicks: 11
       })
@@ -298,7 +298,7 @@ describe('ReferralService', () => {
       })
 
       expect(result.success).toBe(true)
-      expect(mockPrisma.referralLink.update).toHaveBeenCalledWith({
+      expect(mockPrismaInstance.referralLink.update).toHaveBeenCalledWith({
         where: { id: link.id },
         data: {
           clicks: { increment: 1 }
@@ -312,8 +312,8 @@ describe('ReferralService', () => {
       const expectedHash = createHash('sha256').update(ipAddress).digest('hex')
 
       const link = factories.referralLink('cafe-1', { shortCode })
-      mockPrisma.referralLink.findUnique.mockResolvedValue(link)
-      mockPrisma.referralLink.update.mockResolvedValue(link)
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue(link)
+      mockPrismaInstance.referralLink.update.mockResolvedValue(link)
 
       const result = await trackClick(shortCode, {
         ipAddress,
@@ -330,8 +330,8 @@ describe('ReferralService', () => {
       const expectedHash = createHash('sha256').update(userAgent).digest('hex')
 
       const link = factories.referralLink('cafe-1', { shortCode })
-      mockPrisma.referralLink.findUnique.mockResolvedValue(link)
-      mockPrisma.referralLink.update.mockResolvedValue(link)
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue(link)
+      mockPrismaInstance.referralLink.update.mockResolvedValue(link)
 
       const result = await trackClick(shortCode, {
         ipAddress: '192.168.1.1',
@@ -346,8 +346,8 @@ describe('ReferralService', () => {
       const shortCode = 'ABCD1234'
       const link = factories.referralLink('cafe-1', { shortCode })
 
-      mockPrisma.referralLink.findUnique.mockResolvedValue(link)
-      mockPrisma.referralLink.update.mockResolvedValue(link)
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue(link)
+      mockPrismaInstance.referralLink.update.mockResolvedValue(link)
 
       const result = await trackClick(shortCode, {
         ipAddress: '192.168.1.1',
@@ -361,7 +361,7 @@ describe('ReferralService', () => {
     it('throws error for non-existent link', async () => {
       const shortCode = 'INVALID123'
 
-      mockPrisma.referralLink.findUnique.mockResolvedValue(null)
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue(null)
 
       await expect(
         trackClick(shortCode, {
@@ -375,9 +375,9 @@ describe('ReferralService', () => {
   describe('Short Code Generation', () => {
     it('generates 8-character alphanumeric code', async () => {
       const cafe = factories.cafe('partner-1')
-      mockPrisma.referralCafe.findUnique.mockResolvedValue(cafe)
-      mockPrisma.referralLink.findUnique.mockResolvedValue(null) // No collision
-      mockPrisma.$transaction.mockImplementation(async (callback) => {
+      mockPrismaInstance.referralCafe.findUnique.mockResolvedValue(cafe)
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue(null) // No collision
+      mockPrismaInstance.$transaction.mockImplementation(async (callback) => {
         const tx = {
           referralLink: {
             create: vi.fn().mockImplementation((data) => {
@@ -408,16 +408,16 @@ describe('ReferralService', () => {
 
     it('retries on collision (up to 10 attempts)', async () => {
       const cafe = factories.cafe('partner-1')
-      mockPrisma.referralCafe.findUnique.mockResolvedValue(cafe)
+      mockPrismaInstance.referralCafe.findUnique.mockResolvedValue(cafe)
 
       let attempts = 0
-      mockPrisma.referralLink.findUnique.mockImplementation(async () => {
+      mockPrismaInstance.referralLink.findUnique.mockImplementation(async () => {
         attempts++
         // First 5 attempts collide, 6th succeeds
         return attempts <= 5 ? factories.referralLink(cafe.id) : null
       })
 
-      mockPrisma.$transaction.mockImplementation(async (callback) => {
+      mockPrismaInstance.$transaction.mockImplementation(async (callback) => {
         const tx = {
           referralLink: {
             create: vi.fn().mockResolvedValue(factories.referralLink(cafe.id))
@@ -440,10 +440,10 @@ describe('ReferralService', () => {
 
     it('throws error after max retries', async () => {
       const cafe = factories.cafe('partner-1')
-      mockPrisma.referralCafe.findUnique.mockResolvedValue(cafe)
+      mockPrismaInstance.referralCafe.findUnique.mockResolvedValue(cafe)
 
       // Always return collision
-      mockPrisma.referralLink.findUnique.mockResolvedValue(
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue(
         factories.referralLink(cafe.id)
       )
 
@@ -459,13 +459,13 @@ describe('ReferralService', () => {
       const cafe = factories.cafe('partner-1')
       const existingCode = 'ABCD1234'
 
-      mockPrisma.referralCafe.findUnique.mockResolvedValue(cafe)
-      mockPrisma.referralLink.findUnique.mockResolvedValue(
+      mockPrismaInstance.referralCafe.findUnique.mockResolvedValue(cafe)
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue(
         factories.referralLink(cafe.id, { shortCode: existingCode })
       )
 
       // Should retry until unique code found
-      expect(mockPrisma.referralLink.findUnique).toBeDefined()
+      expect(mockPrismaInstance.referralLink.findUnique).toBeDefined()
     })
   })
 
@@ -493,7 +493,7 @@ describe('ReferralService', () => {
         })
       ]
 
-      mockPrisma.referralConversion.findMany.mockResolvedValue(conversions)
+      mockPrismaInstance.referralConversion.findMany.mockResolvedValue(conversions)
 
       const result = await getConversionTrends({
         linkId,
@@ -524,18 +524,18 @@ describe('ReferralService', () => {
       const cafeIds = ['cafe-1', 'cafe-2']
       const linkIds = ['link-1', 'link-2', 'link-3']
 
-      mockPrisma.referralCafe.findMany.mockResolvedValue([
+      mockPrismaInstance.referralCafe.findMany.mockResolvedValue([
         { id: 'cafe-1', partnerId },
         { id: 'cafe-2', partnerId }
       ])
 
-      mockPrisma.referralLink.findMany.mockResolvedValue([
+      mockPrismaInstance.referralLink.findMany.mockResolvedValue([
         { id: 'link-1', cafeId: 'cafe-1' },
         { id: 'link-2', cafeId: 'cafe-1' },
         { id: 'link-3', cafeId: 'cafe-2' }
       ])
 
-      mockPrisma.referralConversion.findMany.mockResolvedValue([])
+      mockPrismaInstance.referralConversion.findMany.mockResolvedValue([])
 
       await getConversionTrends({
         partnerId,
@@ -545,7 +545,7 @@ describe('ReferralService', () => {
       })
 
       // Should query with linkIds from all cafes under partner
-      expect(mockPrisma.referralConversion.findMany).toHaveBeenCalledWith(
+      expect(mockPrismaInstance.referralConversion.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             linkId: { in: linkIds }
@@ -562,7 +562,7 @@ describe('ReferralService', () => {
         factories.conversion('user-3', linkId, { amount: 150, commissionAmount: 7.5 })
       ]
 
-      mockPrisma.referralConversion.findMany.mockResolvedValue(conversions)
+      mockPrismaInstance.referralConversion.findMany.mockResolvedValue(conversions)
 
       const result = await getConversionTrends({
         linkId,
@@ -593,7 +593,7 @@ describe('ReferralService', () => {
         factories.conversion('user-2', linkId, { amount: 150, commissionAmount: 7.5 })
       ]
 
-      mockPrisma.referralLink.findUnique.mockResolvedValue({
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue({
         ...link,
         cafe: {
           ...factories.cafe('partner-1'),
@@ -601,7 +601,7 @@ describe('ReferralService', () => {
         }
       })
 
-      mockPrisma.referralConversion.findMany.mockResolvedValue(conversions)
+      mockPrismaInstance.referralConversion.findMany.mockResolvedValue(conversions)
 
       const result = await getLinkStats(linkId)
 
@@ -620,7 +620,7 @@ describe('ReferralService', () => {
         clicks: 0
       })
 
-      mockPrisma.referralLink.findUnique.mockResolvedValue({
+      mockPrismaInstance.referralLink.findUnique.mockResolvedValue({
         ...link,
         cafe: {
           ...factories.cafe('partner-1'),
@@ -628,7 +628,7 @@ describe('ReferralService', () => {
         }
       })
 
-      mockPrisma.referralConversion.findMany.mockResolvedValue([])
+      mockPrismaInstance.referralConversion.findMany.mockResolvedValue([])
 
       const result = await getLinkStats(linkId)
 
