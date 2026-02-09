@@ -7,23 +7,49 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { factories, calculateSnapshotHash } from './utils/test-helpers'
 
 // Create mocks using vi.hoisted to ensure proper initialization order
-const { mockPrisma, mockRedis } = vi.hoisted(() => ({
-  mockPrisma: {
+const { mockPrisma, mockRedis } = vi.hoisted(() => {
+  const createTxClient = () => {
+    const txClient: any = {
+      referralPartner: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
+      referralCafe: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
+      referralLink: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
+      referralConversion: { findUnique: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), count: vi.fn() },
+      payoutLedger: {
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        findFirst: vi.fn(),
+        create: vi.fn((data) => Promise.resolve({ id: 'payout-123', ...data.data })),
+        update: vi.fn(),
+        count: vi.fn()
+      },
+      $queryRaw: vi.fn()
+    }
+    return txClient
+  }
+
+  const prismaClient = {
     referralPartner: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
     referralCafe: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
     referralLink: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
     referralConversion: { findUnique: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), count: vi.fn() },
     payoutLedger: { findUnique: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), count: vi.fn() },
-    $transaction: vi.fn((callback: any) => callback({})),
+    $transaction: vi.fn(async (callback: any) => {
+      const txClient = createTxClient()
+      return await callback(txClient)
+    }),
     $queryRaw: vi.fn()
-  },
-  mockRedis: {
-    get: vi.fn(),
-    set: vi.fn(),
-    setex: vi.fn(),
-    publish: vi.fn()
   }
-}))
+
+  return {
+    mockPrisma: prismaClient,
+    mockRedis: {
+      get: vi.fn(),
+      set: vi.fn(),
+      setex: vi.fn(),
+      publish: vi.fn()
+    }
+  }
+})
 
 vi.mock('@/lib/db/prisma', () => ({
   prisma: mockPrisma
@@ -69,32 +95,32 @@ describe('PayoutService', () => {
         partnerId: partner.id,
         periodStart,
         periodEnd
-      })
+      }, 'admin-id', 'admin@qetta.com')
 
       expect(result.success).toBe(true)
-      expect(result.data?.snapshotHash).toBe(expectedHash)
-      expect(result.data?.snapshotHash).toMatch(/^[a-f0-9]{64}$/)
-      expect(result.data?.totalConversions).toBe(3)
-      expect(result.data?.totalCommission).toBe(22.5)
+      expect(result.data?.payout.snapshotHash).toBe(expectedHash)
+      expect(result.data?.payout.snapshotHash).toMatch(/^[a-f0-9]{64}$/)
+      expect(result.data?.payout.totalConversions).toBe(3)
+      expect(result.data?.payout.totalCommission).toBe(22.5)
     })
 
     it('rejects approval if snapshot hash mismatches', async () => {
       const payoutId = 'payout-123'
       const payout = factories.payout(payoutId, {
         snapshotHash: 'abc123',
-        status: 'DRAFT'
+        status: 'DRAFT',
+        conversionIds: ['conv-1', 'conv-2']
       })
 
       mockPrisma.payoutLedger.findUnique.mockResolvedValue(payout)
 
-      const result = await approvePayout({
-        payoutId,
-        snapshotHash: 'wrong-hash',
-        approvedBy: 'admin@qetta.com'
-      })
-
-      expect(result.success).toBe(false)
-      expect(result.error).toContain('Snapshot verification failed')
+      await expect(
+        approvePayout({
+          payoutId,
+          snapshotHash: 'wrong-hash',
+          approvedBy: 'admin@qetta.com'
+        }, 'admin-id', 'admin@qetta.com')
+      ).rejects.toThrow('Snapshot hash mismatch')
     })
   })
 
@@ -114,10 +140,10 @@ describe('PayoutService', () => {
         partnerId: partner.id,
         periodStart: new Date('2026-02-01'),
         periodEnd: new Date('2026-02-28')
-      })
+      }, 'admin-id', 'admin@qetta.com')
 
-      expect(result.success).toBe(true)
-      expect(result.message).toContain('existing')
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('already exists')
     })
   })
 })

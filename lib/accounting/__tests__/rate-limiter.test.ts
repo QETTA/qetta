@@ -114,10 +114,11 @@ const checkRateLimit = async (
     await mockRedisInstance.zadd(key, now, `${now}-${Math.random()}`)
     await mockRedisInstance.expire(key, windowSec)
 
+    // After adding current request, total count is count + 1
     return {
       success: true,
       limit,
-      remaining: limit - count - 1,
+      remaining: limit - (count + 1),
       resetAt: new Date(now + windowSec * 1000)
     }
   } catch (error) {
@@ -259,11 +260,20 @@ describe('Rate Limiter - Distributed Correctness (CRITICAL)', () => {
 
   it('blocks 4th request when limit is 3', async () => {
     const identifier = 'partner:pk_test_123'
+    const now = Date.now()
+
     mockRedisInstance.zcard
       .mockResolvedValueOnce(0)
       .mockResolvedValueOnce(1)
       .mockResolvedValueOnce(2)
       .mockResolvedValueOnce(3) // Limit reached
+
+    // Mock zrange for the 4th request (blocking case)
+    mockRedisInstance.zrange
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(['req-1', now.toString()])
 
     const results = []
     for (let i = 0; i < 4; i++) {
@@ -394,25 +404,32 @@ describe('Rate Limiter - Middleware Integration', () => {
     vi.clearAllMocks()
     mockRedisEnabled = true
     mockRedisInstance.zcard.mockResolvedValue(0)
+    mockRedisInstance.zremrangebyscore.mockResolvedValue(0)
+    mockRedisInstance.zadd.mockResolvedValue(1)
+    mockRedisInstance.expire.mockResolvedValue(1)
+    mockRedisInstance.zrange.mockResolvedValue([])
   })
 
   it('sets correct response headers (allowed)', async () => {
     const identifier = 'partner:pk_test_123'
-    mockRedisInstance.zcard.mockResolvedValue(3)
+    mockRedisInstance.zcard.mockResolvedValueOnce(3)
+    mockRedisInstance.zrange.mockResolvedValueOnce([])
 
     const result = await rateLimitMiddleware(identifier, 100, 60)
 
     expect(result.allowed).toBe(true)
     expect(result.headers['X-RateLimit-Limit']).toBe('100')
-    expect(result.headers['X-RateLimit-Remaining']).toBe('96')
+    expect(result.headers['X-RateLimit-Remaining']).toBe(String(100 - 3 - 1))
     expect(result.headers['X-RateLimit-Reset']).toMatch(/^\d{4}-\d{2}-\d{2}T/)
     expect(result.headers).not.toHaveProperty('Retry-After')
   })
 
   it('sets Retry-After header when blocked', async () => {
     const identifier = 'partner:pk_test_123'
-    mockRedisInstance.zcard.mockResolvedValue(100)
-    mockRedisInstance.zrange.mockResolvedValue(['req-1', String(Date.now() - 30 * 1000)])
+    const now = Date.now()
+
+    mockRedisInstance.zcard.mockResolvedValueOnce(100)
+    mockRedisInstance.zrange.mockResolvedValueOnce(['req-1', String(now - 30 * 1000)])
 
     const result = await rateLimitMiddleware(identifier, 100, 60)
 
@@ -462,6 +479,11 @@ describe('Rate Limiter - Security Edge Cases', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockRedisEnabled = true
+    mockRedisInstance.zcard.mockResolvedValue(0)
+    mockRedisInstance.zremrangebyscore.mockResolvedValue(0)
+    mockRedisInstance.zadd.mockResolvedValue(1)
+    mockRedisInstance.expire.mockResolvedValue(1)
+    mockRedisInstance.zrange.mockResolvedValue([])
   })
 
   it('prevents IP rotation bypass (per API key)', async () => {
@@ -479,8 +501,10 @@ describe('Rate Limiter - Security Edge Cases', () => {
   it('enforces separate limits for different API keys', async () => {
     const keyA = 'partner:pk_test_aaa'
     const keyB = 'partner:pk_test_bbb'
+    const now = Date.now()
 
     mockRedisInstance.zcard.mockResolvedValueOnce(10).mockResolvedValueOnce(0)
+    mockRedisInstance.zrange.mockResolvedValueOnce(['req-1', now.toString()]).mockResolvedValueOnce([])
 
     const resultA = await checkRateLimit(keyA, 10, 60)
     const resultB = await checkRateLimit(keyB, 10, 60)
@@ -501,7 +525,11 @@ describe('Rate Limiter - Security Edge Cases', () => {
 
   it('validates window size (prevents infinite windows)', async () => {
     const identifier = 'partner:pk_test_123'
-    mockRedisInstance.zcard.mockResolvedValue(0)
+    mockRedisInstance.zcard.mockResolvedValueOnce(0)
+    mockRedisInstance.zrange.mockResolvedValueOnce([])
+    mockRedisInstance.zremrangebyscore.mockResolvedValueOnce(0)
+    mockRedisInstance.zadd.mockResolvedValueOnce(1)
+    mockRedisInstance.expire.mockResolvedValueOnce(1)
 
     const result = await checkRateLimit(identifier, 10, 3600) // 1 hour window
 
