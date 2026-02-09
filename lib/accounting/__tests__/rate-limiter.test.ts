@@ -4,12 +4,32 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { createMockRedis } from './utils/test-helpers'
 
-// Mock Redis
-const // Mock setup done above
+// Mock Redis using vi.hoisted - inline mock creation to avoid import issues
+const { mockRedisInstance } = vi.hoisted(() => {
+  const createMock = () => ({
+    get: vi.fn(),
+    set: vi.fn(),
+    setEx: vi.fn(),
+    del: vi.fn(),
+    incr: vi.fn(),
+    expire: vi.fn(),
+    zadd: vi.fn(),
+    zcard: vi.fn(),
+    zrange: vi.fn(),
+    zremrangebyscore: vi.fn(),
+    keys: vi.fn(),
+    publish: vi.fn(),
+    subscribe: vi.fn(),
+    on: vi.fn(),
+    duplicate: vi.fn()
+  })
+
+  return { mockRedisInstance: createMock() }
+})
+
 vi.mock('ioredis', () => ({
-  default: vi.fn(() => mockRedis)
+  default: vi.fn(() => mockRedisInstance)
 }))
 
 // Mock in-memory fallback store

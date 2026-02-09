@@ -5,12 +5,63 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createHash } from 'crypto'
-import { factories, createMockPrisma } from './utils/test-helpers'
+import { factories } from './utils/test-helpers'
 
-// Mock Prisma
-const // Mock setup done above
+// Mock Prisma using vi.hoisted - inline mock creation to avoid import issues
+const { mockPrismaInstance } = vi.hoisted(() => {
+  const createMock = () => ({
+    referralPartner: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn()
+    },
+    referralCafe: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn()
+    },
+    referralLink: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn()
+    },
+    referralConversion: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      count: vi.fn()
+    },
+    payoutLedger: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn()
+    },
+    partnerApiKey: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn()
+    },
+    $transaction: vi.fn(),
+    $queryRaw: vi.fn()
+  })
+
+  return { mockPrismaInstance: createMock() }
+})
+
 vi.mock('@/lib/db/prisma', () => ({
-  prisma: mockPrisma
+  prisma: mockPrismaInstance
 }))
 
 // Mock partner service functions
@@ -278,7 +329,7 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
     const partnerId = 'partner-123'
     const keyHash = createHash('sha256').update('pk_live_secret123').digest('hex')
 
-    mockPrismaInstance.partnerApiKey.create.mockResolvedValue({
+    const dbRecord = {
       id: 'key-123',
       partnerId,
       keyHash,
@@ -286,7 +337,10 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
       keyType: 'partner',
       permissions: ['read:cafes'],
       expiresAt: new Date()
-    })
+    }
+
+    mockPrismaInstance.partnerApiKey.create.mockResolvedValue(dbRecord)
+    mockPrismaInstance.partnerApiKey.findUnique.mockResolvedValue(dbRecord)
 
     const result = await generateApiKey({
       partnerId,
@@ -298,8 +352,9 @@ describe('Partner Service - API Key Management (CRITICAL)', () => {
     expect(result.data.rawKey).toBeDefined()
 
     // Simulate database lookup (raw key not stored)
-    const dbRecord = await mockPrismaInstance.partnerApiKey.findUnique({ where: { id: 'key-123' } })
-    expect(dbRecord).not.toHaveProperty('rawKey')
+    const lookedUpRecord = await mockPrismaInstance.partnerApiKey.findUnique({ where: { id: 'key-123' } })
+    expect(lookedUpRecord).toBeDefined()
+    expect(lookedUpRecord).not.toHaveProperty('rawKey')
   })
 
   it('validates API key with hash comparison', async () => {

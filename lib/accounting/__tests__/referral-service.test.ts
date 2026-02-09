@@ -4,10 +4,70 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { factories, createMockPrisma, createHash } from './utils/test-helpers'
+import { createHash } from 'crypto'
+import { factories } from './utils/test-helpers'
 
-// Mock dependencies
-const mockPrismaInstance = createMockPrisma()
+// Mock dependencies using vi.hoisted - inline mock creation to avoid import issues
+const { mockPrismaInstance } = vi.hoisted(() => {
+  const createMock = () => ({
+    referralPartner: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn()
+    },
+    referralCafe: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn()
+    },
+    referralLink: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn()
+    },
+    referralConversion: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      count: vi.fn()
+    },
+    payoutLedger: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      update: vi.fn(),
+      count: vi.fn()
+    },
+    partnerApiKey: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn()
+    },
+    auditLog: {
+      create: vi.fn(),
+      findMany: vi.fn()
+    },
+    externalPost: {
+      create: vi.fn(),
+      upsert: vi.fn(),
+      findMany: vi.fn()
+    },
+    $transaction: vi.fn(),
+    $queryRaw: vi.fn()
+  })
+
+  return { mockPrismaInstance: createMock() }
+})
 
 vi.mock('@/lib/db/prisma', () => ({
   prisma: mockPrismaInstance
