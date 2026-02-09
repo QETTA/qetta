@@ -691,3 +691,372 @@ npm run db:studio
 
 **Markers not clickable?**
 → Ensure `onClick` handler passed to `addMarker({ ...place, onClick: selectPlace })`
+
+---
+
+## 🏦 Accounting & Settlement Module
+
+**Partner Accounting and Referral Settlement System** - B2B2C revenue sharing with cafe partners.
+
+| Aspect | Details |
+|--------|---------|
+| **Purpose** | Track cafe partnerships, referral conversions, automate monthly payouts |
+| **Commission Model** | 5% revenue share on first-touch attributed conversions |
+| **Attribution Window** | 7-day cookie (first-touch only) |
+| **Settlement Cycle** | Monthly (draft → approved → paid) |
+| **Database** | PostgreSQL via Prisma (ACID transactions) |
+| **Authentication** | NextAuth (admin) + x-api-key (partner) |
+
+### Architecture Decisions
+
+#### ✅ Database: PostgreSQL via Prisma
+- **Why**: Financial ledgers require ACID transactions, foreign key enforcement
+- **Models**: ReferralPartner, ReferralCafe, PartnerApiKey, ReferralLink, ReferralConversion, PayoutLedger, ExternalPost
+- **Benefits**: Transaction support, cascade rules, consistency with existing User/Payment models
+
+#### ✅ Authentication: 2 Systems (NOT 5)
+- **Admin Dashboard**: NextAuth with `role: 'ADMIN'` check
+  - Routes: `app/(dashboard)/accounting/*`
+  - Session-based, no API keys
+- **Partner API**: Extend existing x-api-key pattern
+  - Add `key_type: 'partner'` field to differentiate from firm keys
+  - Routes: `server/src/routes/accounting-partners.ts`
+
+#### ✅ Rollback: Compensating Ledger Entries
+- **State Machine**: `draft → approved → processing → paid → [adjustment_pending] → adjusted`
+- **Ledger Types**:
+  - `PAYOUT` (positive amount)
+  - `ADJUSTMENT` (negative amount, references original ledger)
+  - `CLAWBACK` (recovery from partner)
+- **Audit Trail**: Immutable snapshot with SHA-256 hash at approval time
+
+### Database Schema
+
+#### Core Models (8 New)
+
+```prisma
+model ReferralPartner {
+  id              String   @id @default(cuid())
+  orgId           String   @unique @map("org_id")
+  orgName         String   @map("org_name")
+  businessNumber  String   @unique @map("business_number")
+  contactEmail    String   @map("contact_email")
+  status          PartnerStatus @default(ACTIVE)
+
+  cafes           ReferralCafe[]
+  apiKeys         PartnerApiKey[]
+  payoutLedgers   PayoutLedger[]
+
+  @@map("referral_partners")
+}
+
+model ReferralCafe {
+  id              String   @id @default(cuid())
+  partnerId       String   @map("partner_id")
+  cafeName        String   @map("cafe_name")
+  commissionRate  Decimal  @db.Decimal(5,4) @map("commission_rate")
+  status          CafeStatus @default(ACTIVE)
+
+  partner         ReferralPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  referralLinks   ReferralLink[]
+
+  @@index([partnerId, status])
+  @@map("referral_cafes")
+}
+
+model PartnerApiKey {
+  id              String   @id @default(cuid())
+  partnerId       String   @map("partner_id")
+  keyHash         String   @unique @map("key_hash")  // SHA-256
+  keyPrefix       String   @map("key_prefix")       // pk_abc123...
+  keyType         String   @default("partner") @map("key_type")
+  permissions     String[] // ['read:cafes', 'write:posts']
+
+  partner         ReferralPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@map("partner_api_keys")
+}
+
+model ReferralLink {
+  id              String   @id @default(cuid())
+  cafeId          String   @map("cafe_id")
+  shortCode       String   @unique @map("short_code")  // ABCD1234
+  fullUrl         String   @map("full_url")
+  utmSource       String?  @map("utm_source")
+  utmCampaign     String?  @map("utm_campaign")
+  clicks          Int      @default(0)
+  status          LinkStatus @default(ACTIVE)
+
+  cafe            ReferralCafe @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  conversions     ReferralConversion[]
+
+  @@index([cafeId, status])
+  @@map("referral_links")
+}
+
+model ReferralConversion {
+  id              String   @id @default(cuid())
+  userId          String   @unique @map("user_id")  // First-touch only
+  linkId          String   @map("link_id")
+
+  ipHash          String   @map("ip_hash")
+  attributedAt    DateTime @map("attributed_at")
+
+  subscriptionId  String?  @map("subscription_id")
+  amount          Decimal  @db.Decimal(10,2)
+  commissionRate  Decimal  @db.Decimal(5,4) @map("commission_rate")
+  commissionAmount Decimal @db.Decimal(10,2) @map("commission_amount")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link            ReferralLink @relation(fields: [linkId], references: [id])
+
+  @@index([linkId, attributedAt])
+  @@map("referral_conversions")
+}
+
+model PayoutLedger {
+  id              String   @id @default(cuid())
+  partnerId       String   @map("partner_id")
+  periodStart     DateTime @map("period_start")
+  periodEnd       DateTime @map("period_end")
+  status          PayoutStatus @default(DRAFT)
+  ledgerType      LedgerType @default(PAYOUT) @map("ledger_type")
+
+  snapshotHash    String?  @map("snapshot_hash")  // SHA-256 of approval snapshot
+  conversionIds   String[] @map("conversion_ids")
+
+  totalConversions Int     @default(0) @map("total_conversions")
+  totalRevenue    Decimal  @db.Decimal(10,2) @default(0) @map("total_revenue")
+  totalCommission Decimal  @db.Decimal(10,2) @default(0) @map("total_commission")
+
+  approvedBy      String?  @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  paidAt          DateTime? @map("paid_at")
+
+  referenceLedgerId String? @map("reference_ledger_id")  // For adjustments
+  adjustmentReason  String? @map("adjustment_reason")
+
+  partner         ReferralPartner @relation(fields: [partnerId], references: [id])
+
+  @@unique([partnerId, periodStart, periodEnd, version])
+  @@index([status, periodStart])
+  @@map("payout_ledgers")
+}
+
+model ExternalPost {
+  id              String   @id @default(cuid())
+  partnerId       String   @map("partner_id")
+  postType        PostType @map("post_type")  // BLOG, INSTAGRAM, YOUTUBE
+  url             String   @unique
+  title           String
+
+  publishedAt     DateTime @map("published_at")
+
+  @@index([partnerId, postType])
+  @@map("external_posts")
+}
+```
+
+### API Routes
+
+#### Admin Routes (NextAuth Protected)
+
+**Directory**: `app/api/accounting/admin/`
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/accounting/admin/partners` | POST | Create partner |
+| `/api/accounting/admin/partners/[id]/cafes` | POST | Add cafe |
+| `/api/accounting/admin/partners/[id]/api-keys` | POST | Generate API key (returns raw key ONCE) |
+| `/api/accounting/admin/cafes/[id]/referral-links` | POST | Create referral link |
+| `/api/accounting/admin/payouts/preview` | POST | Calculate payout with snapshot |
+| `/api/accounting/admin/payouts/approve` | POST | Approve payout (verify snapshotHash) |
+| `/api/accounting/admin/payouts/[id]/adjust` | POST | Create adjustment ledger |
+
+#### Partner Routes (x-api-key Protected)
+
+**Directory**: `server/src/routes/accounting-partners.ts`
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/qetta/v1/partners/me/cafes` | GET | List partner's cafes |
+| `/api/qetta/v1/partners/me/referral-links` | GET | List referral links with stats |
+| `/api/qetta/v1/partners/me/payouts` | GET | Payout history |
+| `/api/qetta/v1/partners/me/external-posts/batch` | POST | Upload posts (blog/Instagram/YouTube) |
+
+### Authentication Details
+
+#### Admin Authentication
+```typescript
+// app/(dashboard)/accounting/layout.tsx
+export default async function AccountingLayout({ children }) {
+  const session = await auth()
+
+  if (!session || session.user.role !== 'ADMIN') {
+    redirect('/login')
+  }
+
+  return <>{children}</>
+}
+```
+
+#### Partner Authentication
+```typescript
+// server/src/middleware/partnerAuth.ts
+export async function requirePartnerAuth(req, res, next) {
+  const apiKey = req.headers['x-api-key']
+
+  const keyRecord = await prisma.partnerApiKey.findUnique({
+    where: { keyHash: sha256(apiKey) },
+    include: { partner: true }
+  })
+
+  if (!keyRecord || keyRecord.keyType !== 'partner') {
+    return res.status(401).json({ error: 'Invalid partner API key' })
+  }
+
+  req.partner = keyRecord.partner
+  next()
+}
+```
+
+### Critical Rules
+
+#### 1. Idempotency
+- **Payout**: Unique index on `(partnerId, periodStart, periodEnd, version)` prevents duplicate runs
+- **Attribution**: Unique index on `userId` enforces first-touch only
+- **Snapshot Verification**: Approve endpoint checks `snapshotHash` to prevent tampering
+
+#### 2. First-Touch Attribution
+- **Cookie**: `qetta_ref` (7-day expiry, httpOnly, secure)
+- **Constraint**: `userId` unique in `referral_conversions` table
+- **Fallback**: IP hash + user agent hash if cookie missing
+
+#### 3. Compensating Ledger Entries
+- **Never Hard-Delete**: Use `LedgerType.ADJUSTMENT` for corrections
+- **Reference Tracking**: `referenceLedgerId` links adjustments to original payout
+- **Audit Trail**: All changes logged with `adjustmentReason`
+
+#### 4. Snapshot-Based Approval
+- **Hash**: SHA-256 of conversion IDs + amounts + commission rates
+- **Verification**: Approve endpoint recalculates hash and compares
+- **Prevents**: Tampering between preview and approval
+
+### Common Tasks
+
+#### Generate Partner API Key (Admin)
+```bash
+curl -X POST http://localhost:3003/api/accounting/admin/partners/[partnerId]/api-keys \
+  -H "Cookie: next-auth.session-token=xxx" \
+  -H "Content-Type: application/json" \
+  -d '{"permissions":["read:cafes","write:posts"],"expiresInDays":365}'
+
+# Response (raw key shown ONCE, cannot recover)
+{
+  "apiKey": "pk_abc123def456...",
+  "keyPrefix": "pk_abc123",
+  "expiresAt": "2027-02-08T00:00:00Z"
+}
+```
+
+#### Run Monthly Payout (Admin)
+```bash
+# 1. Preview
+curl -X POST http://localhost:3003/api/accounting/admin/payouts/preview \
+  -H "Cookie: next-auth.session-token=xxx" \
+  -d '{
+    "partnerId": "cuid_partner123",
+    "periodStart": "2026-02-01T00:00:00Z",
+    "periodEnd": "2026-02-28T23:59:59Z"
+  }'
+
+# Response
+{
+  "snapshotId": "snap_xyz789",
+  "snapshotHash": "a1b2c3d4...",
+  "totalConversions": 42,
+  "totalCommission": 2100000
+}
+
+# 2. Approve (verify snapshot unchanged)
+curl -X POST http://localhost:3003/api/accounting/admin/payouts/approve \
+  -H "Cookie: next-auth.session-token=xxx" \
+  -d '{
+    "partnerId": "cuid_partner123",
+    "snapshotId": "snap_xyz789",
+    "approvedBy": "admin@qetta.com"
+  }'
+```
+
+#### Partner: List Cafes
+```bash
+curl -X GET http://localhost:3003/api/qetta/v1/partners/me/cafes \
+  -H "x-api-key: pk_abc123..."
+
+# Response
+{
+  "cafes": [
+    {
+      "id": "cafe_xyz",
+      "name": "HQ Location",
+      "commissionRate": 0.05,
+      "totalConversions": 42,
+      "totalCommission": 2100000
+    }
+  ]
+}
+```
+
+### Referral Tracking Flow
+
+1. **User Clicks Link**: Visit `https://qetta.com/r/ABCD1234`
+2. **Cookie Set**: `qetta_ref=ABCD1234` (7 days, httpOnly, secure)
+3. **Redirect**: To `/register?ref=ABCD1234`
+4. **User Signs Up**: Normal registration flow
+5. **User Pays**: Subscription purchase triggers webhook
+6. **Attribution**: Webhook checks `qetta_ref` cookie → creates `ReferralConversion` (first-touch only)
+7. **Monthly Payout**: Admin runs payout → calculates commission → approves → marks paid
+
+### Security Notes
+
+- **API Keys**: Display raw key ONLY ONCE during creation (cannot recover)
+- **Key Rotation**: Admin can delete key from `partner_api_keys` → partner receives 401
+- **Attribution Window**: 7-day cookie prevents indefinite tracking
+- **Snapshot Verification**: Prevents tampering between preview and approval
+- **Audit Logging**: All admin actions logged with NextAuth user ID
+
+### Testing
+
+```bash
+# Database migration
+npx prisma migrate dev --name add_accounting_models
+
+# Verify schema
+npm run db:studio
+
+# Run validation
+npm run validate
+
+# E2E tests
+npm run e2e -- accounting.spec.ts
+```
+
+### Documentation
+
+- **Plan File**: `/root/.claude/plans/floofy-rolling-meteor.md`
+- **Serena Memories**: `.serena/memories/10-architecture-core.md`, `40-quality-workflow.md`
+- **API Testing**: See plan file "Verification Plan" section
+
+### Troubleshooting
+
+**API key authentication failing?**
+→ Verify `keyType = 'partner'` in `partner_api_keys` table
+
+**Attribution not working?**
+→ Check `qetta_ref` cookie is set (httpOnly, secure, 7-day expiry)
+
+**Payout approval failing?**
+→ Verify `snapshotHash` matches (no data changed between preview and approval)
+
+**Duplicate conversions?**
+→ Check `userId` unique constraint in `referral_conversions` table

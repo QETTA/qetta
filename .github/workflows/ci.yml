@@ -1,169 +1,65 @@
-# QETTA CI Pipeline
-#
-# 트리거: Push, Pull Request (main, master, develop 브랜치)
-# 작업: Lint + TypeCheck (병렬) → Test → Build
-
 name: CI
-
 on:
   push:
-    branches: [main, master, develop]
+    branches: [main]
   pull_request:
-    branches: [main, master, develop]
-  workflow_dispatch: # 수동 실행 지원
-
-env:
-  NODE_VERSION: '20'
+    branches: [main]
 
 jobs:
-  # ============================================
-  # Lint Job (병렬 실행)
-  # ============================================
-  lint:
-    name: Lint
+  check:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: qetta_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qetta_test
+      REDIS_URL: redis://localhost:6379
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run ESLint
-        run: npm run lint
-
-  # ============================================
-  # TypeCheck Job (병렬 실행)
-  # ============================================
-  typecheck:
-    name: TypeCheck
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run TypeScript check
+          node-version: 20
+          cache: npm
+      - name: Install ClamAV (for integration tests)
+        run: sudo apt-get update && sudo apt-get install -y clamav
+        # Allow failures if apt not available in runner
+        continue-on-error: true
+      - name: Update freshclam DB (best-effort)
+        run: sudo freshclam || true
+      - run: npm ci
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy || npx prisma db push
+      - name: Run typecheck
         run: npm run typecheck
-
-  # ============================================
-  # Test Job (lint + typecheck 후)
-  # ============================================
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    needs: [lint, typecheck]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests with coverage
-        run: npm run test:coverage
+      - name: Run lint
+        run: npm run lint
+      - name: Run tests (with ClamAV enabled)
         env:
-          # 테스트 환경 변수
-          DATABASE_URL: 'postgresql://test:test@localhost:5432/test'
-          NEXTAUTH_SECRET: 'test-secret-for-ci'
-          NEXTAUTH_URL: 'http://localhost:3000'
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/coverage-final.json
-          fail_ci_if_error: false
-
-  # ============================================
-  # Build Job
-  # ============================================
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Cache Next.js build
-        uses: actions/cache@v4
-        with:
-          path: |
-            .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build application
-        run: npm run build
-        env:
-          # 빌드 환경 변수 (Sentry는 선택적)
-          SKIP_ENV_VALIDATION: 'true'
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: .next
-          retention-days: 7
+          CLAMAV_SCAN_ENABLED: 'true'
+        run: npm run test

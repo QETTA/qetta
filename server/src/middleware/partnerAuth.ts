@@ -1,7 +1,7 @@
-import { type Request, type Response, type NextFunction } from 'express';
+import { type NextFunction, type Request, type Response } from 'express';
 import { createHash } from 'node:crypto';
-import { getDb } from '../config/mongodb.js';
 import { logger } from '../config/logger.js';
+import { getDb } from '../config/mongodb.js';
 import type { FirmAccount } from '../types/settlement.js';
 
 declare module 'express-serve-static-core' {
