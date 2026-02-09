@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
-import { getDb } from '../config/mongodb.js';
 import { logger } from '../config/logger.js';
+import { getDb } from '../config/mongodb.js';
 import type { QaResult, SettlementProject } from '../types/settlement.js';
 
 /**

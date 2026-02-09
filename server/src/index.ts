@@ -18,6 +18,7 @@ import { rulesRouter } from './routes/rules.js';
 import { templatesRouter } from './routes/templates.js';
 import { quarantineRouter } from './routes/quarantine.js';
 import { adminRouter } from './routes/admin.js';
+import accountingPartnersRouter from './routes/accounting-partners.js';
 
 const app = express();
 
@@ -57,6 +58,10 @@ app.use('/api/qetta/v1/firm', ...qettaAuth, firmRouter);
 app.use('/api/qetta/v1/rules', ...qettaAuth, rulesRouter);
 app.use('/api/qetta/v1/templates', ...qettaAuth, templatesRouter);
 app.use('/api/qetta/v1/quarantine', ...qettaAuth, quarantineRouter);
+
+// --- Accounting Partner API (separate auth middleware) ---
+app.use('/api/qetta/v1/partners', accountingPartnersRouter);
+
 // Admin UI (restricted - partner org required)
 app.use('/admin', requirePartnerOrg, adminRouter);
 

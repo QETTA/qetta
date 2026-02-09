@@ -26,12 +26,13 @@ model User {
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
 
-  sessions      Session[]
-  accounts      Account[]
-  documents     Document[]
-  applications  Application[]
-  companyBlocks CompanyBlock[]
-  subscription  Subscription?
+  sessions            Session[]
+  accounts            Account[]
+  documents           Document[]
+  applications        Application[]
+  companyBlocks       CompanyBlock[]
+  subscription        Subscription?
+  referralConversions ReferralConversion[]
 
   @@index([email])
 }
@@ -1009,4 +1010,225 @@ model KidsmapBlockStats {
   lastUpdated DateTime @default(now())
 
   @@map("kidsmap_block_stats")
+}
+
+// ============================================
+// Accounting & Settlement Module
+// Partner Referral System with 5% Commission
+// ============================================
+
+model ReferralPartner {
+  id             String        @id @default(cuid())
+  orgId          String        @unique @map("org_id")
+  orgName        String        @map("org_name")
+  businessNumber String        @unique @map("business_number") // 사업자등록번호
+  contactEmail   String        @map("contact_email")
+  contactName    String        @map("contact_name")
+  status         PartnerStatus @default(ACTIVE)
+
+  // Relations
+  cafes         ReferralCafe[]
+  apiKeys       PartnerApiKey[]
+  payoutLedgers PayoutLedger[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("referral_partners")
+}
+
+model ReferralCafe {
+  id             String     @id @default(cuid())
+  partnerId      String     @map("partner_id")
+  cafeName       String     @map("cafe_name")
+  commissionRate Decimal    @db.Decimal(5, 4) @map("commission_rate") // 0.0500 = 5%
+  status         CafeStatus @default(ACTIVE)
+
+  // Relations
+  partner       ReferralPartner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  referralLinks ReferralLink[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([partnerId, status])
+  @@map("referral_cafes")
+}
+
+model PartnerApiKey {
+  id          String   @id @default(cuid())
+  partnerId   String   @map("partner_id")
+  keyHash     String   @unique @map("key_hash") // SHA-256
+  keyPrefix   String   @map("key_prefix") // pk_abc123...
+  keyType     String   @default("partner") @map("key_type") // 'firm' or 'partner'
+  permissions String[] // ['read:cafes', 'write:posts']
+  rateLimit   Int      @default(100) @map("rate_limit")
+
+  // Relations
+  partner ReferralPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  lastUsedAt DateTime? @map("last_used_at")
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([partnerId])
+  @@map("partner_api_keys")
+}
+
+model ReferralLink {
+  id          String     @id @default(cuid())
+  cafeId      String     @map("cafe_id")
+  shortCode   String     @unique @map("short_code") // ABCD1234
+  fullUrl     String     @map("full_url")
+  utmSource   String?    @map("utm_source")
+  utmMedium   String?    @map("utm_medium")
+  utmCampaign String?    @map("utm_campaign")
+  clicks      Int        @default(0)
+  status      LinkStatus @default(ACTIVE)
+
+  // Relations
+  cafe        ReferralCafe         @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  conversions ReferralConversion[]
+
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([cafeId, status])
+  @@index([status, expiresAt]) // For soft-delete cron
+  @@map("referral_links")
+}
+
+model ReferralConversion {
+  id           String  @id @default(cuid())
+  userId       String  @unique @map("user_id") // First-touch attribution
+  linkId       String  @map("link_id")
+
+  // Attribution metadata
+  ipHash        String   @map("ip_hash") // SHA-256(ip)
+  userAgentHash String   @map("user_agent_hash") // SHA-256(user_agent)
+  attributedAt  DateTime @map("attributed_at")
+
+  // Conversion data
+  subscriptionId   String?  @map("subscription_id")
+  planType         String?  @map("plan_type")
+  amount           Decimal  @db.Decimal(10, 2)
+  commissionRate   Decimal  @db.Decimal(5, 4) @map("commission_rate") // Snapshot at attribution time
+  commissionAmount Decimal  @db.Decimal(10, 2) @map("commission_amount")
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link          ReferralLink   @relation(fields: [linkId], references: [id])
+  payoutLedgers PayoutLedger[] @relation("LedgerConversions")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([linkId, attributedAt])
+  @@map("referral_conversions")
+}
+
+model PayoutLedger {
+  id         String       @id @default(cuid())
+  partnerId  String       @map("partner_id")
+  periodStart DateTime    @map("period_start")
+  periodEnd   DateTime    @map("period_end")
+  status     PayoutStatus @default(DRAFT)
+  ledgerType LedgerType   @default(PAYOUT) @map("ledger_type") // PAYOUT, ADJUSTMENT, CLAWBACK
+  version    Int          @default(1)
+
+  // Snapshot at approval
+  snapshotHash  String?  @map("snapshot_hash") // SHA-256 of approval snapshot
+  conversionIds String[] @map("conversion_ids") // Array of conversion IDs included
+
+  // Totals
+  totalConversions Int     @default(0) @map("total_conversions")
+  totalRevenue     Decimal @db.Decimal(10, 2) @default(0) @map("total_revenue")
+  totalCommission  Decimal @db.Decimal(10, 2) @default(0) @map("total_commission")
+
+  // Payment tracking
+  approvedBy       String?   @map("approved_by")
+  approvedAt       DateTime? @map("approved_at")
+  paidAt           DateTime? @map("paid_at")
+  paymentMethod    String?   @map("payment_method")
+  paymentReference String?   @map("payment_reference")
+
+  // Adjustment metadata (if ledgerType = ADJUSTMENT/CLAWBACK)
+  referenceLedgerId String? @map("reference_ledger_id")
+  adjustmentReason  String? @map("adjustment_reason")
+
+  // Relations
+  partner     ReferralPartner      @relation(fields: [partnerId], references: [id])
+  conversions ReferralConversion[] @relation("LedgerConversions")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([partnerId, periodStart, periodEnd, version])
+  @@index([status, periodStart])
+  @@map("payout_ledgers")
+}
+
+model ExternalPost {
+  id             String   @id @default(cuid())
+  partnerId      String   @map("partner_id")
+  cafeId         String   @map("cafe_id")
+  postType       PostType @map("post_type")
+  url            String   @unique
+  title          String
+  contentPreview String?  @map("content_preview") @db.Text
+
+  publishedAt DateTime @default(now()) @map("published_at")
+  uploadedAt  DateTime @default(now()) @map("uploaded_at")
+
+  // Metadata (JSON)
+  views    Int?
+  likes    Int?
+  comments Int?
+
+  @@index([partnerId, cafeId])
+  @@index([postType, publishedAt])
+  @@map("external_posts")
+}
+
+// ============================================
+// Accounting Enums
+// ============================================
+
+enum PartnerStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum CafeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum LinkStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum PayoutStatus {
+  DRAFT
+  APPROVED
+  PROCESSING
+  PAID
+  ADJUSTMENT_PENDING
+  ADJUSTED
+  FAILED
+}
+
+enum LedgerType {
+  PAYOUT
+  ADJUSTMENT
+  CLAWBACK
+}
+
+enum PostType {
+  BLOG
+  INSTAGRAM
+  YOUTUBE
+  FACEBOOK
 }

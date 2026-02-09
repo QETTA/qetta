@@ -1,0 +1,279 @@
+name: Accounting Module Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/accounting/**'
+      - 'app/api/accounting/**'
+      - 'server/src/routes/accounting-partners.ts'
+      - 'e2e/accounting-*.spec.ts'
+      - 'prisma/schema.prisma'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/accounting/**'
+      - 'app/api/accounting/**'
+      - 'server/src/routes/accounting-partners.ts'
+      - 'e2e/accounting-*.spec.ts'
+      - 'prisma/schema.prisma'
+  workflow_dispatch: {}
+
+jobs:
+  unit-tests:
+    name: Accounting Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: qetta_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qetta_test
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy || npx prisma db push
+
+      - name: Run accounting unit tests
+        run: npm test -- lib/accounting/__tests__
+
+      - name: Generate coverage report
+        run: npm test -- lib/accounting/__tests__ --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: accounting-unit-tests
+          name: accounting-unit-coverage
+
+  integration-tests:
+    name: Accounting Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: qetta_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qetta_test
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+      NEXTAUTH_SECRET: test-secret-for-ci
+      NEXTAUTH_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy || npx prisma db push
+
+      - name: Run Admin API integration tests
+        run: npm test -- app/api/accounting/admin/__tests__
+
+      - name: Run Partner API integration tests
+        run: npm test -- server/src/routes/__tests__/accounting-partners.test.ts
+
+      - name: Generate coverage report
+        run: npm test -- "app/api/accounting/**/__tests__" "server/src/routes/__tests__/accounting-*.test.ts" --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: accounting-integration-tests
+          name: accounting-integration-coverage
+
+  e2e-tests:
+    name: Accounting E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: qetta_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qetta_test
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+      NEXTAUTH_SECRET: test-secret-for-ci
+      NEXTAUTH_URL: http://localhost:3000
+      BASE_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy || npx prisma db push
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Run accounting E2E tests
+        run: npx playwright test e2e/accounting-*.spec.ts
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-accounting
+          path: playwright-report/
+          retention-days: 30
+
+  coverage-report:
+    name: Combined Coverage Report
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-reports
+          path: ./coverage
+
+      - name: Generate combined coverage report
+        run: |
+          npx nyc report --reporter=text-summary --reporter=html
+          echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          npx nyc report --reporter=text >> $GITHUB_STEP_SUMMARY
+
+      - name: Check coverage thresholds
+        run: |
+          LINES=$(npx nyc report --reporter=json-summary | jq '.total.lines.pct')
+          FUNCTIONS=$(npx nyc report --reporter=json-summary | jq '.total.functions.pct')
+          BRANCHES=$(npx nyc report --reporter=json-summary | jq '.total.branches.pct')
+
+          echo "Coverage: Lines=$LINES%, Functions=$FUNCTIONS%, Branches=$BRANCHES%"
+
+          if (( $(echo "$LINES < 85" | bc -l) )); then
+            echo "❌ Line coverage $LINES% is below 85% threshold"
+            exit 1
+          fi
+
+          if (( $(echo "$FUNCTIONS < 85" | bc -l) )); then
+            echo "❌ Function coverage $FUNCTIONS% is below 85% threshold"
+            exit 1
+          fi
+
+          if (( $(echo "$BRANCHES < 80" | bc -l) )); then
+            echo "❌ Branch coverage $BRANCHES% is below 80% threshold"
+            exit 1
+          fi
+
+          echo "✅ All coverage thresholds met"
