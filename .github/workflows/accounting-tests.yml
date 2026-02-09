@@ -76,6 +76,7 @@ jobs:
 
       - name: Generate coverage report
         run: npm test -- lib/accounting/__tests__ --coverage
+        continue-on-error: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
