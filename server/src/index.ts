@@ -1,24 +1,26 @@
-import express from 'express';
+// Load environment variables from .env file
+import 'dotenv/config';
+
 import cors from 'cors';
+import express from 'express';
 import helmet from 'helmet';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
-import { connectDb } from './config/mongodb.js';
 import { ensureIndexes } from './config/mongodb-indexes.js';
+import { connectDb } from './config/mongodb.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { requirePartnerOrg } from './middleware/partnerAuth.js';
-import { firmRls } from './middleware/firmRls.js';
 import { firmRateLimit } from './middleware/firmRateLimit.js';
-import { healthRouter } from './routes/health.js';
-import { settlementRouter } from './routes/settlement.js';
-import { evidenceRouter } from './routes/evidence.js';
-import { auditRouter } from './routes/audit.js';
-import { firmRouter } from './routes/firm.js';
-import { rulesRouter } from './routes/rules.js';
-import { templatesRouter } from './routes/templates.js';
-import { quarantineRouter } from './routes/quarantine.js';
+import { firmRls } from './middleware/firmRls.js';
+import { requirePartnerOrg } from './middleware/partnerAuth.js';
 import { adminRouter } from './routes/admin.js';
-import accountingPartnersRouter from './routes/accounting-partners.js';
+import { auditRouter } from './routes/audit.js';
+import { evidenceRouter } from './routes/evidence.js';
+import { firmRouter } from './routes/firm.js';
+import { healthRouter } from './routes/health.js';
+import { quarantineRouter } from './routes/quarantine.js';
+import { rulesRouter } from './routes/rules.js';
+import { settlementRouter } from './routes/settlement.js';
+import { templatesRouter } from './routes/templates.js';
 
 const app = express();
 
@@ -58,10 +60,6 @@ app.use('/api/qetta/v1/firm', ...qettaAuth, firmRouter);
 app.use('/api/qetta/v1/rules', ...qettaAuth, rulesRouter);
 app.use('/api/qetta/v1/templates', ...qettaAuth, templatesRouter);
 app.use('/api/qetta/v1/quarantine', ...qettaAuth, quarantineRouter);
-
-// --- Accounting Partner API (separate auth middleware) ---
-app.use('/api/qetta/v1/partners', accountingPartnersRouter);
-
 // Admin UI (restricted - partner org required)
 app.use('/admin', requirePartnerOrg, adminRouter);
 
