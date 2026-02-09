@@ -7,11 +7,8 @@ import { type NextFunction, type Request, type Response } from 'express'
 import { createHash } from 'node:crypto'
 import { logger } from '../config/logger.js'
 
-// Import Prisma client
-// Note: Adjust path based on your project structure
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+// Import shared Prisma client singleton
+import { prisma } from '../../../lib/db/prisma.js'
 
 // Extend Express Request type with partner
 declare module 'express-serve-static-core' {

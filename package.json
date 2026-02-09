@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@prisma/adapter-pg": "^7.3.0",
     "cors": "^2.8.5",
     "docxtemplater": "^3.31.0",
     "express": "^5.1.0",
@@ -34,6 +35,7 @@
     "mammoth": "^1.4.21",
     "mongodb": "^7.0.0",
     "multer": "^1.4.5-lts.2",
+    "pg": "^8.18.0",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
     "pizzip": "^3.1.1",
